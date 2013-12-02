@@ -1,1 +1,1 @@
-Jniper Diag
+Juniper Diag

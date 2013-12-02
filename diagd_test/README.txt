@@ -1,0 +1,1 @@
+diag daemon test project
