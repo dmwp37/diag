@@ -39,8 +39,6 @@ endif
 
 LOCAL_BUILT_MODULE := $(intermediates)/$(LOCAL_BUILT_MODULE_STEM)
 
-LOCAL_INSTALLED_MODULE := $(LOCAL_MODULE_PATH)/$(LOCAL_INSTALLED_MODULE_STEM)
-
 ###########################################################
 ## make clean- targets
 ###########################################################
@@ -65,21 +63,25 @@ $(LOCAL_INTERMEDIATE_TARGETS) : PRIVATE_INTERMEDIATES_DIR:= $(intermediates)
 # Tell the module and all of its sub-modules who it is.
 $(LOCAL_INTERMEDIATE_TARGETS) : PRIVATE_MODULE:= $(LOCAL_MODULE)
 
-# Provide a short-hand for building this module.
-# We name both BUILT and INSTALLED in case
-# LOCAL_UNINSTALLABLE_MODULE is set.
-.PHONY: $(LOCAL_MODULE)
-$(LOCAL_MODULE): $(LOCAL_BUILT_MODULE) $(LOCAL_INSTALLED_MODULE)
-
 ###########################################################
 ## Module installation rule
 ###########################################################
 
+ifndef LOCAL_UNINSTALLABLE_MODULE
 LOCAL_INSTALLED_MODULE := $(LOCAL_MODULE_PATH)/$(LOCAL_INSTALLED_MODULE_STEM)
 
 $(LOCAL_INSTALLED_MODULE): $(LOCAL_BUILT_MODULE)
 	@echo "Install: $@"
 	$(copy-file-to-target-with-cp)
+
+endif # !LOCAL_UNINSTALLABLE_MODUL
+
+
+# Provide a short-hand for building this module.
+# We name both BUILT and INSTALLED in case
+# LOCAL_UNINSTALLABLE_MODULE is set.
+.PHONY: $(LOCAL_MODULE)
+$(LOCAL_MODULE): $(LOCAL_BUILT_MODULE) $(LOCAL_INSTALLED_MODULE)
 
 ###########################################################
 ## Register with ALL_MODULES
@@ -97,4 +99,6 @@ ALL_MODULES.$(LOCAL_MODULE).BUILT := \
     $(ALL_MODULES.$(LOCAL_MODULE).BUILT) $(LOCAL_BUILT_MODULE)
 ALL_MODULES.$(LOCAL_MODULE).INSTALLED := \
     $(strip $(ALL_MODULES.$(LOCAL_MODULE).INSTALLED) $(LOCAL_INSTALLED_MODULE))
+ALL_MODULES.$(LOCAL_MODULE).REQUIRED := \
+    $(ALL_MODULES.$(LOCAL_MODULE).REQUIRED) $(LOCAL_REQUIRED_MODULES)
 

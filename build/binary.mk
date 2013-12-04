@@ -16,20 +16,8 @@ my_compiler_dependencies :=
 ##################################################
 # the linked_module is the linker raw output
 ##################################################
-linked_module := $(intermediates)/LINKED/$(LOCAL_BUILT_MODULE_STEM)
-LOCAL_INTERMEDIATE_TARGETS += $(linked_module)
-
-
-###########################################################
-## Strip
-###########################################################
-strip_input := $(linked_module)
-strip_output := $(LOCAL_BUILT_MODULE)
-
-# Strip the binary
-$(strip_output): $(strip_input)
-	$(transform-to-stripped)
-
+LOCAL_LINKED_MODULE := $(intermediates)/LINKED/$(LOCAL_BUILT_MODULE_STEM)
+LOCAL_INTERMEDIATE_TARGETS += $(LOCAL_LINKED_MODULE)
 
 ###########################################################
 ## Explicitly declare assembly-only __ASSEMBLY__ macro for
@@ -40,13 +28,9 @@ LOCAL_ASFLAGS += -D__ASSEMBLY__
 ###########################################################
 ## Define PRIVATE_ variables from global vars
 ###########################################################
-my_project_includes := $(TARGET_PROJECT_INCLUDES)
-my_c_includes := $(TARGET_C_INCLUDES)
-my_global_cflags := $(TARGET_GLOBAL_CFLAGS)
-
-$(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_PROJECT_INCLUDES := $(my_project_includes)
-$(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_C_INCLUDES := $(my_c_includes)
-$(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_GLOBAL_CFLAGS := $(my_global_cflags)
+$(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_PROJECT_INCLUDES := $(GLOBAL_INCLUDES)
+$(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_C_INCLUDES := $(GLOBAL_C_INCLUDES)
+$(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_GLOBAL_CFLAGS := $(GLOBAL_CFLAGS)
 $(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_GLOBAL_CPPFLAGS := $(GLOBAL_CPPFLAGS)
 
 ###########################################################
@@ -54,6 +38,9 @@ $(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_GLOBAL_CPPFLAGS := $(GLOBAL_CPPFLAGS)
 ###########################################################
 $(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_NO_DEFAULT_COMPILER_FLAGS := \
     $(strip $(LOCAL_NO_DEFAULT_COMPILER_FLAGS))
+
+LOCAL_AR := $(AR)
+$(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_AR := $(LOCAL_AR)
 
 LOCAL_CC := $(CC)
 $(LOCAL_INTERMEDIATE_TARGETS): PRIVATE_CC := $(LOCAL_CC)
@@ -144,7 +131,7 @@ ifneq ($(strip $(asm_objects_s)),)
 $(asm_objects_s): $(intermediates)/%.o: $(TOPDIR)$(LOCAL_PATH)/%.s \
     $(LOCAL_ADDITIONAL_DEPENDENCIES) \
     | $(my_compiler_dependencies)
-	$(transform-$(PRIVATE_HOST)s-to-o-no-deps)
+	$(transform-s-to-o-no-deps)
 -include $(asm_objects_s:%.o=%.P)
 endif
 
@@ -290,3 +277,4 @@ endif
 
 # Make sure export_includes gets generated when you are running mm/mmm
 $(LOCAL_BUILT_MODULE) : | $(export_includes)
+

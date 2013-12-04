@@ -10,7 +10,7 @@ LOCAL_MODULE_MAKEFILE_NAME := local_module.mk
 # ###############################################################
 CLEAR_VARS:= $(BUILD_SYSTEM)/clear_vars.mk
 BUILD_EXECUTABLE:= $(BUILD_SYSTEM)/executable.mk
-
+BUILD_STATIC_LIBRARY:= $(BUILD_SYSTEM)/static_library.mk
 
 # ###############################################################
 # Parse out any modifier targets.
@@ -27,32 +27,18 @@ SHOW_COMMANDS:= $(filter showcommands,$(MAKECMDGOALS))
 
 # These can be changed to modify both host and device modules.
 COMMON_GLOBAL_CFLAGS:= -fmessage-length=0 -W -Wall -Wno-unused -Winit-self -Wpointer-arith
-COMMON_RELEASE_CFLAGS:= -DNDEBUG -UDEBUG
-
 COMMON_GLOBAL_CPPFLAGS:= $(COMMON_GLOBAL_CFLAGS) -Wsign-promo
+
+COMMON_RELEASE_CFLAGS:= -DNDEBUG -UDEBUG
 COMMON_RELEASE_CPPFLAGS:= $(COMMON_RELEASE_CFLAGS)
 
 # list of flags to turn specific warnings in to errors
-TARGET_ERROR_FLAGS := -Werror=return-type -Werror=non-virtual-dtor -Werror=address -Werror=sequence-point
+COMMON_ERROR_FLAGS := -Werror=return-type -Werror=non-virtual-dtor -Werror=address -Werror=sequence-point
 
 # ---------------------------------------------------------------
 # Set up configuration for host machine.  We don't do cross-
 # compiles except for arm/mips, so the HOST is whatever we are
 # running on
-
-ifneq ($(findstring CYGWIN,$(UNAME)),)
-ifeq ($(strip $(USE_CYGWIN)),)
-
-endif
-endif
-
-
-# $(1): The file to check
-# TODO: find out what format cygwin's stat(1) uses
-define get-file-size
-999999999
-endef
-
 UNAME := $(shell uname -sm)
 
 # HOST_OS
@@ -67,12 +53,29 @@ ifneq (,$(findstring CYGWIN,$(UNAME)))
     EXECUTABLE_SUFFIX := .exe
 endif
 
-# BUILD_OS is the real host doing the build.
-BUILD_OS := $(HOST_OS)
+STATIC_LIB_SUFFIX := .a
 
 ifeq ($(HOST_OS),)
 $(error Unable to determine HOST_OS from uname -sm: $(UNAME)!)
 endif
+
+# ###############################################################
+# Set up final options.
+# ###############################################################
+
+GLOBAL_INCLUDES :=
+GLOBAL_C_INCLUDES :=
+
+GLOBAL_ARFLAGS := cqs
+
+GLOBAL_CFLAGS += $(COMMON_GLOBAL_CFLAGS)
+GLOBAL_CPPFLAGS += $(COMMON_GLOBAL_CPPFLAGS)
+
+GLOBAL_CFLAGS += $(COMMON_ERROR_FLAGS)
+GLOBAL_CPPFLAGS += $(COMMON_ERROR_FLAGS)
+
+GLOBAL_CFLAGS += $(COMMON_RELEASE_CFLAGS)
+GLOBAL_CPPFLAGS += $(COMMON_RELEASE_CPPFLAGS)
 
 # ---------------------------------------------------------------
 # figure out the output directories
@@ -84,8 +87,10 @@ endif
 # config the global output for where to install
 OUT_INSTALL := $(OUT_DIR)/install
 OUT_EXECUTABLES := $(OUT_INSTALL)/bin
-OUT_SHARE_LIB :=  $(OUT_INSTALL)/lib
+OUT_SHARE_LIBRARIES :=  $(OUT_INSTALL)/lib
+OUT_STATIC_LIBRARIES := $(OUT_INSTALL)/lib
 
 #  config the global intermediate output
 OUT_INTERMEDIATES := $(OUT_DIR)/obj
 OUT_INTERMEDIATE_LIBRARIES := $(OUT_INTERMEDIATES)/lib
+

@@ -66,7 +66,28 @@ include $(subdir_makefiles)
 # -------------------------------------------------------------------
 # All module makefiles have been included at this point.
 # -------------------------------------------------------------------
+# -------------------------------------------------------------------
+# Define dependencies for modules that require other modules.
+# This can only happen now, after we've read in all module makefiles.
+#
+define add-required-deps
+$(1): | $(2)
+endef
+$(foreach m,$(ALL_MODULES), \
+  $(eval r := $(ALL_MODULES.$(m).REQUIRED)) \
+  $(if $(r), \
+    $(eval r := $(call module-installed-files,$(r))) \
+    $(eval $(call add-required-deps, $(m),$(r))) \
+   ) \
+ )
 
+m :=
+r :=
+add-required-deps :=
+
+# -------------------------------------------------------------------
+# Figure out our module sets.
+#
 # by default we need to compile all registered modules
 modules_to_install := $(call module-installed-files, $(ALL_MODULES))
 
