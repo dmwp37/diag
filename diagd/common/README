@@ -1,0 +1,7 @@
+Important Note:
+
+All of the files & directories contained in this directory are part of common DIAGs.  They should
+only be changed as part of a common DIAG CR, with approval of the common DIAG team.  Any changes 
+non-approved changes will be considered invalid/unsupported for common DIAGs.
+
+For more information, please visit wiki DiagCommon

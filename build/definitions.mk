@@ -77,6 +77,16 @@ define local-intermediates-dir
 $(call intermediates-dir-for,$(LOCAL_MODULE_CLASS),$(LOCAL_MODULE))
 endef
 
+###########################################################
+## Convert "path/to/libXXX.so" to "-lXXX".
+## Any "path/to/libXXX.a" elements pass through unchanged.
+###########################################################
+
+define normalize-libraries
+$(foreach so,$(filter %.so,$(1)),-l$(patsubst lib%.so,%,$(notdir $(so))))\
+$(filter-out %.so,$(1))
+endef
+
 
 ###########################################################
 ## Output the command lines, or not
@@ -263,12 +273,12 @@ $(hide) $(PRIVATE_CXX) \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_ALL_OBJECTS) \
 	-Wl,--whole-archive \
-	$(call normalize-target-libraries,$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
+	$(call normalize-libraries,$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
 	-Wl,--no-whole-archive \
 	$(if $(PRIVATE_GROUP_STATIC_LIBRARIES),-Wl$(comma)--start-group) \
-	$(call normalize-target-libraries,$(PRIVATE_ALL_STATIC_LIBRARIES)) \
+	$(call normalize-libraries,$(PRIVATE_ALL_STATIC_LIBRARIES)) \
 	$(if $(PRIVATE_GROUP_STATIC_LIBRARIES),-Wl$(comma)--end-group) \
-	$(call normalize-target-libraries,$(PRIVATE_ALL_SHARED_LIBRARIES)) \
+	$(call normalize-ibraries,$(PRIVATE_ALL_SHARED_LIBRARIES)) \
 	-o $@ \
 	$(PRIVATE_LDLIBS)
 endef
