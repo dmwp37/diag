@@ -12,6 +12,7 @@ Revision History:
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/19     xxxxx-0001   Update diag rsp protocol
 
 ====================================================================================================
                                            INCLUDE FILES
@@ -300,7 +301,6 @@ void DG_AUX_ENGINE_create_and_send_aux_diag(int aux_id,
 
     /* Build up the DIAG request */
     diag_req.header.seq_tag          = dg_aux_engine_seq_tag++;
-    diag_req.header.cmd_rsp_flag     = DG_DEFS_HDR_FLAG_CMD_RSP_COMMAND;
     diag_req.header.opcode           = opcode;
     diag_req.header.no_rsp_reqd_flag = DG_DEFS_HDR_FLAG_RESPONSE_EXPECTED;
     diag_req.header.length           = req_data_len;
@@ -579,11 +579,6 @@ void dg_aux_engine_handle_aux_cmd_impl(int                         aux_id,
                              aux_id);
 
                 /* Take DIAG response and convert it to a response builder */
-                if (resp->header.fail_flag)
-                {
-                    DG_ENGINE_UTIL_rsp_set_flag(rsp, DG_DEFS_RSP_FLAG_FAIL);
-                }
-
                 if (resp->header.unsol_rsp_flag)
                 {
                     DG_ENGINE_UTIL_rsp_set_flag(rsp, DG_DEFS_RSP_FLAG_UNSOL);

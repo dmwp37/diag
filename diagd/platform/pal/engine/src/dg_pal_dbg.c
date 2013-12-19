@@ -75,7 +75,7 @@ void DG_PAL_DBG_print(int debug_level, const char* format, ...)
 *//*==============================================================================================*/
 int DG_PAL_DBG_load_dbg_lvl()
 {
-    /* always return TC_DBG_LVL_TRACE for the test platform */
+    /* always return DG_DBG_LVL_TRACE for the test platform */
     return DG_DBG_LVL_TRACE;
 }
 
@@ -99,7 +99,7 @@ BOOL DG_PAL_DBG_save_dbg_lvl(int gate)
 *//*==============================================================================================*/
 int DG_PAL_DBG_load_autolog_lvl()
 {
-    /* always return TC_DBG_LVL_DISABLE for the test platform */
+    /* always return DG_DBG_LVL_DISABLE for the test platform */
     return DG_DBG_LVL_DISABLE;
 }
 
@@ -136,7 +136,6 @@ void DG_PAL_DBG_dump_fs_log(UINT16 id)
 /*==================================================================================================
                                           LOCAL FUNCTIONS
 ==================================================================================================*/
-
 
 /** @} */
 /** @} */

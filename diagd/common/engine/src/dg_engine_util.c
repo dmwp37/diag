@@ -11,6 +11,7 @@ Revision History:
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/19     xxxxx-0001   Update diag rsp protocol
 
 ====================================================================================================
                                            INCLUDE FILES
@@ -158,15 +159,8 @@ void DG_ENGINE_UTIL_hdr_rsp_ntoh(DG_DEFS_DIAG_RSP_HDR_T* hdr_in,
                                  DG_DEFS_DIAG_RSP_HDR_T* hdr_out)
 {
     memcpy(hdr_out, hdr_in, sizeof(DG_DEFS_DIAG_RSP_HDR_T));
-#ifdef DG_ENDIAN_BIG
-    /* Do nothing special since the DIAG header is already in big endian */
-#else
-    hdr_out->opcode = ((hdr_in->opcode & 0x00FF) << 8) | ((hdr_in->opcode & 0xFF00) >> 8);
-    hdr_out->length = ((hdr_in->length & 0x000000FF) << 24) |
-                      ((hdr_in->length & 0x0000FF00) << 8) |
-                      ((hdr_in->length & 0x00FF0000) >> 8) |
-                      ((hdr_in->length & 0xFF000000) >> 24);
-#endif
+    hdr_out->opcode = ntohs(hdr_in->opcode);
+    hdr_out->length = ntohl(hdr_in->length);
 }
 
 /*=============================================================================================*//**
@@ -179,12 +173,8 @@ void DG_ENGINE_UTIL_hdr_rsp_hton(DG_DEFS_DIAG_RSP_HDR_T* hdr_in,
                                  DG_DEFS_DIAG_RSP_HDR_T* hdr_out)
 {
     memcpy(hdr_out, hdr_in, sizeof(DG_DEFS_DIAG_RSP_HDR_T));
-#ifdef DG_ENDIAN_BIG
-    /* Do nothing special since the DIAG header is already in big endian */
-#else
     hdr_out->opcode = htons(hdr_in->opcode);
     hdr_out->length = htonl(hdr_in->length);
-#endif
 }
 
 /*=============================================================================================*//**
@@ -197,15 +187,8 @@ void DG_ENGINE_UTIL_hdr_req_ntoh(DG_DEFS_DIAG_REQ_HDR_T* hdr_in,
                                  DG_DEFS_DIAG_REQ_HDR_T* hdr_out)
 {
     memcpy(hdr_out, hdr_in, sizeof(DG_DEFS_DIAG_REQ_HDR_T));
-#ifdef DG_ENDIAN_BIG
-    /* Do nothing special since the DIAG header is already in big endian */
-#else
-    hdr_out->opcode = ((hdr_in->opcode & 0x00FF) << 8) | ((hdr_in->opcode & 0xFF00) >> 8);
-    hdr_out->length = ((hdr_in->length & 0x000000FF) << 24) |
-                      ((hdr_in->length & 0x0000FF00) << 8) |
-                      ((hdr_in->length & 0x00FF0000) >> 8) |
-                      ((hdr_in->length & 0xFF000000) >> 24);
-#endif
+    hdr_out->opcode = ntohs(hdr_in->opcode);
+    hdr_out->length = ntohl(hdr_in->length);
 }
 
 /*=============================================================================================*//**
@@ -218,12 +201,8 @@ void DG_ENGINE_UTIL_hdr_req_hton(DG_DEFS_DIAG_REQ_HDR_T* hdr_in,
                                  DG_DEFS_DIAG_REQ_HDR_T* hdr_out)
 {
     memcpy(hdr_out, hdr_in, sizeof(DG_DEFS_DIAG_REQ_HDR_T));
-#ifdef DG_ENDIAN_BIG
-    /* Do nothing special since the DIAG header is already in big endian */
-#else
     hdr_out->opcode = htons(hdr_in->opcode);
     hdr_out->length = htonl(hdr_in->length);
-#endif
 }
 
 /*=============================================================================================*//**
@@ -1444,7 +1423,7 @@ void DG_ENGINE_UTIL_rsp_set_code(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, DG_RSP_CODE_T 
 }
 
 /*=============================================================================================*//**
-@brief Indiciates if the response indicates a failure
+@brief Indicates if the response indicates a failure
 
 @param[in] rsp  - The response builder to check for failure
 
@@ -1459,11 +1438,10 @@ BOOL DG_ENGINE_UTIL_rsp_is_failure(DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
     dg_engine_util_diag_rsp_builder_t* real_rsp   = (dg_engine_util_diag_rsp_builder_t*)rsp;
     BOOL                               is_failure = FALSE;
 
-    /* If the fail flag is set, or a response code is set to a failure, indicate the response is a
+    /* If response code is set to a failure, indicate the response is a
        failure */
-    if ((real_rsp->flag & DG_DEFS_RSP_FLAG_FAIL) ||
-        ((real_rsp->code != DG_RSP_CODE_CMD_RSP_GENERIC) &&
-         (real_rsp->code != DG_RSP_CODE_NOT_SET)))
+    if ((real_rsp->code != DG_RSP_CODE_NOT_SET) &&
+        (real_rsp->code != DG_RSP_CODE_CMD_RSP_GENERIC))
     {
         is_failure = TRUE;
     }
@@ -1733,29 +1711,20 @@ void dg_engine_util_send_response(DG_DEFS_DIAG_REQ_T* diag,
     {
         final_rsp_code   = DG_RSP_CODE_CMD_INTL_ERR;
         final_rsp_length = 0;
-        final_rsp_flags |= DG_DEFS_RSP_FLAG_FAIL;
     }
-
+    
     rsp.header.unsol_rsp_flag = (final_rsp_flags & DG_DEFS_RSP_FLAG_UNSOL) ?
                                 DG_DEFS_HDR_FLAG_RESPONSE_UNSOLICITED : DG_DEFS_HDR_FLAG_RESPONSE_SOLICITED;
-    rsp.header.data_flag      = (final_rsp_length > 0) ?
-                                DG_DEFS_HDR_FLAG_DATA_PRESENT : DG_DEFS_HDR_FLAG_DATA_NOT_PRESENT;
-    rsp.header.fail_flag      = ((final_rsp_code != DG_RSP_CODE_CMD_RSP_GENERIC) ||
-                                 (final_rsp_flags & DG_DEFS_RSP_FLAG_FAIL)) ?
-                                DG_DEFS_HDR_FLAG_CMD_FAILED : DG_DEFS_HDR_FLAG_CMD_NOT_FAILED;
     rsp.header.diag_version   = DG_DEFS_HDR_DIAG_VERSION_VALUE;
-    rsp.header.cmd_rsp_flag   = DG_DEFS_HDR_FLAG_CMD_RSP_RESPONSE;
     rsp.header.seq_tag        = diag->header.seq_tag;
     rsp.header.opcode         = diag->header.opcode;
-    rsp.header.reserved1      = 0;
-    rsp.header.reserved2      = 0;
     rsp.header.rsp_code       = final_rsp_code;
     rsp.header.length         = final_rsp_length;
 
     DG_DBG_TRACE("Response Flags - unsol = %d, data = %d, fail = %d", rsp.header.unsol_rsp_flag,
-                 rsp.header.data_flag, rsp.header.fail_flag);
+                 rsp.header.length>0, rsp.header.rsp_code!=DG_RSP_CODE_CMD_RSP_GENERIC);
 
-    if (rsp.header.fail_flag)
+    if (rsp.header.rsp_code != DG_RSP_CODE_CMD_RSP_GENERIC)
     {
         DG_PAL_DBG_dump_fs_log(rsp.header.opcode);
     }

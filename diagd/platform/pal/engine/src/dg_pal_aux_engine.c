@@ -12,6 +12,7 @@ Revision History:
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2012/04/27     xxxxxx-000   Creation
+Xudong Huang    - xudongh    2013/12/19     xxxxx-0001   Update diag rsp protocol
 
 ====================================================================================================
                                             INCLUDE FILES
@@ -320,17 +321,10 @@ static void* dg_pal_aux_engine_aux_thread(void* id)
             {
                 /* Set the DIAG response header */
                 memset(&rsp_hdr, 0, sizeof(rsp_hdr));
-                rsp_hdr.cmd_rsp_flag = 1;
                 rsp_hdr.seq_tag      = req_hdr.seq_tag;
                 rsp_hdr.opcode       = req_hdr.opcode;
                 rsp_hdr.rsp_code     = DG_RSP_CODE_CMD_RSP_GENERIC;
                 rsp_hdr.length       = req_hdr.length + 1; /* +1 for the aux id added in response data */
-
-                /* Set the data flag if there is a payload */
-                if (req_hdr.length > 0)
-                {
-                    rsp_hdr.data_flag = 1;
-                }
 
                 /* Endian swap the header */
                 DG_ENGINE_UTIL_hdr_rsp_hton(&rsp_hdr, &n_rsp_hdr);

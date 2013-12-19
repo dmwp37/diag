@@ -13,6 +13,7 @@ Revision History:
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/19     xxxxx-0001   Update diag rsp protocol
 
 ====================================================================================================
                                            INCLUDE FILES
@@ -36,14 +37,14 @@ extern "C" {
 /** Diag response codes */
 typedef enum
 {
-    DG_RSP_CODE_PAR_ERR_LENGTH       = 0x00,     /**< Parser length error        */
-    DG_RSP_CODE_PAR_ERR_SECUR        = 0x01,     /**< Parser security error      */
+    DG_RSP_CODE_CMD_RSP_GENERIC      = 0x00,     /**< Generic Response           */
+    DG_RSP_CODE_CMD_RSP_GEN_FAIL     = 0x01,     /**< General failure            */
     DG_RSP_CODE_PAR_ERR_PROT         = 0x02,     /**< Parser protocol error      */
     DG_RSP_CODE_PAR_ERR_MODE         = 0x03,     /**< Parser mode error          */
     DG_RSP_CODE_PAR_ERR_OPCODE       = 0x04,     /**< Parser opcode error        */
     DG_RSP_CODE_PAR_ERR_PARM         = 0x05,     /**< Parser parameter error     */
-    DG_RSP_CODE_CMD_RSP_GENERIC      = 0x06,     /**< Generic Response           */
-    DG_RSP_CODE_CMD_RSP_GEN_FAIL     = 0x07,     /**< General failure            */
+    DG_RSP_CODE_PAR_ERR_LENGTH       = 0x06,     /**< Parser length error        */
+    DG_RSP_CODE_PAR_ERR_SECUR        = 0x07,     /**< Parser security error      */
     DG_RSP_CODE_CMD_MALLOC_FAIL      = 0x0A,     /**< Error allocating memory    */
     DG_RSP_CODE_CMD_INTL_ERR         = 0x0B,     /**< Tcmd internal error        */
     DG_RSP_CODE_CMD_RSP_TIMEOUT      = 0x0C,     /**< Timeout error              */

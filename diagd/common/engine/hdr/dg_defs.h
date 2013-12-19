@@ -13,6 +13,7 @@ Revision History:
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/19     xxxxx-0001   Update diag rsp protocol
 
 ====================================================================================================
                                            INCLUDE FILES
@@ -34,20 +35,11 @@ extern "C" {
 */
 
 /* DIAG header values */
-#define DG_DEFS_HDR_FLAG_CMD_RSP_COMMAND       0 /**< Header indicates a command */
-#define DG_DEFS_HDR_FLAG_CMD_RSP_RESPONSE      1 /**< Header indicates a response */
-
 #define DG_DEFS_HDR_FLAG_RESPONSE_EXPECTED     0 /**< Header indicates a response is expected */
 #define DG_DEFS_HDR_FLAG_RESPONSE_NOT_EXPECTED 1 /**< Header indicates a response is not expected */
 
 #define DG_DEFS_HDR_FLAG_RESPONSE_SOLICITED    0 /**< Header indicates a solicited response */
 #define DG_DEFS_HDR_FLAG_RESPONSE_UNSOLICITED  1 /**< Header indicates a unsolicited response */
-
-#define DG_DEFS_HDR_FLAG_DATA_NOT_PRESENT      0 /**< Header indicates response data present */
-#define DG_DEFS_HDR_FLAG_DATA_PRESENT          1 /**< Header indicates no response data present */
-
-#define DG_DEFS_HDR_FLAG_CMD_NOT_FAILED        0 /**< Header indicates command did not fail */
-#define DG_DEFS_HDR_FLAG_CMD_FAILED            1 /**< Header indicates command failed */
 
 #define DG_DEFS_HDR_DIAG_VERSION_VALUE         0 /**< Current DIAG header version */
 
@@ -80,69 +72,35 @@ typedef enum
 } DG_DEFS_SEC_IC_STATE_T;
 
 /** Response flags bitmask, used to describe a DIAG response */
-enum
+typedef enum
 {
     DG_DEFS_RSP_FLAG_NONE  = 0x00, /**< No special attribute for the response */
-    DG_DEFS_RSP_FLAG_FAIL  = 0x01, /**< DIAG Failure, <b>used when response code does NOT 
-                                        imply failure</b> */
-    DG_DEFS_RSP_FLAG_UNSOL = 0x02  /**< Unsolicited Response */
-}; typedef UINT32 DG_DEFS_RSP_FLAG_T;
+    DG_DEFS_RSP_FLAG_UNSOL = 0x01  /**< Unsolicited Response */
+} DG_DEFS_RSP_FLAG_T;
 
 /** The Diag Protocol Header (Bulk Endpoint/12 byte) - Request Header */
 typedef struct
 {
-#ifdef DG_ENDIAN_BIG
-    UINT8             cmd_rsp_flag      : 1;  /**< Command/Response Flag */
-    UINT8             reserved1         : 7;  /**< Reserved */
+    UINT8             reserved1;              /**< Reserved */
     UINT8             seq_tag;                /**< Sequence Tag */
     DG_DEFS_OPCODE_T  opcode;                 /**< Opcode */
     UINT8             reserved2;              /**< Reserved */
-    UINT8             reserved3         : 7;  /**< Reserved */
-    UINT8             no_rsp_reqd_flag  : 1;  /**< No Response Required Flag */
+    UINT8             no_rsp_reqd_flag;       /**< No Response Required Flag */
     UINT16            reserved4;              /**< Reserved */
     UINT32            length;                 /**< Data Length of Request */
-#else
-    UINT8             reserved1         : 7;  /**< Reserved */
-    UINT8             cmd_rsp_flag      : 1;  /**< Command/Response Flag */
-    UINT8             seq_tag;                /**< Sequence Tag */
-    DG_DEFS_OPCODE_T  opcode;                 /**< Opcode */
-    UINT8             reserved2;              /**< Reserved */
-    UINT8             no_rsp_reqd_flag  : 1;  /**< No Response Required Flag */
-    UINT8             reserved3         : 7;  /**< Reserved */
-    UINT16            reserved4;              /**< Reserved */
-    UINT32            length;                 /**< Data Length of Request */
-#endif
 } DG_DEFS_DIAG_REQ_HDR_T;
 
 /** The Diag Protocol Header (Bulk Endpoint/12 byte) - Response Header */
 typedef struct
 {
-#ifdef DG_ENDIAN_BIG
-    UINT8             cmd_rsp_flag    : 1;    /**< Command/Response Flag */
-    UINT8             diag_version    : 4;    /**< DIAG Version Number */
-    UINT8             fail_flag       : 1;    /**< Fail Flag */
-    UINT8             data_flag       : 1;    /**< Response Data Flag */
-    UINT8             unsol_rsp_flag  : 1;    /**< Unsolicited Response Flag */
-    UINT8             seq_tag;                /**< Sequence Tag */
-    DG_DEFS_OPCODE_T  opcode;                 /**< Opcode */
-    UINT8             reserved1;              /**< Reserved */
-    UINT8             rsp_code;               /**< Response Code.  For real */
-    UINT16            reserved2;              /**< Reserved */
-    UINT32            length;                 /**< Data Length of Response */
-#else
-    UINT8             unsol_rsp_flag  : 1;    /**< Unsolicited Response Flag */
-    UINT8             data_flag       : 1;    /**< Response Data Flag */
-    UINT8             fail_flag       : 1;    /**< Fail Flag */
-    UINT8             diag_version    : 4;    /**< DIAG Version Number */
-    UINT8             cmd_rsp_flag    : 1;    /**< Command/Response Flag */
-    UINT8             seq_tag;                /**< Sequence Tag */
-    DG_DEFS_OPCODE_T  opcode;                 /**< Opcode */
-    UINT8             reserved1;              /**< Reserved */
-    UINT8             rsp_code;               /**< Response Code.  For real */
-    UINT16            reserved2;              /**< Reserved */
-    UINT32            length;                 /**< Data Length of Response */
-#endif
+    UINT8             rsp_code;         /**< Response Code */
+    UINT8             unsol_rsp_flag;   /**< Unsolicited Response Flag */
+    UINT16            diag_version;     /**< Diag Version Number */
+    UINT16            seq_tag;          /**< Sequence Tag */
+    UINT16            opcode;           /**< Opcode */
+    UINT32            length;      /**< Data Length of Response */
 } DG_DEFS_DIAG_RSP_HDR_T;
+
                             
 /** Diag Request Structure */
 typedef struct

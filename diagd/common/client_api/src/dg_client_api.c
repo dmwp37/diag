@@ -11,6 +11,7 @@ Revision History:
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/19     xxxxx-0001   Update diag rsp protocol
 
 ====================================================================================================
                                            INCLUDE FILES
@@ -603,7 +604,7 @@ DG_CLIENT_API_STATUS_T DG_CLIENT_API_parse_diag_rsp(UINT8* rsp_ptr, UINT32 rsp_l
         }
         if (diag_fail_ptr)
         {
-            *diag_fail_ptr = (hdr.fail_flag) ? TRUE : FALSE;
+            *diag_fail_ptr = (hdr.rsp_code != DG_RSP_CODE_CMD_RSP_GENERIC) ? TRUE : FALSE;
         }
         if (timestamp_ptr)
         {
@@ -851,15 +852,8 @@ void dg_client_api_req_hdr_hton(DG_DEFS_DIAG_REQ_HDR_T* hdr_in, DG_DEFS_DIAG_REQ
 void dg_client_api_rsp_hdr_ntoh(DG_DEFS_DIAG_RSP_HDR_T* hdr_in, DG_DEFS_DIAG_RSP_HDR_T* hdr_out)
 {
     memcpy(hdr_out, hdr_in, sizeof(DG_DEFS_DIAG_RSP_HDR_T));
-#ifdef DG_ENDIAN_BIG
-    /* Do nothing special since the DIAG header is already in big endian */
-#else
-    hdr_out->opcode = ((hdr_in->opcode & 0x00FF) << 8) | ((hdr_in->opcode & 0xFF00) >> 8);
-    hdr_out->length =
-        ((hdr_in->length & 0x000000FF) << 24) |
-        ((hdr_in->length & 0x0000FF00) << 8) |
-        ((hdr_in->length & 0x00FF0000) >> 8) |
-        ((hdr_in->length & 0xFF000000) >> 24);
-#endif
+    
+    hdr_out->opcode = ntohs(hdr_in->opcode);
+    hdr_out->length = ntohl(hdr_in->length);
 }
 
