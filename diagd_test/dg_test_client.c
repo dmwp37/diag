@@ -14,6 +14,7 @@ Revision History:
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/11     xxxxx-0002   Fix aux test thread return bug
 
 ====================================================================================================
                                             INCLUDE FILES
@@ -706,7 +707,7 @@ BOOL dg_test_client_multi_aux_test(void)
     UINT8 index = 0;
     pthread_t thread_id[2];
     int thread_status;
-    int *thread_ret_value = 0;
+    int thread_ret_value = 0;
     UINT16 opcode = 0xbeef;
     
     for (index = 0; index < 2; index++)
@@ -726,7 +727,6 @@ BOOL dg_test_client_multi_aux_test(void)
     {
         for (index = 0; index < 2; index++)
         {
-            thread_ret_value = NULL;
             if ( (thread_status = pthread_join(thread_id[index], (void **)&thread_ret_value)) != 0)
             {
                 printf("Error: Joining client thread #%d\n", index);
@@ -734,7 +734,7 @@ BOOL dg_test_client_multi_aux_test(void)
             }
             else if ( thread_ret_value != 0)
             {
-                printf("Error: Client thread #%d returned failure status of %d\n", index, *thread_ret_value);
+                printf("Error: Client thread #%d returned failure status of %d\n", index, thread_ret_value);
                 is_success = FALSE;
             }
         }
