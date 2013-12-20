@@ -17,7 +17,11 @@ my_compiler_dependencies :=
 # the linked_module is the linker raw output
 ##################################################
 LOCAL_LINKED_MODULE := $(intermediates)/LINKED/$(LOCAL_BUILT_MODULE_STEM)
-LOCAL_INTERMEDIATE_TARGETS += $(LOCAL_LINKED_MODULE)
+ifeq ($(LOCAL_MODULE_CLASS),STATIC_LIBRARIES)
+  LOCAL_INTERMEDIATE_TARGETS += $(LOCAL_BUILT_MODULE)
+else
+  LOCAL_INTERMEDIATE_TARGETS += $(LOCAL_LINKED_MODULE)
+endif
 
 ###########################################################
 ## Explicitly declare assembly-only __ASSEMBLY__ macro for
