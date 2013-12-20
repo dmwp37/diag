@@ -11,6 +11,7 @@ Revision History:
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/20     xxxxx-0003   Enable aux engine
 
 ====================================================================================================
                                             INCLUDE FILES
@@ -60,8 +61,18 @@ void DG_AUX_CMD_handler_main(DG_DEFS_DIAG_REQ_T *req)
 #if DG_CFG_AUX_NUM==0
     /* If no modem existing, return error opcode */
     DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_PAR_ERR_OPCODE);
-#else  
+#elif DG_CFG_AUX_NUM==1
     DG_AUX_ENGINE_handle_aux_cmd(DG_AUX_ENGINE_AUX_ID_AUX1, req, rsp);
+#else
+    /* Use an arbitary opcode value to determine which aux engine to forward the request to */
+    if (req->header.opcode < 0xc000)
+    {
+        DG_AUX_ENGINE_handle_aux_cmd(DG_AUX_ENGINE_AUX_ID_AUX1, req, rsp);
+    }
+    else
+    {
+        DG_AUX_ENGINE_handle_aux_cmd(DG_AUX_ENGINE_AUX_ID_AUX2, req, rsp);
+    }
 #endif
 
     DG_ENGINE_UTIL_rsp_send(rsp, req);

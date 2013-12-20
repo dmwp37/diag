@@ -15,6 +15,7 @@ Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0002   Fix aux test thread return bug
+Xudong Huang    - xudongh    2013/12/20     xxxxx-0003   Enable aux engine
 
 ====================================================================================================
                                             INCLUDE FILES
@@ -25,6 +26,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0002   Fix aux test thread ret
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
 #include <dg_client_api.h>
 
@@ -50,10 +52,10 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0002   Fix aux test thread ret
 
 /* Mass connection test settings */
 #define DG_TEST_CLIENT_MASS_CONNECT_NUM_CLIENTS          10  /* Number of clients/threads to use */
-#define DG_TEST_CLIENT_MASS_CONNECT_NUM_CMD_PER_CONNECT  100 /* Number of times a command is sent per 
+#define DG_TEST_CLIENT_MASS_CONNECT_NUM_CMD_PER_CONNECT  20 /* Number of times a command is sent per 
                                                                engine connect */
-#define DG_TEST_CLIENT_MASS_CONNECT_NUM_CONNECT_PER_LOOP 500
-#define DG_TEST_CLIENT_MASS_CONNECT_LOOP_SLEEP           60
+#define DG_TEST_CLIENT_MASS_CONNECT_NUM_CONNECT_PER_LOOP 50
+#define DG_TEST_CLIENT_MASS_CONNECT_LOOP_SLEEP           2
 #define DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS            4
 
 /*==================================================================================================
@@ -408,15 +410,22 @@ BOOL dg_test_client_unsol_rsp_test(void)
     UINT8 *rsp_payload;
     UINT32 i;
     BOOL success = FALSE;
-
-
+    
+    UINT32 action = 0x00000001;
+    UINT16 num = 1000;
+    
+    action = htonl(action);
+    num = htons(num);
+    memcpy(diag_req_data, &action, sizeof(action));
+    memcpy(diag_req_data+4, &num, sizeof(num));
+/*
     diag_req_data[0] = 0x00;
     diag_req_data[1] = 0x00;
     diag_req_data[2] = 0x00;
     diag_req_data[3] = 0x01;
     diag_req_data[4] = 0x03;
     diag_req_data[5] = 0xe8;
-
+*/
     if (DG_CLIENT_API_send_diag_req(dg_test_client_server_cs, 0x0ffe, dg_test_client_timestamp,
                                     6, diag_req_data) == DG_CLIENT_API_STATUS_SUCCESS)
     {
@@ -496,7 +505,7 @@ void dg_test_client_print_diag_rsp(UINT8* diag_rsp, UINT32 rsp_len)
 {
     BOOL   diag_fail;
     BOOL   unsol_rsp;
-    UINT8  timestamp;
+    UINT16 timestamp;
     UINT16 opcode;
     UINT8  rsp_code;
     UINT32 data_offset_val;
@@ -540,10 +549,17 @@ void dg_test_client_print_diag_rsp(UINT8* diag_rsp, UINT32 rsp_len)
 BOOL dg_test_client_api_timeout_test(void)
 {
     DG_CLIENT_API_STATUS_T status;
-    UINT8 diag_req_data[] = {0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x0F, 0xA0}; // 4000msec wait
+    UINT8 diag_req_data[8]; /* = {0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x0F, 0xA0};*/ // 4000msec wait
     UINT32 rsp_len;
     UINT8 *rsp_ptr = NULL;
     BOOL is_success = FALSE;
+    
+    UINT32 action = 0x00000002;
+    UINT32 time_out = 4000;
+    action = htonl(action);
+    time_out = htonl(time_out);
+    memcpy(diag_req_data, &action, sizeof(action));
+    memcpy(diag_req_data+4, &time_out, sizeof(time_out));
     
     /* Send 4000 msec delay command */
     if (DG_CLIENT_API_send_diag_req(dg_test_client_server_cs, 0x0ffe, dg_test_client_timestamp,
@@ -701,16 +717,17 @@ void *dg_test_client_mass_connection_test_thread(void* p)
     return((int *)thread_ret);
 }
 
+#define DG_TEST_AUX_THREAD_NUM 2
 BOOL dg_test_client_multi_aux_test(void)
 {
     BOOL is_success = TRUE;
     UINT8 index = 0;
-    pthread_t thread_id[2];
+    pthread_t thread_id[DG_TEST_AUX_THREAD_NUM];
     int thread_status;
     int thread_ret_value = 0;
     UINT16 opcode = 0xbeef;
     
-    for (index = 0; index < 2; index++)
+    for (index = 0; index < DG_TEST_AUX_THREAD_NUM; index++)
     {
         if ( (thread_status = pthread_create(&thread_id[index], NULL, 
                                              dg_test_client_multi_aux_test_thread,  (void*)(long)opcode)) != 0)
@@ -725,7 +742,7 @@ BOOL dg_test_client_multi_aux_test(void)
     
     if (is_success == TRUE)
     {
-        for (index = 0; index < 2; index++)
+        for (index = 0; index < DG_TEST_AUX_THREAD_NUM; index++)
         {
             if ( (thread_status = pthread_join(thread_id[index], (void **)&thread_ret_value)) != 0)
             {

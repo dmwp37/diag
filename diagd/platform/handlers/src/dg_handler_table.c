@@ -11,6 +11,7 @@ Revision History:
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/20     xxxxx-0003   Enable aux engine
 
 ====================================================================================================
                                             INCLUDE FILES
@@ -49,8 +50,8 @@ const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
     {0x0FFF, DG_DEFS_MODE_ALL,  DG_PING_handler_main,       NULL, DG_HANDLER_TABLE_DEFAULT_TIMEOUT},
 
     /* IMPORTANT: This must be the last line! */
-    {DG_DEFS_HANDLER_TABLE_OPCODE_END, DG_DEFS_MODE_ALL, NULL, NULL, 60000}
-//    {DG_DEFS_HANDLER_TABLE_OPCODE_END, DG_DEFS_MODE_ALL, DG_AUX_CMD_handler_main, NULL, 60000}
+//    {DG_DEFS_HANDLER_TABLE_OPCODE_END, DG_DEFS_MODE_ALL, NULL, NULL, 60000}
+    {DG_DEFS_HANDLER_TABLE_OPCODE_END, DG_DEFS_MODE_ALL, DG_AUX_CMD_handler_main, NULL, 60000}
 
 };
 
