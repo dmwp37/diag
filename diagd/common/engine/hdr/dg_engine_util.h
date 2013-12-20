@@ -13,6 +13,7 @@ Revision History:
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protocol
 
 ====================================================================================================
                                            INCLUDE FILES
@@ -96,7 +97,6 @@ BOOL DG_ENGINE_UTIL_rsp_data_alloc(DG_DEFS_DIAG_RSP_BUILDER_T *rsp, UINT32 max_s
 void DG_ENGINE_UTIL_rsp_append_1_byte_hton(DG_DEFS_DIAG_RSP_BUILDER_T *rsp, UINT8 val);
 void DG_ENGINE_UTIL_rsp_append_2_bytes_hton(DG_DEFS_DIAG_RSP_BUILDER_T *rsp, UINT16 val);
 void DG_ENGINE_UTIL_rsp_append_4_bytes_hton(DG_DEFS_DIAG_RSP_BUILDER_T *rsp, UINT32 val);
-void DG_ENGINE_UTIL_rsp_append_flt_signed_4byte_fpv_hton(DG_DEFS_DIAG_RSP_BUILDER_T *rsp,float val);
 void DG_ENGINE_UTIL_rsp_append_buf(DG_DEFS_DIAG_RSP_BUILDER_T *rsp, UINT8 *src, UINT32 num_bytes);
 void DG_ENGINE_UTIL_rsp_replace_1_byte_hton(DG_DEFS_DIAG_RSP_BUILDER_T *rsp, UINT32 offset, 
                                             UINT8 val);

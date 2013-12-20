@@ -12,6 +12,7 @@ Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 Xudong Huang    - xudongh    2013/12/19     xxxxx-0001   Update diag rsp protocol
+Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protocol
 
 ====================================================================================================
                                            INCLUDE FILES
@@ -280,7 +281,7 @@ DG_CLIENT_API_STATUS_T DG_CLIENT_API_disconnect_from_server(DG_CLIENT_API_SESSIO
 @return Status of function
 *//*==============================================================================================*/
 DG_CLIENT_API_STATUS_T DG_CLIENT_API_send_diag_req(DG_CLIENT_API_SESSION_T socket, UINT16 opcode,
-                                                   UINT8 timestamp, UINT32 req_len,
+                                                   UINT16 timestamp, UINT32 req_len,
                                                    UINT8* req_data_ptr)
 {
     int                    write_return_len = 0;
@@ -403,15 +404,15 @@ DG_CLIENT_API_STATUS_T DG_CLIENT_API_send_diag_req_raw(DG_CLIENT_API_SESSION_T s
   - If the expected response is unsolicited, the timestamp parameter is ignored
 *//*==============================================================================================*/
 UINT8* DG_CLIENT_API_rcv_desired_diag_rsp(DG_CLIENT_API_SESSION_T socket, UINT16 opcode,
-                                          UINT8 timestamp, BOOL is_unsol,
+                                          UINT16 timestamp, BOOL is_unsol,
                                           UINT32 timeout_in_ms, UINT32* rsp_len_ptr,
                                           DG_CLIENT_API_STATUS_T* status_ptr)
 {
-    BOOL   is_rcvd_unsol  = FALSE;
-    UINT8  rcvd_timestamp = 0;
-    UINT16 rcvd_opcode    = 0;
-    UINT8* diag_rsp       = NULL;
-    BOOL   got_rsp        = FALSE;
+    BOOL   is_rcvd_unsol   = FALSE;
+    UINT16  rcvd_timestamp = 0;
+    UINT16 rcvd_opcode     = 0;
+    UINT8* diag_rsp        = NULL;
+    BOOL   got_rsp         = FALSE;
 
     *status_ptr = DG_CLIENT_API_STATUS_SUCCESS;
 
@@ -441,6 +442,7 @@ UINT8* DG_CLIENT_API_rcv_desired_diag_rsp(DG_CLIENT_API_SESSION_T socket, UINT16
 
         if (got_rsp == FALSE)
         {
+            DG_CLIENT_API_TRACE("Got the wrong response!!");
             free(diag_rsp);
             diag_rsp = NULL;
         }
@@ -532,19 +534,20 @@ UINT8* DG_CLIENT_API_rcv_diag_rsp(DG_CLIENT_API_SESSION_T socket, UINT32 timeout
                     if ((diag_rsp = (UINT8*)malloc(total_len)) != NULL)
                     {
                         *rsp_len_ptr = total_len;
-                        memcpy(diag_rsp, &orig_hdr, sizeof(orig_hdr));
+                        memcpy(diag_rsp, &converted_hdr, sizeof(converted_hdr));
 
                         /* Attempt to read the response data if present */
-                        if ((converted_hdr.length) &&
-                            ((*status_ptr =
-                                  dg_client_api_read_socket(socket, converted_hdr.length,
-                                                            (diag_rsp + sizeof(orig_hdr))))
-                             != DG_CLIENT_API_STATUS_SUCCESS))
+                        if (converted_hdr.length > 0)
                         {
-                            /* Reading the data failed, cleanup */
-                            free(diag_rsp);
-                            diag_rsp     = NULL;
-                            *rsp_len_ptr = 0;
+                           *status_ptr = dg_client_api_read_socket(socket, converted_hdr.length,
+                                                                   diag_rsp + sizeof(orig_hdr));
+                            if (*status_ptr != DG_CLIENT_API_STATUS_SUCCESS)
+                            {
+                                /* Reading the data failed, cleanup */
+                                free(diag_rsp);
+                                diag_rsp     = NULL;
+                                *rsp_len_ptr = 0;
+                            }
                         }
                     }
                     else
@@ -582,17 +585,14 @@ UINT8* DG_CLIENT_API_rcv_diag_rsp(DG_CLIENT_API_SESSION_T socket, UINT32 timeout
 *//*==============================================================================================*/
 DG_CLIENT_API_STATUS_T DG_CLIENT_API_parse_diag_rsp(UINT8* rsp_ptr, UINT32 rsp_len,
                                                     BOOL* diag_fail_ptr, BOOL* unsol_rsp_ptr,
-                                                    UINT8* timestamp_ptr, UINT16* opcode_ptr,
+                                                    UINT16* timestamp_ptr, UINT16* opcode_ptr,
                                                     UINT8* rsp_code_ptr,
                                                     UINT32* data_offset_val_ptr,
                                                     UINT32* data_len_ptr)
 {
     DG_CLIENT_API_STATUS_T status = DG_CLIENT_API_STATUS_ERROR;
-    DG_DEFS_DIAG_RSP_HDR_T hdr;
+    DG_DEFS_DIAG_RSP_HDR_T hdr    = *(DG_DEFS_DIAG_RSP_HDR_T*)rsp_ptr;
 
-    /* Do an endian swap on the header and ensure the supplied response length matches what the
-       header indicates */
-    dg_client_api_rsp_hdr_ntoh((DG_DEFS_DIAG_RSP_HDR_T*)rsp_ptr, &hdr);
     if (rsp_len == (hdr.length + sizeof(hdr)))
     {
         status = DG_CLIENT_API_STATUS_SUCCESS;
@@ -840,6 +840,7 @@ void dg_client_api_req_hdr_hton(DG_DEFS_DIAG_REQ_HDR_T* hdr_in, DG_DEFS_DIAG_REQ
 {
     memcpy(hdr_out, hdr_in, sizeof(DG_DEFS_DIAG_REQ_HDR_T));
     hdr_out->opcode = htons(hdr_in->opcode);
+    hdr_out->seq_tag = htons(hdr_in->seq_tag);
     hdr_out->length = htonl(hdr_in->length);
 }
 
@@ -853,7 +854,8 @@ void dg_client_api_rsp_hdr_ntoh(DG_DEFS_DIAG_RSP_HDR_T* hdr_in, DG_DEFS_DIAG_RSP
 {
     memcpy(hdr_out, hdr_in, sizeof(DG_DEFS_DIAG_RSP_HDR_T));
     
-    hdr_out->opcode = ntohs(hdr_in->opcode);
-    hdr_out->length = ntohl(hdr_in->length);
+    hdr_out->opcode  = ntohs(hdr_in->opcode);
+    hdr_out->seq_tag = ntohs(hdr_in->seq_tag);
+    hdr_out->length  = ntohl(hdr_in->length);
 }
 

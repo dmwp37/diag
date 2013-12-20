@@ -13,6 +13,7 @@ Revision History:
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protocol
 
 ====================================================================================================
                                            INCLUDE FILES
@@ -59,18 +60,18 @@ DG_CLIENT_API_STATUS_T DG_CLIENT_API_connect_to_server(int                      
                                                        DG_CLIENT_API_SESSION_T* socket_ptr);
 DG_CLIENT_API_STATUS_T DG_CLIENT_API_disconnect_from_server(DG_CLIENT_API_SESSION_T socket);
 DG_CLIENT_API_STATUS_T DG_CLIENT_API_send_diag_req(DG_CLIENT_API_SESSION_T socket, UINT16 opcode,
-                                                   UINT8 timestamp, UINT32 req_len,
+                                                   UINT16 timestamp, UINT32 req_len,
                                                    UINT8* req_data_ptr);
 DG_CLIENT_API_STATUS_T DG_CLIENT_API_send_diag_req_raw(DG_CLIENT_API_SESSION_T socket,
                                                        UINT32 raw_data_len, UINT8* raw_data_ptr);
 UINT8* DG_CLIENT_API_rcv_desired_diag_rsp(DG_CLIENT_API_SESSION_T socket, UINT16 opcode,
-                                          UINT8 timestamp, BOOL is_unsol, UINT32 timeout_in_ms,
+                                          UINT16 timestamp, BOOL is_unsol, UINT32 timeout_in_ms,
                                           UINT32* rsp_len_ptr, DG_CLIENT_API_STATUS_T* status_ptr);
 UINT8* DG_CLIENT_API_rcv_diag_rsp(DG_CLIENT_API_SESSION_T socket, UINT32 timeout_in_ms,
                                   UINT32* rsp_len_ptr, DG_CLIENT_API_STATUS_T* status_ptr);
 DG_CLIENT_API_STATUS_T DG_CLIENT_API_parse_diag_rsp(UINT8* rsp_ptr, UINT32 rsp_len,
                                                     BOOL* diag_fail_ptr, BOOL* unsol_rsp_ptr,
-                                                    UINT8* timestamp_ptr, UINT16* opcode_ptr,
+                                                    UINT16* timestamp_ptr, UINT16* opcode_ptr,
                                                     UINT8* rsp_code_ptr,
                                                     UINT32* data_offset_val_ptr,
                                                     UINT32* data_len_ptr);

@@ -14,6 +14,7 @@ Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 Xudong Huang    - xudongh    2013/12/19     xxxxx-0001   Update diag rsp protocol
+Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protocol
 
 ====================================================================================================
                                            INCLUDE FILES
@@ -81,12 +82,11 @@ typedef enum
 /** The Diag Protocol Header (Bulk Endpoint/12 byte) - Request Header */
 typedef struct
 {
-    UINT8             reserved1;              /**< Reserved */
-    UINT8             seq_tag;                /**< Sequence Tag */
     DG_DEFS_OPCODE_T  opcode;                 /**< Opcode */
-    UINT8             reserved2;              /**< Reserved */
+    UINT16            diag_version;           /**< Diag Version Number */
+    UINT8             reserved;               /**< reserved */
     UINT8             no_rsp_reqd_flag;       /**< No Response Required Flag */
-    UINT16            reserved4;              /**< Reserved */
+    UINT16            seq_tag;                /**< Sequence Tag */
     UINT32            length;                 /**< Data Length of Request */
 } DG_DEFS_DIAG_REQ_HDR_T;
 

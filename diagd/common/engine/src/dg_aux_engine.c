@@ -13,6 +13,7 @@ Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 Xudong Huang    - xudongh    2013/12/19     xxxxx-0001   Update diag rsp protocol
+Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protocol
 
 ====================================================================================================
                                            INCLUDE FILES
@@ -73,7 +74,7 @@ static int                 dg_aux_engine_handle_override(int aux_id);
 /*==================================================================================================
                                       MODULE GLOBAL VARIABLES
 ==================================================================================================*/
-static UINT8           dg_aux_engine_seq_tag        = 0;
+static UINT16          dg_aux_engine_seq_tag        = 0;
 static int             dg_aux_engine_override_id    = DG_AUX_ENGINE_OVERRIDE_DISABLED;
 static pthread_mutex_t dg_aux_engine_override_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_t       dg_aux_engine_listener_thread_hndl[DG_CFG_AUX_NUM];
@@ -528,7 +529,7 @@ void dg_aux_engine_handle_aux_cmd_impl(int                         aux_id,
     DG_DEFS_DIAG_RSP_T* resp = NULL;
     DG_DEFS_STATUS_T    send_status;
     DG_DEFS_OPCODE_T    opcode;
-    UINT8               seq_tag;
+    UINT16              seq_tag;
 
     if (!DG_AUX_ENGINE_is_aux_enabled(aux_id))
     {

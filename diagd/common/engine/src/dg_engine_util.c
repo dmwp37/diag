@@ -12,6 +12,7 @@ Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 Xudong Huang    - xudongh    2013/12/19     xxxxx-0001   Update diag rsp protocol
+Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protocol
 
 ====================================================================================================
                                            INCLUDE FILES
@@ -159,8 +160,9 @@ void DG_ENGINE_UTIL_hdr_rsp_ntoh(DG_DEFS_DIAG_RSP_HDR_T* hdr_in,
                                  DG_DEFS_DIAG_RSP_HDR_T* hdr_out)
 {
     memcpy(hdr_out, hdr_in, sizeof(DG_DEFS_DIAG_RSP_HDR_T));
-    hdr_out->opcode = ntohs(hdr_in->opcode);
-    hdr_out->length = ntohl(hdr_in->length);
+    hdr_out->opcode  = ntohs(hdr_in->opcode);
+    hdr_out->seq_tag = ntohs(hdr_in->seq_tag);
+    hdr_out->length  = ntohl(hdr_in->length);
 }
 
 /*=============================================================================================*//**
@@ -173,8 +175,9 @@ void DG_ENGINE_UTIL_hdr_rsp_hton(DG_DEFS_DIAG_RSP_HDR_T* hdr_in,
                                  DG_DEFS_DIAG_RSP_HDR_T* hdr_out)
 {
     memcpy(hdr_out, hdr_in, sizeof(DG_DEFS_DIAG_RSP_HDR_T));
-    hdr_out->opcode = htons(hdr_in->opcode);
-    hdr_out->length = htonl(hdr_in->length);
+    hdr_out->opcode  = htons(hdr_in->opcode);
+    hdr_out->seq_tag = htons(hdr_in->seq_tag);
+    hdr_out->length  = htonl(hdr_in->length);
 }
 
 /*=============================================================================================*//**
@@ -187,8 +190,9 @@ void DG_ENGINE_UTIL_hdr_req_ntoh(DG_DEFS_DIAG_REQ_HDR_T* hdr_in,
                                  DG_DEFS_DIAG_REQ_HDR_T* hdr_out)
 {
     memcpy(hdr_out, hdr_in, sizeof(DG_DEFS_DIAG_REQ_HDR_T));
-    hdr_out->opcode = ntohs(hdr_in->opcode);
-    hdr_out->length = ntohl(hdr_in->length);
+    hdr_out->opcode  = ntohs(hdr_in->opcode);
+    hdr_out->seq_tag = ntohs(hdr_in->seq_tag);
+    hdr_out->length  = ntohl(hdr_in->length);
 }
 
 /*=============================================================================================*//**
@@ -201,8 +205,9 @@ void DG_ENGINE_UTIL_hdr_req_hton(DG_DEFS_DIAG_REQ_HDR_T* hdr_in,
                                  DG_DEFS_DIAG_REQ_HDR_T* hdr_out)
 {
     memcpy(hdr_out, hdr_in, sizeof(DG_DEFS_DIAG_REQ_HDR_T));
-    hdr_out->opcode = htons(hdr_in->opcode);
-    hdr_out->length = htonl(hdr_in->length);
+    hdr_out->opcode  = htons(hdr_in->opcode);
+    hdr_out->seq_tag = htons(hdr_in->seq_tag);
+    hdr_out->length  = htonl(hdr_in->length);
 }
 
 /*=============================================================================================*//**
@@ -420,8 +425,7 @@ UINT8 DG_ENGINE_UTIL_req_parse_1_byte_ntoh(DG_DEFS_DIAG_REQ_T* req)
 *//*==============================================================================================*/
 UINT16 DG_ENGINE_UTIL_req_parse_2_bytes_ntoh(DG_DEFS_DIAG_REQ_T* req)
 {
-    UINT16 val = (*(req->data_ptr + req->data_offset) << 8) |
-                 (*(req->data_ptr + req->data_offset + 1));
+    UINT16 val = ntohs(*(UINT16*)(req->data_ptr + req->data_offset));
     req->data_offset += 2;
     return val;
 }
@@ -435,10 +439,7 @@ UINT16 DG_ENGINE_UTIL_req_parse_2_bytes_ntoh(DG_DEFS_DIAG_REQ_T* req)
 *//*==============================================================================================*/
 UINT32 DG_ENGINE_UTIL_req_parse_4_bytes_ntoh(DG_DEFS_DIAG_REQ_T* req)
 {
-    UINT32 val = (*(req->data_ptr + req->data_offset) << 24) |
-                 (*(req->data_ptr + req->data_offset + 1) << 16) |
-                 (*(req->data_ptr + req->data_offset + 2) << 8) |
-                 (*(req->data_ptr + req->data_offset + 3));
+    UINT32 val = ntohl(*(UINT32*)(req->data_ptr + req->data_offset));
     req->data_offset += 4;
     return val;
 }
@@ -662,69 +663,6 @@ void DG_ENGINE_UTIL_rsp_append_4_bytes_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UIN
 }
 
 /*=============================================================================================*//**
-@brief Converts a float to a signed 4 byte fixed point value from host to network endian
-       and appends it to a #DG_DEFS_DIAG_RSP_BUILDER_T response builder
-
-@param[in,out] rsp - The response builder to append to
-@param[in]     val - The value to append
-
-@note
-  - example 1: if val = 11.28,
-               11.28 is converted into 4 bytes(2 words) -
-               1st and 2nd bytes of buffer will contain 0x000B
-               3rd and 4th bytes of buffer will contain (.28 * 65536) = 18350 = 0x47AE
-  - example 2: if val is -11.28,
-               -11.28 is converted into 4 bytes(2 words) -
-               1st and 2nd bytes of buffer will contain 11 with the sign bit set (0x800B)
-               3rd and 4th bytes of buffer will contain (.28 * 65536) = 18350 = 0x47AE
-  - rsp must have been initialized by DG_ENGINE_UTIL_rsp_init() before using this function
-  - rsp must have had sufficient memory allocated by DG_ENGINE_UTIL_rsp_data_alloc() before using
-    this function
-*//*==============================================================================================*/
-void DG_ENGINE_UTIL_rsp_append_flt_signed_4byte_fpv_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, float val)
-{
-    dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
-    float                              integer_part, fraction_part;
-    UINT16                             converted_integer_part, converted_fraction_part;
-
-    /* convert val to signed 4 byte floating point value:                    */
-    /* integer_part may be a negative value, fraction part is positive value */
-    fraction_part = modff(val, &integer_part);
-
-    /* integer_part cannot be larger than 0x7FFF because we need the MSB for the sign bit */
-    if (integer_part > 0x7FFF)
-    {
-        converted_integer_part = 0x7FFF;
-    }
-    else if (integer_part < -0x7FFF)
-    {
-        converted_integer_part = 0xFFFF;
-    }
-    else if (integer_part < 0)
-    {
-        converted_integer_part = (UINT16)((abs((int)integer_part)) | 0x8000);
-    }
-    else
-    {
-        converted_integer_part = (UINT16)integer_part;
-    }
-
-    converted_fraction_part = (UINT16)(fabs(fraction_part) * 65536);
-
-    DG_DBG_TRACE("integer_part            = %f", integer_part);
-    DG_DBG_TRACE("fraction_part           = %f", fraction_part);
-    DG_DBG_TRACE("converted_integer_part  = %x", converted_integer_part);
-    DG_DBG_TRACE("converted_fraction_part = %x", converted_fraction_part);
-
-    /* now we can put the converted integer part into 1st and 2nd bytes and */
-    /* the converted fraction part into the 3rd and 4th bytes:    */
-    DG_ENGINE_UTIL_buf_append_2_bytes_hton(real_rsp->data_ptr, &real_rsp->data_cur_len,
-                                           converted_integer_part);
-    DG_ENGINE_UTIL_buf_append_2_bytes_hton(real_rsp->data_ptr, &real_rsp->data_cur_len,
-                                           converted_fraction_part);
-}
-
-/*=============================================================================================*//**
 @brief Appends a buffer of X bytes to a #DG_DEFS_DIAG_RSP_BUILDER_T response builder
 
 @param[in,out] rsp        - The response builder to append to
@@ -834,8 +772,8 @@ void DG_ENGINE_UTIL_buf_append_1_byte_hton(UINT8* buf, UINT32* cur_buf_len, UINT
 *//*==============================================================================================*/
 void DG_ENGINE_UTIL_buf_append_2_bytes_hton(UINT8* buf, UINT32* cur_buf_len, UINT16 val)
 {
-    *(buf + (*cur_buf_len)++) = (UINT8)(val >> 8);
-    *(buf + (*cur_buf_len)++) = (UINT8)(val & 0x00FF);
+    *(UINT16*)(buf + *cur_buf_len) = htons(val);
+    *cur_buf_len += 2;
 }
 
 /*=============================================================================================*//**
@@ -847,10 +785,8 @@ void DG_ENGINE_UTIL_buf_append_2_bytes_hton(UINT8* buf, UINT32* cur_buf_len, UIN
 *//*==============================================================================================*/
 void DG_ENGINE_UTIL_buf_append_4_bytes_hton(UINT8* buf, UINT32* cur_buf_len, UINT32 val)
 {
-    *(buf + (*cur_buf_len)++) = (UINT8)(val >> 24);
-    *(buf + (*cur_buf_len)++) = (UINT8)((val & 0x00FF0000) >> 16);
-    *(buf + (*cur_buf_len)++) = (UINT8)((val & 0x0000FF00) >> 8);
-    *(buf + (*cur_buf_len)++) = (UINT8)((val & 0x000000FF));
+    *(UINT32*)(buf + *cur_buf_len) = htonl(val);
+    *cur_buf_len += 4;
 }
 
 /*=============================================================================================*//**
@@ -865,7 +801,7 @@ void DG_ENGINE_UTIL_buf_uint16_hton(UINT16* buf, UINT32 len)
 
     for (offset = 0; offset < len; offset++)
     {
-        buf[offset] = (buf[offset] >> 8) | ((buf[offset] & 0x00FF) << 8);
+        buf[offset] = htons(buf[offset]);
     }
 }
 
@@ -904,8 +840,7 @@ void DG_ENGINE_UTIL_buf_replace_1_byte_hton(UINT8* buf, UINT32 offset, UINT8 val
 *//*==============================================================================================*/
 void DG_ENGINE_UTIL_buf_replace_2_bytes_hton(UINT8* buf, UINT32 offset, UINT16 val)
 {
-    *(buf + offset)       = (UINT8)(val >> 8);
-    *(buf + (offset + 1)) = (UINT8)(val & 0x00FF);
+    *(UINT16*)(buf + offset) = htons(val);
 }
 
 /*=============================================================================================*//**
@@ -917,10 +852,7 @@ void DG_ENGINE_UTIL_buf_replace_2_bytes_hton(UINT8* buf, UINT32 offset, UINT16 v
 *//*==============================================================================================*/
 void DG_ENGINE_UTIL_buf_replace_4_bytes_hton(UINT8* buf, UINT32 offset, UINT32 val)
 {
-    *(buf + offset)       = (UINT8)(val >> 24);
-    *(buf + (offset + 1)) = (UINT8)((val & 0x00FF0000) >> 16);
-    *(buf + (offset + 2)) = (UINT8)((val & 0x0000FF00) >> 8);
-    *(buf + (offset + 3)) = (UINT8)((val & 0x000000FF));
+    *(UINT32*)(buf + offset) = htonl(val);
 }
 /*=============================================================================================*//**
 @brief From a buf, gets a 1 byte value.
@@ -945,7 +877,7 @@ UINT8 DG_ENGINE_UTIL_buf_parse_1_byte_ntoh(UINT8** buf_ptr)
 *//*==============================================================================================*/
 UINT16 DG_ENGINE_UTIL_buf_parse_2_bytes_ntoh(UINT8** buf_ptr)
 {
-    UINT16 val = (**buf_ptr << 8) | (*(*buf_ptr + 1));
+    UINT16 val = ntohs(*(UINT16*)(*buf_ptr));
     *buf_ptr += 2;
     return val;
 }
@@ -959,8 +891,7 @@ UINT16 DG_ENGINE_UTIL_buf_parse_2_bytes_ntoh(UINT8** buf_ptr)
 *//*==============================================================================================*/
 UINT32 DG_ENGINE_UTIL_buf_parse_4_bytes_ntoh(UINT8** buf_ptr)
 {
-    UINT32 val = ((**buf_ptr << 24) | (*(*buf_ptr + 1) << 16) |
-                  (*(*buf_ptr + 2) << 8) | (*(*buf_ptr + 3)));
+    UINT32 val = ntohl(*(UINT32*)(*buf_ptr));
     *buf_ptr += 4;
     return val;
 }
@@ -1721,8 +1652,11 @@ void dg_engine_util_send_response(DG_DEFS_DIAG_REQ_T* diag,
     rsp.header.rsp_code       = final_rsp_code;
     rsp.header.length         = final_rsp_length;
 
-    DG_DBG_TRACE("Response Flags - unsol = %d, data = %d, fail = %d", rsp.header.unsol_rsp_flag,
-                 rsp.header.length>0, rsp.header.rsp_code!=DG_RSP_CODE_CMD_RSP_GENERIC);
+    DG_DBG_TRACE("Response Flags - unsol = %d, data = %d, fail = %d, seq = %d",
+                 rsp.header.unsol_rsp_flag,
+                 rsp.header.length > 0,
+                 rsp.header.rsp_code != DG_RSP_CODE_CMD_RSP_GENERIC,
+                 rsp.header.seq_tag);
 
     if (rsp.header.rsp_code != DG_RSP_CODE_CMD_RSP_GENERIC)
     {
