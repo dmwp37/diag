@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="90">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="common" displayName="common" projectFiles="true">
+      <logicalFolder name="drivers" displayName="drivers" projectFiles="true">
+        <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="engine" displayName="engine" projectFiles="true">
+        <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
+          <itemPath>../../../diagd/common/engine/hdr/dg_aux_engine.h</itemPath>
+          <itemPath>../../../diagd/common/engine/hdr/dg_aux_util.h</itemPath>
+          <itemPath>../../../diagd/common/engine/hdr/dg_client_comm.h</itemPath>
+          <itemPath>../../../diagd/common/engine/hdr/dg_dbg.h</itemPath>
+          <itemPath>../../../diagd/common/engine/hdr/dg_defs.h</itemPath>
+          <itemPath>../../../diagd/common/engine/hdr/dg_engine_util.h</itemPath>
+          <itemPath>../../../diagd/common/engine/hdr/dg_main.h</itemPath>
+          <itemPath>../../../diagd/common/engine/hdr/dg_rsp_code.h</itemPath>
+          <itemPath>../../../diagd/common/engine/hdr/dg_socket.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="pal" displayName="pal" projectFiles="true">
+          <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
+            <itemPath>../../../diagd/common/engine/pal/hdr/dg_pal_aux_engine.h</itemPath>
+            <itemPath>../../../diagd/common/engine/pal/hdr/dg_pal_dbg.h</itemPath>
+            <itemPath>../../../diagd/common/engine/pal/hdr/dg_pal_security.h</itemPath>
+            <itemPath>../../../diagd/common/engine/pal/hdr/dg_pal_util.h</itemPath>
+          </logicalFolder>
+        </logicalFolder>
+        <logicalFolder name="src" displayName="src" projectFiles="true">
+          <itemPath>../../../diagd/common/engine/src/dg_aux_engine.c</itemPath>
+          <itemPath>../../../diagd/common/engine/src/dg_aux_util.c</itemPath>
+          <itemPath>../../../diagd/common/engine/src/dg_client_comm.c</itemPath>
+          <itemPath>../../../diagd/common/engine/src/dg_dbg.c</itemPath>
+          <itemPath>../../../diagd/common/engine/src/dg_engine_util.c</itemPath>
+          <itemPath>../../../diagd/common/engine/src/dg_main.c</itemPath>
+          <itemPath>../../../diagd/common/engine/src/dg_socket.c</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="handlers" displayName="handlers" projectFiles="true">
+        <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
+          <itemPath>../../../diagd/common/handlers/hdr/dg_common_handler_table.h</itemPath>
+          <itemPath>../../../diagd/common/handlers/hdr/dg_handler_inc.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="src" displayName="src" projectFiles="true">
+          <itemPath>../../../diagd/common/handlers/src/dg_debug_level.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_test_engine.c</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <itemPath>../../../diagd/common/README</itemPath>
+    </logicalFolder>
+    <logicalFolder name="platform" displayName="platform" projectFiles="true">
+      <logicalFolder name="drivers" displayName="drivers" projectFiles="true">
+        <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
+          <itemPath>../../../diagd/platform/drivers/hdr/dg_util_drv.h</itemPath>
+          <itemPath>../../../diagd/platform/drivers/hdr/dg_util_drv_err_string.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="src" displayName="src" projectFiles="true">
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_util_drv.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_util_drv_err_string.c</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="handlers" displayName="handlers" projectFiles="true">
+        <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
+          <itemPath>../../../diagd/platform/handlers/hdr/dg_handler_table.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="src" displayName="src" projectFiles="true">
+          <itemPath>../../../diagd/platform/handlers/src/dg_aux_cmd.c</itemPath>
+          <itemPath>../../../diagd/platform/handlers/src/dg_handler_table.c</itemPath>
+          <itemPath>../../../diagd/platform/handlers/src/dg_ping.c</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="pal" displayName="pal" projectFiles="true">
+        <logicalFolder name="engine" displayName="engine" projectFiles="true">
+          <logicalFolder name="src" displayName="src" projectFiles="true">
+            <itemPath>../../../diagd/platform/pal/engine/src/dg_main_task.c</itemPath>
+            <itemPath>../../../diagd/platform/pal/engine/src/dg_pal_aux_engine.c</itemPath>
+            <itemPath>../../../diagd/platform/pal/engine/src/dg_pal_dbg.c</itemPath>
+            <itemPath>../../../diagd/platform/pal/engine/src/dg_pal_security.c</itemPath>
+            <itemPath>../../../diagd/platform/pal/engine/src/dg_pal_util.c</itemPath>
+          </logicalFolder>
+        </logicalFolder>
+      </logicalFolder>
+      <itemPath>../../../diagd/platform/README.txt</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+      <itemPath>../../../diagd/README.txt</itemPath>
+      <itemPath>../../../diagd/dg_cfg.mk</itemPath>
+      <itemPath>../../../diagd/local_module.mk</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>../../../diagd/common</Elem>
+    <Elem>../../../diagd/platform</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>../../../diagd/common/engine/hdr</pElem>
+            <pElem>../../../diagd/common/engine/pal/hdr</pElem>
+            <pElem>../../../diagd/common/client_api/hdr</pElem>
+            <pElem>../../../diagd/common/handlers/hdr</pElem>
+            <pElem>../../../diagd/common/drivers/hdr</pElem>
+            <pElem>../../../diagd/platform/pal/client_api/hdr</pElem>
+            <pElem>../../../diagd/platform/handlers/hdr</pElem>
+            <pElem>../../../diagd/platform/drivers/hdr</pElem>
+          </incDir>
+          <commandLine>-pipe -fno-keep-inline-dllexport -Wall -Wextra</commandLine>
+          <preprocessorList>
+            <Elem>DG_CFG_AUX_NUM=2</Elem>
+            <Elem>DG_CFG_INT_SOCKET="/tmp/diagd_local_socket"</Elem>
+            <Elem>DG_CFG_PID_FILE="/tmp/diagd.pid"</Elem>
+          </preprocessorList>
+          <warningLevel>3</warningLevel>
+        </cTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../libdiagapi"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../libdiagapi"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdiagapi.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
+          </linkerLibItems>
+          <commandLine>-mconsole</commandLine>
+        </linkerTool>
+      </compileType>
+      <item path="../../../diagd/README.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/common/README" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_aux_engine.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_aux_util.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_client_comm.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_dbg.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_defs.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_engine_util.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_main.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_rsp_code.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_socket.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/pal/hdr/dg_pal_aux_engine.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/pal/hdr/dg_pal_dbg.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/pal/hdr/dg_pal_security.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/pal/hdr/dg_pal_util.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_aux_engine.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_aux_util.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_client_comm.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_dbg.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_engine_util.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_main.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_socket.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/hdr/dg_common_handler_table.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/hdr/dg_handler_inc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/src/dg_debug_level.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/src/dg_test_engine.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/dg_cfg.mk" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/local_module.mk" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/README.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/hdr/dg_util_drv.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/hdr/dg_util_drv_err_string.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_util_drv.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_util_drv_err_string.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/handlers/hdr/dg_handler_table.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/handlers/src/dg_aux_cmd.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/handlers/src/dg_handler_table.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/handlers/src/dg_ping.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/pal/engine/src/dg_main_task.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/pal/engine/src/dg_pal_aux_engine.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/pal/engine/src/dg_pal_dbg.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/pal/engine/src/dg_pal_security.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/pal/engine/src/dg_pal_util.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+      </compileType>
+      <item path="../../../diagd/README.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/common/README" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_aux_engine.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_aux_util.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_client_comm.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_dbg.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_defs.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_engine_util.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_main.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_rsp_code.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/hdr/dg_socket.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/pal/hdr/dg_pal_aux_engine.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/pal/hdr/dg_pal_dbg.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/pal/hdr/dg_pal_security.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/pal/hdr/dg_pal_util.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_aux_engine.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_aux_util.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_client_comm.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_dbg.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_engine_util.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_main.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/engine/src/dg_socket.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/hdr/dg_common_handler_table.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/hdr/dg_handler_inc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/src/dg_debug_level.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/src/dg_test_engine.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/dg_cfg.mk" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/local_module.mk" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/README.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/hdr/dg_util_drv.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/hdr/dg_util_drv_err_string.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_util_drv.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_util_drv_err_string.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/handlers/hdr/dg_handler_table.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/handlers/src/dg_aux_cmd.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/handlers/src/dg_handler_table.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/handlers/src/dg_ping.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/pal/engine/src/dg_main_task.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/pal/engine/src/dg_pal_aux_engine.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/pal/engine/src/dg_pal_dbg.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/pal/engine/src/dg_pal_security.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/pal/engine/src/dg_pal_util.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
