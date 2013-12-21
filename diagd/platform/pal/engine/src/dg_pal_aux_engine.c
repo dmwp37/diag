@@ -199,19 +199,47 @@ void DG_PAL_AUX_ENGINE_close(int aux_id)
 *//*==============================================================================================*/
 BOOL DG_PAL_AUX_ENGINE_read(int aux_id, UINT32 bytes_to_read, UINT8* data)
 {
-    BOOL is_success = FALSE;
+    BOOL is_success         = TRUE;
+    int  total_bytes_read   = 0;
+    int  current_bytes_read = 0;
+    int  try_count          = 0;
 
     /* Return error if the aux engine handle is not init'd */
     if ((aux_id >= DG_CFG_AUX_NUM) ||
         (dg_pal_aux_engine_socket_diag[aux_id] == DG_PAL_AUX_ENGINE_FD_NOT_INIT))
     {
         DG_DBG_ERROR("Aux engine device is not open, aux_id = %d!", aux_id);
+        return FALSE;
     }
-    else if (read(dg_pal_aux_engine_socket_diag[aux_id], data, bytes_to_read) ==
-             (ssize_t)bytes_to_read)
+    
+    /* Continue to read until an error occurs or we read the desired number of bytes */
+    while (is_success && (total_bytes_read != (int)bytes_to_read))
     {
-        is_success = TRUE;
+        current_bytes_read = read(dg_pal_aux_engine_socket_diag[aux_id],
+                                  ((UINT8*)data + total_bytes_read),
+                                  (bytes_to_read - total_bytes_read));
+        if (current_bytes_read > 0)
+        {
+            total_bytes_read += current_bytes_read;
+        }
+        else
+        {
+            /* Only print errors if the current_bytes_read is NOT 0.  0 bytes most likely
+               indicates client closed its connection */
+            if (current_bytes_read != 0)
+            {
+                DG_DBG_ERROR("Read AUX[%d]failed, current_bytes_read = %d, errno = %d",
+                             aux_id, current_bytes_read, errno);
+            }
+
+            if (++try_count == 3)
+            {
+                DG_DBG_ERROR("Read Failed on AUX[%d], over number of retries.", aux_id);
+                is_success = FALSE;
+            }
+        }
     }
+
     return is_success;
 }
 
