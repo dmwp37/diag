@@ -27,6 +27,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 #include <net/if.h>
 #include <arpa/inet.h>
 #include <netinet/tcp.h>
+#include <signal.h>
 #include "dg_defs.h"
 #include "dg_dbg.h"
 #include "dg_aux_engine.h"

@@ -19,6 +19,7 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protoco
                                            INCLUDE FILES
 ==================================================================================================*/
 #include <stdlib.h>
+#include <stdint.h>
 #include <pthread.h>
 #include <signal.h>
 #include <string.h>
@@ -877,7 +878,7 @@ void dg_aux_engine_init_impl(int aux_id)
             dg_aux_engine_listener_run_ctrl[aux_id] = TRUE;
             /* Create a new thread to receive responses from aux diag engine. */
             if (!(pthread_create(&dg_aux_engine_listener_thread_hndl[aux_id], NULL,
-                                 dg_aux_engine_listener_thread, (void*)aux_id)))
+                                 dg_aux_engine_listener_thread, (void*)(intptr_t)aux_id)))
             {
                 DG_DBG_TRACE("Successfully init aux engine %d interface!", aux_id);
             }

@@ -24,6 +24,7 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0003   Enable aux engine
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -654,7 +655,7 @@ void *dg_test_client_mass_connection_test_thread(void* p)
     int num_loops = 0;
 
     printf("Created client thread %p, doing %d loop(s) of %d connect(s), each connect sending %d diag(s)\n",
-           pthread_self(), DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS, DG_TEST_CLIENT_MASS_CONNECT_NUM_CONNECT_PER_LOOP,
+           (void*)pthread_self(), DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS, DG_TEST_CLIENT_MASS_CONNECT_NUM_CONNECT_PER_LOOP,
            DG_TEST_CLIENT_MASS_CONNECT_NUM_CMD_PER_CONNECT);
 
     for (num_loops = 0; ( (num_loops < DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS) &&
@@ -668,7 +669,7 @@ void *dg_test_client_mass_connection_test_thread(void* p)
             if (DG_CLIENT_API_connect_to_server(20000, &diag_cs) != DG_CLIENT_API_STATUS_SUCCESS)
             {
                 printf("Error: Failed to send DIAG request on client thread %p, diag_cs = %d\n",
-                       pthread_self(), diag_cs);
+                       (void*)pthread_self(), diag_cs);
                 thread_ret = 1;
             }
             else
@@ -680,7 +681,7 @@ void *dg_test_client_mass_connection_test_thread(void* p)
                     if (DG_CLIENT_API_send_diag_req(diag_cs, 0x0ffe, timestamp,
                                                     sizeof(diag_req_data), diag_req_data) != DG_CLIENT_API_STATUS_SUCCESS)
                     {
-                        printf("Error: Failed to send DIAG request on client thread %p, diag_cs = %d\n", pthread_self(), diag_cs);
+                        printf("Error: Failed to send DIAG request on client thread %p, diag_cs = %d\n", (void*)pthread_self(), diag_cs);
                         thread_ret = 1;
                     }
                     else
@@ -690,7 +691,7 @@ void *dg_test_client_mass_connection_test_thread(void* p)
                                                                      FALSE, 5000, &rsp_len, &status);
                         if (!rsp_ptr)
                         {
-                            printf("Error: Failed to receive DIAG response on client thread %p, diag_cs = %d, status = %d\n", pthread_self(), diag_cs, status);
+                            printf("Error: Failed to receive DIAG response on client thread %p, diag_cs = %d, status = %d\n", (void*)pthread_self(), diag_cs, status);
                             thread_ret = 1;
                         }
                         else
@@ -709,12 +710,12 @@ void *dg_test_client_mass_connection_test_thread(void* p)
              (thread_ret == 0))
         {
             printf("Client thread %p completed loop #%d of %d, sleeping %d seconds before next loop\n",
-                   pthread_self(), (num_loops+1),  DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS,
+                   (void*)pthread_self(), (num_loops+1),  DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS,
                    DG_TEST_CLIENT_MASS_CONNECT_LOOP_SLEEP);
             sleep(DG_TEST_CLIENT_MASS_CONNECT_LOOP_SLEEP);
         }
     }
-    return((int *)thread_ret);
+    return((int *)(intptr_t)thread_ret);
 }
 
 #define DG_TEST_AUX_THREAD_NUM 2
@@ -774,14 +775,14 @@ void *dg_test_client_multi_aux_test_thread(void *data)
     UINT16 opcode = *(UINT16*)(&data);
 
     printf("Created client thread %p, doing %d loop(s) of %d connect(s), each connect sending %d diag(s)\n",
-           pthread_self(), DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS, DG_TEST_CLIENT_MASS_CONNECT_NUM_CONNECT_PER_LOOP,
+           (void*)pthread_self(), DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS, DG_TEST_CLIENT_MASS_CONNECT_NUM_CONNECT_PER_LOOP,
            DG_TEST_CLIENT_MASS_CONNECT_NUM_CMD_PER_CONNECT);
 
     timestamp = 0;        
     if (DG_CLIENT_API_connect_to_server(20000, &diag_cs) != DG_CLIENT_API_STATUS_SUCCESS)
     {
         printf("Error: Failed to send DIAG request on client thread %p, diag_cs = %d\n",
-               pthread_self(), diag_cs);
+               (void*)pthread_self(), diag_cs);
         thread_ret = 1;
     }
     else
@@ -792,13 +793,13 @@ void *dg_test_client_multi_aux_test_thread(void *data)
         {
             if ( (diag_req_data = dg_test_client_create_random_data(&diag_req_data_len)) == NULL)
             {
-                printf("Error: Failed to send create random DIAG request on client thread %p, diag_cs = %d\n", pthread_self(), diag_cs);
+                printf("Error: Failed to send create random DIAG request on client thread %p, diag_cs = %d\n", (void*)pthread_self(), diag_cs);
                 thread_ret = 1; 
             }            
             else if (DG_CLIENT_API_send_diag_req(diag_cs, opcode, timestamp,
                                             diag_req_data_len, diag_req_data) != DG_CLIENT_API_STATUS_SUCCESS)
             {
-                printf("Error: Failed to send DIAG request on client thread %p, diag_cs = %d\n", pthread_self(), diag_cs);
+                printf("Error: Failed to send DIAG request on client thread %p, diag_cs = %d\n", (void*)pthread_self(), diag_cs);
                 thread_ret = 1;
             }
             else
@@ -808,7 +809,7 @@ void *dg_test_client_multi_aux_test_thread(void *data)
                                                              FALSE, 5000, &rsp_len, &status);
                 if (!rsp_ptr)
                 {
-                    printf("Error: Failed to receive DIAG response on client thread %p, diag_cs = %d, status = %d\n", pthread_self(), diag_cs, status);
+                    printf("Error: Failed to receive DIAG response on client thread %p, diag_cs = %d, status = %d\n", (void*)pthread_self(), diag_cs, status);
                     thread_ret = 1;
                 }
                 else
@@ -831,7 +832,7 @@ void *dg_test_client_multi_aux_test_thread(void *data)
         } /* End sending commands per connect */
         DG_CLIENT_API_disconnect_from_server(diag_cs);
     }
-    return((int *)thread_ret);
+    return((int *)(intptr_t)thread_ret);
 }
 
 UINT8 *dg_test_client_create_random_data(UINT32 *diag_req_data_len)

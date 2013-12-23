@@ -16,6 +16,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
+#include <stdint.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/select.h>
@@ -282,7 +283,7 @@ void dg_socket_accept_client_connect(int listen_sock, DG_CLIENT_COMM_CLIENT_TYPE
             /* Create a thread to handle the client's requests */
             if (pthread_create(&tid, NULL,
                                &DG_CLIENT_COMM_client_connection_handler,
-                               (void*)client_sock) != 0)
+                               (void*)(intptr_t)client_sock) != 0)
             {
                 DG_DBG_ERROR("Error creating client thread for connection socket: %d",
                              client_sock);
@@ -290,8 +291,8 @@ void dg_socket_accept_client_connect(int listen_sock, DG_CLIENT_COMM_CLIENT_TYPE
             }
             else
             {
-                DG_DBG_TRACE("Created client thread (%d) to handle connection socket: %d",
-                             (int)tid, client_sock);
+                DG_DBG_TRACE("Created client thread (%p) to handle connection socket: %d",
+                             (void*)tid, client_sock);
                 pthread_detach(tid);
                 is_success = TRUE;
             }

@@ -22,6 +22,7 @@ Xudong Huang    - xudongh    2013/12/19     xxxxx-0001   Update diag rsp protoco
 #include <unistd.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <errno.h>
 
 #include "dg_defs.h"
@@ -122,7 +123,7 @@ DG_PAL_AUX_ENGINE_INIT_T DG_PAL_AUX_ENGINE_init(int aux_id)
 
         /* Spawn a thread to simulate an aux engine */
         if ((thread_status = pthread_create(&dg_pal_aux_engine_thread_hndl[aux_id], NULL,
-                                            dg_pal_aux_engine_aux_thread, (void*)aux_id)) != 0)
+                                            dg_pal_aux_engine_aux_thread, (void*)(intptr_t)aux_id)) != 0)
         {
             DG_DBG_ERROR("Failed to create aux simulation thread, errno = %d (%s)",
                          errno, strerror(errno));

@@ -331,7 +331,7 @@ static void dg_send_dump (const char *title, unsigned char *buf, UINT32 len)
     unsigned char buffer[DG_SEND_DBG_DUMP_LINE_HEADER_LEN + (DG_SEND_DBG_MAX_DUMP_COLS * 3) + 1];
 
     /* print the dump title */
-    printf("%s hex dump from addr %08x, len %d\n", title, (UINT32)buf, len);
+    printf("%s hex dump from addr %p, len %d\n", title, buf, len);
 
     for(i = 0; i <= len/DG_SEND_DBG_MAX_DUMP_COLS; i++)
     {
