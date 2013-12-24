@@ -101,10 +101,11 @@ DG_HANDLERS_PLAT_SRC := \
   platform/handlers/src/dg_handler_table.c \
   platform/handlers/src/dg_aux_cmd.c
 
+DG_DRIVERS_CMN_SRC := \
+  common/drivers/src/dg_drv_util.c
+
 #Platform Specific Drivers
 DG_DRIVERS_PLAT_SRC := \
-  platform/drivers/src/dg_util_drv_err_string.c \
-  platform/drivers/src/dg_util_drv.c \
   platform/drivers/src/dg_cmn_drv_debug_level.c
 
 LOCAL_SRC_FILES := \
@@ -112,6 +113,7 @@ LOCAL_SRC_FILES := \
   $(DG_ENGINE_PAL_SRC) \
   $(DG_HANDLERS_CMN_SRC) \
   $(DG_HANDLERS_PLAT_SRC) \
+  $(DG_DRIVERS_CMN_SRC) \
   $(DG_DRIVERS_PLAT_SRC)
 
 include $(BUILD_EXECUTABLE)

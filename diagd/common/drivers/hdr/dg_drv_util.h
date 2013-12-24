@@ -1,10 +1,10 @@
-#ifndef _DG_UTIL_DRV_ERR_STRING_
-#define _DG_UTIL_DRV_ERR_STRING_
+#ifndef _DG_DRV_UTIL_H
+#define _DG_DRV_UTIL_H
 /*==================================================================================================
 
-    Module Name:  dg_util_drv_err_string.h
+    Module Name:  dg_drv_util.h
 
-    General Description: Utility functions for setting driver error strings
+    General Description: Utilities for DIAG drivers
 
 ====================================================================================================
 
@@ -14,36 +14,41 @@ Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
 Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 
-
 ====================================================================================================
-                                         INCLUDE FILES
+                                           INCLUDE FILES
 ==================================================================================================*/
 #include <dg_cmn_drv_defs.h>
 
-#ifdef __cplusplus 
+#ifdef __cplusplus
 extern "C" {
 #endif
 
 /*==================================================================================================
-                                             ENUMS
+                                               MACROS
 ==================================================================================================*/
 
 /*==================================================================================================
-                                 STRUCTURES AND OTHER TYPEDEFS
+                                               ENUMS
 ==================================================================================================*/
 
 /*==================================================================================================
-                                     FUNCTION PROTOTYPES
+                                   STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
-void DG_UTIL_DRV_ERR_STRING_set(char **err_string, const char *format, ...);
-DG_CMN_DRV_ERR_T DG_UTIL_DRV_ERR_STRING_get(UINT32 max_length, char *dest_string, 
-                                            char** src_string);
 
-/** @} */
-/** @} */
+/*==================================================================================================
+                                      GLOBAL VARIABLE DECLARATIONS
+==================================================================================================*/
+
+/*==================================================================================================
+                                        FUNCTION PROTOTYPES
+==================================================================================================*/
+void DG_DRV_UTIL_init_error_string();
+void DG_DRV_UTIL_set_error_string(const char* format, ...);
+char* DG_DRV_UTIL_get_error_string();
 
 #ifdef __cplusplus
 }
+#endif
 
 #endif
-#endif /* _DG_UTIL_DRV_ERR_STRING_  */
+

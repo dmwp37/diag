@@ -1,9 +1,9 @@
 /*==================================================================================================
- 
-    Module Name:  dg_util_drv_err_string.c
 
-    General Description: Test platform utility file for setting driver error strings
-    
+    Module Name:  dg_drv_util.c
+
+    General Description: Utilities DIAG drivers
+
 ====================================================================================================
 
 Revision History:
@@ -18,9 +18,19 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <errno.h>
+#include <pthread.h>
 
-#include "dg_util_drv_err_string.h"
 #include "dg_dbg.h"
+#include "dg_drv_util.h"
+
+/** @addtogroup util_android
+@{
+*/
+
+/** @addtogroup DRV_util_android
+@{
+*/
 
 /*==================================================================================================
                                           LOCAL CONSTANTS
@@ -37,6 +47,8 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
+void dg_drv_util_create_error_string_key();
+void dg_drv_util_free_error_string(void* err_str);
 
 /*==================================================================================================
                                           GLOBAL VARIABLES
@@ -45,15 +57,33 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
+static pthread_key_t  dg_drv_util_error_string_key;
+static pthread_once_t dg_drv_util_key_once = PTHREAD_ONCE_INIT;
 
 /*==================================================================================================
                                           GLOBAL FUNCTIONS
 ==================================================================================================*/
+/*=============================================================================================*//**
+@brief Initializes error string for the current driver thread
+
+@note
+- the init would only happen once for threads, please see the pthread_once manual
+*//*==============================================================================================*/
+void DG_DRV_UTIL_init_error_string()
+{
+    int ret = pthread_once(&dg_drv_util_key_once, dg_drv_util_create_error_string_key);
+
+    if (ret != 0)
+    {
+        DG_DBG_ERROR("pthread_once() for error string key failed. errno=%d (%s)",
+                     errno, strerror(errno));
+    }
+}
+
 
 /*=============================================================================================*//**
-@brief Sets an error string
+@brief Sets an error string for the current driver thread
 
-@param[in,out] err_string - Pointer to pointer to contain the error string
 @param[in]     format     - printf style format string for error message
 @param[in]     ...        - Variable argument, used to popluated format string
 
@@ -61,64 +91,101 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 - If err_string already has a string, the old one will be freed
 - Calling function responsible for freeing
 *//*==============================================================================================*/
-void DG_UTIL_DRV_ERR_STRING_set(char **err_string, const char *format, ...)
+void DG_DRV_UTIL_set_error_string(const char* format, ...)
 {
-    int max_size = 1000; /* Arbitary max size */
-    va_list  args;       /* Variable arg list */
+    va_list args;       /* Variable arg list */
+    char*   p_err_str;  /* pointer to the error string */
+    int     str_len;    /* error string length*/
 
     /* Init variable arg list */
-    va_start (args, format);
+    va_start(args, format);
 
-    /* Free any existing error string */
-    if (*err_string != NULL)
+
+    str_len = vsnprintf(NULL, 0, format, args);
+
+    if (str_len < 0)
     {
-        DG_DBG_TRACE("Overwriting error string: %s", *err_string);
-        free(*err_string);
-        *err_string = NULL;
+        DG_DBG_ERROR("vsnprintf() get string length failed. errno=%d (%s)",
+                     errno, strerror(errno));
     }
-
-    if ((*err_string = (char *) malloc(max_size)) == NULL) 
+    else if ((p_err_str = (char*)malloc(str_len + 1)) == NULL)
     {
         DG_DBG_ERROR("Failed to create driver error string");
     }
     else
     {
+        char* old_err_str = (char*)pthread_getspecific(dg_drv_util_error_string_key);
+
+        /* Free any existing error string */
+        if (old_err_str != NULL)
+        {
+            DG_DBG_TRACE("Overwriting error string: %s", old_err_str);
+            free(old_err_str);
+        }
+
+        vsnprintf(p_err_str, str_len + 1, format, args);
+        DG_DBG_ERROR("Driver error string set to: %s", p_err_str);
+
         /* Set new error string */
-        memset(*err_string, 0x00, max_size);
-        vsnprintf(*err_string, max_size, format, args);
+        if (pthread_setspecific(dg_drv_util_error_string_key, p_err_str) != 0)
+        {
+            DG_DBG_ERROR("pthread_setspecific() set error string failed. errno=%d (%s)",
+                         errno, strerror(errno));
+        }
     }
 
     va_end(args);
 }
 
 /*=============================================================================================*//**
-@brief Gets an error string
+@brief Gets an error string for the current driver thread
 
-@param[in]     max_length  - Max size of dest_string buffer
-@param[out]    dest_string - Buffer to copy error string to
-@param[in,out] src_string  - Error string source
+@return - the current driver thread error string
 
 @note
-- src_string will be freed if its not NULL
-- If src_string is NULL, an empty string is placed in dest_string
+- reteive error string from thread specific data
+- If no error string was set, will return NULL
 *//*==============================================================================================*/
-DG_CMN_DRV_ERR_T DG_UTIL_DRV_ERR_STRING_get(UINT32 max_length, char *dest_string, char** src_string)
+char* DG_DRV_UTIL_get_error_string()
 {
-    if (*src_string  == NULL)
-    {
-        dest_string[0] = '\0';
-    }
-    else
-    {
-        strncpy(dest_string, *src_string, max_length);
-        free(*src_string);
-        *src_string = NULL;
-    }
-
-    return (DG_CMN_DRV_ERR_NONE);
+    return pthread_getspecific(dg_drv_util_error_string_key);
 }
 
 
 /*==================================================================================================
                                           LOCAL FUNCTIONS
 ==================================================================================================*/
+
+/*=============================================================================================*//**
+@brief Create error string key for threads specific data
+
+@note
+- this function register a free error string hanldler when thread exit
+- you should free the old error string before set a new error string
+*//*==============================================================================================*/
+void dg_drv_util_create_error_string_key()
+{
+    int ret = pthread_key_create(&dg_drv_util_error_string_key, dg_drv_util_free_error_string);
+
+    if (ret != 0)
+    {
+        DG_DBG_ERROR("pthread_key_create() for driver error string failed. errno=%d (%s)",
+                     errno, strerror(errno));
+    }
+}
+
+/*=============================================================================================*//**
+@brief Initializes error string for the current driver thread
+
+@note
+- when thread exit automatically call this function to free the error string
+*//*==============================================================================================*/
+void dg_drv_util_free_error_string(void* err_str)
+{
+    DG_DBG_TRACE("Free error string for thread %p", pthread_self());
+    free(err_str);
+}
+
+/** @} */
+/** @} */
+

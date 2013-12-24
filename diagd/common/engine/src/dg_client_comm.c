@@ -27,6 +27,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 #include "dg_dbg.h"
 #include "dg_client_comm.h"
 #include "dg_aux_util.h"
+#include "dg_drv_util.h"
 #include "dg_engine_util.h"
 #include "dg_socket.h"
 #include "dg_main.h"
@@ -35,7 +36,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-#define DG_CLIENT_COMM_FD_READ_NUM_RETRY          3  /**< Number of times to retry reading a fd   */
+#define DG_CLIENT_COMM_FD_READ_NUM_RETRY 3  /**< Number of times to retry reading a fd   */
 
 /*==================================================================================================
                                             LOCAL MACROS
@@ -44,7 +45,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
    refers to the connected sockets must lock/unlock at correct times */
 #define DG_CLIENT_COMM_CONNECTED_CLIENTS_LOCK() \
     pthread_cleanup_push(DG_ENGINE_UTIL_generic_cleanup_unlock, \
-                         (void*) &dg_client_comm_connected_clients_mutex); \
+                         (void*)&dg_client_comm_connected_clients_mutex); \
     pthread_mutex_lock(&dg_client_comm_connected_clients_mutex)
 
 #define DG_CLIENT_COMM_CONNECTED_CLIENTS_UNLOCK() \
@@ -53,7 +54,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 
 #define DG_CLIENT_COMM_HANDLER_TBL_LOCK() \
     pthread_cleanup_push(DG_ENGINE_UTIL_generic_cleanup_unlock, \
-                         (void *) &dg_client_common_handler_tbl_mutex); \
+                         (void*)&dg_client_common_handler_tbl_mutex); \
     pthread_mutex_lock(&dg_client_common_handler_tbl_mutex)
 
 #define DG_CLIENT_COMM_HANDLER_TBL_UNLOCK() \
@@ -121,6 +122,7 @@ static pthread_mutex_t               dg_client_common_handler_tbl_mutex      = P
 void DG_CLIENT_COMM_shutdown_clients_of_type(DG_CLIENT_COMM_CLIENT_TYPE_T type)
 {
     DG_CLIENT_COMM_CLIENT_NODE_T* node = NULL;
+
     DG_CLIENT_COMM_CONNECTED_CLIENTS_LOCK();
 
     /* Go through all connected clients, looking for clients of the given type */
@@ -404,7 +406,7 @@ void* dg_client_comm_diag_handler_exec(void* diag_void)
     DG_DEFS_DIAG_RSP_BUILDER_T*   rsp          = NULL;
     DG_DEFS_DIAG_REQ_T*           diag         = (DG_DEFS_DIAG_REQ_T*)diag_void;
 
-    rsp          = DG_ENGINE_UTIL_rsp_init();
+    rsp = DG_ENGINE_UTIL_rsp_init();
     DG_CLIENT_COMM_SET_THREAD_CANCEL();
 
     /* Find the handler for the diag, ensure the handler can be executed */
@@ -426,6 +428,14 @@ void* dg_client_comm_diag_handler_exec(void* diag_void)
         /* Call the handler function for the diag, this will block until the diag is complete */
         DG_DBG_TRACE("For thread %p, executing function pointer %p for DIAG opcode 0x%04x",
                      pthread_self(), diag_handler->fptr, diag->header.opcode);
+
+        /*
+         * here we got the chance to set the connection between diag rsp and pthread_self()
+         * we save this information in the thread specific data
+         * so that the driver layer could get the error string correctly for its own thread
+         */
+        DG_DRV_UTIL_init_error_string();
+
         diag_handler->fptr(diag);
     }
 
@@ -527,8 +537,8 @@ DG_DEFS_DIAG_REQ_T* dg_client_comm_read_diag_req(int fd)
                 }
                 else
                 {
-                    if (dg_client_comm_read_fd(fd, diag_req->data_ptr, diag_req->header.length)
-                        != DG_DEFS_STATUS_SUCCESS)
+                    if (dg_client_comm_read_fd(fd, diag_req->data_ptr, diag_req->header.length) !=
+                        DG_DEFS_STATUS_SUCCESS)
                     {
                         DG_DBG_ERROR("Read payload data failed");
                     }
@@ -683,7 +693,7 @@ void dg_client_comm_alt_timer_create_thread(DG_DEFS_DIAG_REQ_T* diag)
     DG_DBG_TRACE("Creating thread for DIAG 0x%04x", diag->header.opcode);
 
     /* Init response variable */
-    rsp          = DG_ENGINE_UTIL_rsp_init();
+    rsp = DG_ENGINE_UTIL_rsp_init();
 
     /* Find the opcode in the opcode table, needed to determine DIAG timeout time */
     diag_handler = dg_client_comm_find_diag_handler(diag->header.opcode);
@@ -809,3 +819,4 @@ void dg_client_comm_notify_client_update(BOOL is_add)
     DG_PAL_UTIL_notify_client_update(is_add, num_int, num_ext);
     DG_CLIENT_COMM_CONNECTED_CLIENTS_UNLOCK();
 }
+

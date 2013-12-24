@@ -41,8 +41,8 @@ This command is responsible for control debug level of different component
 /*==================================================================================================
                                             LOCAL MACROS
 ==================================================================================================*/
-#define DG_DEBUG_LEVEL_REQ_LEN_SET  3
-#define DG_DEBUG_LEVEL_REQ_LEN_GET  1
+#define DG_DEBUG_LEVEL_REQ_LEN_SET 3
+#define DG_DEBUG_LEVEL_REQ_LEN_GET 1
 
 /*==================================================================================================
                              LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -83,7 +83,7 @@ void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req)
     DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T comp;
     DG_DEBUG_LEVEL_ACTION_T            action;
     UINT16                             dbg_lvl;
-    DG_DEFS_DIAG_RSP_BUILDER_T*        rsp    = DG_ENGINE_UTIL_rsp_init();
+    DG_DEFS_DIAG_RSP_BUILDER_T*        rsp = DG_ENGINE_UTIL_rsp_init();
 
     if (DG_ENGINE_UTIL_req_len_check_at_least(req, sizeof(action), rsp))
     {
@@ -102,7 +102,6 @@ void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req)
                     DG_ENGINE_UTIL_rsp_set_error_string_drv(
                         rsp,
                         DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                        DG_CMN_DRV_DEBUG_LEVEL_get_err_string,
                         "Failed to set debug level, err = %d, status = %d",
                         err, status);
                 }
@@ -126,7 +125,6 @@ void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req)
                     DG_ENGINE_UTIL_rsp_set_error_string_drv(
                         rsp,
                         DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                        DG_CMN_DRV_DEBUG_LEVEL_get_err_string,
                         "Failed to get debug level, err = %d, status = %d",
                         err, status);
                 }
@@ -155,3 +153,4 @@ void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req)
 
 /** @} */
 /** @} */
+

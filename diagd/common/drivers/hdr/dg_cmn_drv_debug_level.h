@@ -85,24 +85,6 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_get(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T c
                                             UINT16*                            debug_level,
                                             DG_CMN_DRV_DEBUG_LEVEL_STATUS_T*   status);
 
-/*=============================================================================================*//**
-@brief Gets an ASCII string from the driver with detailed information of the last error which
-       occurred.
-
-@param[in]     max_length - Maximum length of buffer (including NULL)
-@param[in,out] err_str    - ASCII, NULL terminated error string populated by the driver.  Buffer
-                            will be of size 'max_length'
-
-@note
-- Driver shall clear its own local copy of the error string when its retrieved via this function
-- If error strings are not supported, #DG_CMN_DRV_ERR_NOT_SUPPORTED shall be returned. 'err_str'
-  is only considered valid if #DG_CMN_DRV_ERR_NONE returned.
-- If there is no error string to return, the driver should return #DG_CMN_DRV_ERR_NONE with err_str
-  being blank (err_str[0] = NULL)
-- If 'err_str' is too small to contain the full driver error string, it shall be truncated.
-*//*==============================================================================================*/
-DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_get_err_string(UINT32 max_length, char* err_str);
-
 /** @} */
 /** @} */
 
@@ -111,5 +93,4 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_get_err_string(UINT32 max_length, char* 
 #endif
 
 #endif /* _DG_CMN_DRV_DBG_LVL_H_  */
-
 

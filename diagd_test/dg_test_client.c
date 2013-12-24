@@ -41,19 +41,19 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0003   Enable aux engine
 /* Undefine to enable debug info */
 
 #ifdef DG_DEBUG
-    #define TRACE(x...) \
+    #define TRACE(x ...) \
     do \
     { \
         printf("DG_TEST_CLIENT: "x); \
         printf("\n"); \
-    } while(0)
+    } while (0)
 #else
-    #define TRACE(x...)
+    #define TRACE(x ...)
 #endif
 
 /* Mass connection test settings */
-#define DG_TEST_CLIENT_MASS_CONNECT_NUM_CLIENTS          10  /* Number of clients/threads to use */
-#define DG_TEST_CLIENT_MASS_CONNECT_NUM_CMD_PER_CONNECT  20 /* Number of times a command is sent per 
+#define DG_TEST_CLIENT_MASS_CONNECT_NUM_CLIENTS          10 /* Number of clients/threads to use */
+#define DG_TEST_CLIENT_MASS_CONNECT_NUM_CMD_PER_CONNECT  20 /* Number of times a command is sent per
                                                                engine connect */
 #define DG_TEST_CLIENT_MASS_CONNECT_NUM_CONNECT_PER_LOOP 50
 #define DG_TEST_CLIENT_MASS_CONNECT_LOOP_SLEEP           2
@@ -72,14 +72,16 @@ void dg_test_client_send_diag_req(void);
 void dg_test_client_print_diag_rsp(UINT8* diag_rsp, UINT32 rsp_len);
 BOOL dg_test_client_grow_diag_req_test(void);
 BOOL dg_test_client_unsol_rsp_test(void);
-static UINT8 *hexstr_to_hex(int length, UINT8 *hexstr);
+static UINT8* hexstr_to_hex(int length, UINT8* hexstr);
+
 BOOL dg_test_client_api_timeout_test(void);
-void *dg_test_client_mass_connection_test_thread(void* p);
+void* dg_test_client_mass_connection_test_thread(void* p);
+
 BOOL dg_test_client_mass_connection_test(void);
 
 BOOL dg_test_client_multi_aux_test(void);
-void *dg_test_client_multi_aux_test_thread(void *);
-UINT8 *dg_test_client_create_random_data(UINT32 *diag_req_data_len);
+void* dg_test_client_multi_aux_test_thread(void*);
+UINT8* dg_test_client_create_random_data(UINT32* diag_req_data_len);
 
 /*==================================================================================================
                                           GLOBAL VARIABLES
@@ -90,6 +92,7 @@ UINT8 *dg_test_client_create_random_data(UINT32 *diag_req_data_len);
 ==================================================================================================*/
 static DG_CLIENT_API_SESSION_T dg_test_client_server_cs = -1;
 static int                     dg_test_client_timestamp = 0;
+
 /*==================================================================================================
                                           GLOBAL FUNCTIONS
 ==================================================================================================*/
@@ -98,16 +101,17 @@ static int                     dg_test_client_timestamp = 0;
                                           LOCAL FUNCTIONS
 ==================================================================================================*/
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     DG_COMPILE_UNUSED(argc);
     DG_COMPILE_UNUSED(argv);
     srand(time(NULL));
     char junk[2];
-    if ( (DG_CLIENT_API_launch_server() == DG_CLIENT_API_STATUS_SUCCESS) &&
-         (DG_CLIENT_API_connect_to_server(1000, &dg_test_client_server_cs) == DG_CLIENT_API_STATUS_SUCCESS) )
-	{
-        while(1)
+
+    if ((DG_CLIENT_API_launch_server() == DG_CLIENT_API_STATUS_SUCCESS) &&
+        (DG_CLIENT_API_connect_to_server(1000, &dg_test_client_server_cs) == DG_CLIENT_API_STATUS_SUCCESS))
+    {
+        while (1)
         {
             if (dg_test_client_menu() == -1)
             {
@@ -119,45 +123,45 @@ int main(int argc, char **argv)
 
     printf("Press <ENTER> to exit!\n");
     fgets(junk, sizeof(junk), stdin);
-    
+
     return 0;
 }
 
 
-UINT8 *hexstr_to_hex(int length, UINT8 *hexstr)
+UINT8* hexstr_to_hex(int length, UINT8* hexstr)
 {
-    int j, k;
+    int    j, k;
     UINT8* buff;
     UINT8* new_buff;
-    int bytes_length;
-    
-    k = 0;
+    int    bytes_length;
+
+    k            = 0;
     bytes_length = (length % 2) + (length / 2);
-    
-    buff = (UINT8 *) malloc(length);
-    //printf("hex str %s\n", hexstr);
+
+    buff = (UINT8*)malloc(length);
+    /* printf("hex str %s\n", hexstr); */
     memcpy(buff, hexstr, length);
-    //printf("buff str %s\n", buff);
-    
-    new_buff = (UINT8 *) malloc(bytes_length);
+    /* printf("buff str %s\n", buff); */
+
+    new_buff = (UINT8*)malloc(bytes_length);
     memset(new_buff, 0, bytes_length);
-    
-    for(j = length - 1; j >= 0; j--)
+
+    for (j = length - 1; j >= 0; j--)
     {
-        if((k % 2) == 0)
+        if ((k % 2) == 0)
         {
-            if(buff[j] >= '0' && buff[j] <= '9')
+            if (buff[j] >= '0' && buff[j] <= '9')
             {
-                new_buff[j/2] = ((buff[j] - 48) & 0x0F);
-            } 
-            else if(buff[j] >= 'a' && buff[j] <= 'f')
+                new_buff[j / 2] = ((buff[j] - 48) & 0x0F);
+            }
+            else if (buff[j] >= 'a' && buff[j] <= 'f')
             {
-                new_buff[j/2] = ((buff[j] - 97 + 10) & 0x0F);
-            } 
-            else if(buff[j] >= 'A' && buff[j] <= 'F')
+                new_buff[j / 2] = ((buff[j] - 97 + 10) & 0x0F);
+            }
+            else if (buff[j] >= 'A' && buff[j] <= 'F')
             {
-                new_buff[j/2] = ((buff[j] - 65 + 10) & 0x0F);
-            } 
+                new_buff[j / 2] = ((buff[j] - 65 + 10) & 0x0F);
+            }
             else
             {
                 printf("must be hex decime\n");
@@ -165,20 +169,20 @@ UINT8 *hexstr_to_hex(int length, UINT8 *hexstr)
                 free(new_buff);
                 return NULL;
             }
-            if( j > 0)
+            if (j > 0)
             {
-                if(buff[j - 1] >= '0' && buff[j - 1] <= '9')
+                if (buff[j - 1] >= '0' && buff[j - 1] <= '9')
                 {
-                    new_buff[j/2] |= (((buff[j-1] - 48) << 4) & 0xF0);
-                } 
-                else if(buff[j - 1] >= 'a' && buff[j - 1] <= 'f')
+                    new_buff[j / 2] |= (((buff[j - 1] - 48) << 4) & 0xF0);
+                }
+                else if (buff[j - 1] >= 'a' && buff[j - 1] <= 'f')
                 {
-                    new_buff[j/2] |= (((buff[j-1] - 97 + 10) << 4) & 0xF0);
-                } 
-                else if(buff[j - 1] >= 'A' && buff[j - 1] <= 'F')
+                    new_buff[j / 2] |= (((buff[j - 1] - 97 + 10) << 4) & 0xF0);
+                }
+                else if (buff[j - 1] >= 'A' && buff[j - 1] <= 'F')
                 {
-                    new_buff[j/2] |= (((buff[j-1] - 65 + 10) << 4) & 0xF0);
-                } 
+                    new_buff[j / 2] |= (((buff[j - 1] - 65 + 10) << 4) & 0xF0);
+                }
                 else
                 {
                     printf("must be hex decime\n");
@@ -188,7 +192,7 @@ UINT8 *hexstr_to_hex(int length, UINT8 *hexstr)
                 }
             }
         }
-        if((k % 2) == 1)
+        if ((k % 2) == 1)
         {
             k++;
             continue;
@@ -196,19 +200,19 @@ UINT8 *hexstr_to_hex(int length, UINT8 *hexstr)
         k++;
     }
 
-    //printf("%s\n", buff);
-    for(k = 0; k < bytes_length; k++)
+    /* printf("%s\n", buff); */
+    for (k = 0; k < bytes_length; k++)
     {
-        //printf("%x\n", new_buff[k]);
+        /* printf("%x\n", new_buff[k]); */
     }
     return new_buff;
 }
 
 int dg_test_client_menu(void)
 {
-    //int menu_choice;
+    /* int menu_choice; */
     char menu_choice[4];
-    int ret_val = 0;
+    int  ret_val = 0;
 
     printf("\n\nDIAG Test Client\n");
     printf("----------------\n");
@@ -223,12 +227,12 @@ int dg_test_client_menu(void)
     printf("Enter your choice: ");
     if (fgets(menu_choice, sizeof(menu_choice), stdin) != NULL)
     {
-        switch(menu_choice[0])
+        switch (menu_choice[0])
         {
             case '1':
                 dg_test_client_send_diag_req();
                 break;
-                
+
             case '2':
                 if (dg_test_client_grow_diag_req_test() == TRUE)
                 {
@@ -239,7 +243,7 @@ int dg_test_client_menu(void)
                     printf("Growing DIAG Response test failed!!!\n");
                 }
                 break;
-                
+
             case '3':
                 if (dg_test_client_unsol_rsp_test() == TRUE)
                 {
@@ -287,41 +291,41 @@ int dg_test_client_menu(void)
             case '9':
                 ret_val = -1;
                 break;
-        }                
+        }
 
     }
     else
     {
         printf("\nInput error!\n\n");
-    }    
+    }
 
-    return (ret_val);
+    return ret_val;
 }
 
 void dg_test_client_send_diag_req(void)
 {
     DG_CLIENT_API_STATUS_T status;
-    UINT8 diag_req_data[4000];
-    UINT8 *hex_data = NULL;
-    UINT16 opcode;
-    UINT32 rsp_len;
-    UINT8 *rsp_ptr;
-    
+    UINT8                  diag_req_data[4000];
+    UINT8*                 hex_data = NULL;
+    UINT16                 opcode;
+    UINT32                 rsp_len;
+    UINT8*                 rsp_ptr;
+
     printf("Enter DIAG Opcode + Req Data: ");
-    if (fgets((char *)diag_req_data, sizeof(diag_req_data), stdin) != NULL)
+    if (fgets((char*)diag_req_data, sizeof(diag_req_data), stdin) != NULL)
     {
         dg_test_client_remove_char(' ', diag_req_data);
         dg_test_client_remove_char('\n', diag_req_data);
 
-        if (strlen((char *)diag_req_data) % 2)
+        if (strlen((char*)diag_req_data) % 2)
         {
             printf("Error: Odd number of characters found!\n");
         }
-        else if (strlen((char *)diag_req_data) < 4)
+        else if (strlen((char*)diag_req_data) < 4)
         {
             printf("Error: Opcode not found!\n");
         }
-        else if ( (hex_data = hexstr_to_hex(strlen((char *)diag_req_data), diag_req_data)) == NULL)
+        else if ((hex_data = hexstr_to_hex(strlen((char*)diag_req_data), diag_req_data)) == NULL)
         {
             printf("Error: Converting hex string to hex data failed");
         }
@@ -329,21 +333,21 @@ void dg_test_client_send_diag_req(void)
         {
             opcode = (hex_data[0] << 8) | hex_data[1];
             if (DG_CLIENT_API_send_diag_req(dg_test_client_server_cs, opcode, dg_test_client_timestamp,
-                                            ((strlen((char *)diag_req_data) - 4) / 2), 
+                                            ((strlen((char*)diag_req_data) - 4) / 2),
                                             (hex_data + 2)) != DG_CLIENT_API_STATUS_SUCCESS)
             {
                 printf("Error: Failed to send DIAG response\n");
             }
             else
             {
-                rsp_ptr = DG_CLIENT_API_rcv_desired_diag_rsp(dg_test_client_server_cs, opcode, 
+                rsp_ptr = DG_CLIENT_API_rcv_desired_diag_rsp(dg_test_client_server_cs, opcode,
                                                              dg_test_client_timestamp++,
                                                              FALSE, 5000, &rsp_len, &status);
                 if (rsp_ptr)
                 {
                     dg_test_client_print_diag_rsp(rsp_ptr, rsp_len);
                     free(rsp_ptr);
-                }                
+                }
             }
         }
     }
@@ -352,21 +356,21 @@ void dg_test_client_send_diag_req(void)
 BOOL dg_test_client_grow_diag_req_test(void)
 {
     DG_CLIENT_API_STATUS_T status;
-    UINT8 diag_req_data[4000];
-    UINT32 rsp_len;
-    UINT8 *rsp_ptr;
-    UINT32 diag_loop_i;
-    UINT32 byte_loop_i;
-    BOOL success = TRUE;
-    
-    srand((unsigned) time(NULL));
+    UINT8                  diag_req_data[4000];
+    UINT32                 rsp_len;
+    UINT8*                 rsp_ptr;
+    UINT32                 diag_loop_i;
+    UINT32                 byte_loop_i;
+    BOOL                   success = TRUE;
+
+    srand((unsigned)time(NULL));
     for (diag_loop_i = 0; diag_loop_i < 2000; diag_loop_i++)
     {
         status = DG_CLIENT_API_STATUS_ERROR;
-        memset (diag_req_data, 0, sizeof(diag_req_data));        
+        memset(diag_req_data, 0, sizeof(diag_req_data));
         for (byte_loop_i = 4; byte_loop_i < (diag_loop_i + 4); byte_loop_i++)
         {
-            diag_req_data[byte_loop_i] = (UINT8) rand();
+            diag_req_data[byte_loop_i] = (UINT8)rand();
         }
 
         if (DG_CLIENT_API_send_diag_req(dg_test_client_server_cs, 0x0ffe, dg_test_client_timestamp,
@@ -376,8 +380,8 @@ BOOL dg_test_client_grow_diag_req_test(void)
                                                          FALSE, 5000, &rsp_len, &status);
             if (rsp_ptr)
             {
-                if ( (rsp_len == (byte_loop_i + 12 - 4)) && 
-                     (memcmp((rsp_ptr + 12), (diag_req_data + 4), (byte_loop_i - 4)) == 0) )
+                if ((rsp_len == (byte_loop_i + 12 - 4)) &&
+                    (memcmp((rsp_ptr + 12), (diag_req_data + 4), (byte_loop_i - 4)) == 0))
                 {
                     printf("DIAG Request/Response #%d matched!\n", diag_loop_i);
                 }
@@ -389,7 +393,7 @@ BOOL dg_test_client_grow_diag_req_test(void)
                 }
             }
             free(rsp_ptr);
-            
+
         }
         else
         {
@@ -399,26 +403,26 @@ BOOL dg_test_client_grow_diag_req_test(void)
         }
     }
 
-    return(success);
+    return success;
 }
 
 BOOL dg_test_client_unsol_rsp_test(void)
 {
     DG_CLIENT_API_STATUS_T status;
-    UINT8 diag_req_data[6];
-    UINT32 rsp_len;
-    UINT8 *rsp_ptr;
-    UINT8 *rsp_payload;
-    UINT32 i;
-    BOOL success = FALSE;
-    
+    UINT8                  diag_req_data[6];
+    UINT32                 rsp_len;
+    UINT8*                 rsp_ptr;
+    UINT8*                 rsp_payload;
+    UINT32                 i;
+    BOOL                   success = FALSE;
+
     UINT32 action = 0x00000001;
-    UINT16 num = 1000;
-    
+    UINT16 num    = 1000;
+
     action = htonl(action);
-    num = htons(num);
+    num    = htons(num);
     memcpy(diag_req_data, &action, sizeof(action));
-    memcpy(diag_req_data+4, &num, sizeof(num));
+    memcpy(diag_req_data + 4, &num, sizeof(num));
 /*
     diag_req_data[0] = 0x00;
     diag_req_data[1] = 0x00;
@@ -440,24 +444,24 @@ BOOL dg_test_client_unsol_rsp_test(void)
 
             success = TRUE;
             for (i = 0; i < 1000; i++)
-            {                
+            {
                 rsp_ptr = DG_CLIENT_API_rcv_desired_diag_rsp(dg_test_client_server_cs, 0x0ffe, 0,
                                                              TRUE, 5000, &rsp_len, &status);
                 if (rsp_ptr)
                 {
                     dg_test_client_print_diag_rsp(rsp_ptr, rsp_len);
                     rsp_payload = rsp_ptr + 12;
-                    if ( (rsp_payload[0] != ((i & 0xFF00) >> 8)) ||
-                         (rsp_payload[1] != ((i & 0x00FF))) ||
-                         (rsp_payload[2] != 0xDE) ||
-                         (rsp_payload[3] != 0xAD) ||
-                         (rsp_payload[4] != 0xBE) ||
-                         (rsp_payload[5] != 0xEF))
+                    if ((rsp_payload[0] != ((i & 0xFF00) >> 8)) ||
+                        (rsp_payload[1] != ((i & 0x00FF))) ||
+                        (rsp_payload[2] != 0xDE) ||
+                        (rsp_payload[3] != 0xAD) ||
+                        (rsp_payload[4] != 0xBE) ||
+                        (rsp_payload[5] != 0xEF))
                     {
                         success = FALSE;
                         free(rsp_ptr);
                         break;
-                    }                    
+                    }
                     free(rsp_ptr);
                 }
                 else
@@ -465,7 +469,7 @@ BOOL dg_test_client_unsol_rsp_test(void)
                     success = FALSE;
                     break;
                 }
-            }           
+            }
         }
 
     }
@@ -474,13 +478,13 @@ BOOL dg_test_client_unsol_rsp_test(void)
         printf("Error: Failed sending DIAG request\n");
     }
 
-    return(success);    
+    return success;
 }
 
-void dg_test_client_remove_char(UINT8 to_remove, UINT8 *string)
+void dg_test_client_remove_char(UINT8 to_remove, UINT8* string)
 {
-    UINT8 *src = string;
-    UINT8 *dest = string;
+    UINT8* src  = string;
+    UINT8* dest = string;
 
     TRACE("Remove char \'%c\' from string %s", to_remove, string);
     while (*src != '\0')
@@ -488,7 +492,10 @@ void dg_test_client_remove_char(UINT8 to_remove, UINT8 *string)
         if (*src == to_remove)
         {
             src++;
-            if (*src == '\0') break;
+            if (*src == '\0')
+            {
+                break;
+            }
         }
         else
         {
@@ -523,7 +530,7 @@ void dg_test_client_print_diag_rsp(UINT8* diag_rsp, UINT32 rsp_len)
         {
             printf("%d bytes of response data:\n", data_len);
             /* If response code is an ASCII error string, print out he ascii response */
-            if ( rsp_code >= 0x80 )
+            if (rsp_code >= 0x80)
             {
                 for (i = 0; i < data_len; i++)
                 {
@@ -535,7 +542,7 @@ void dg_test_client_print_diag_rsp(UINT8* diag_rsp, UINT32 rsp_len)
                 for (i = 0; i < data_len; i++)
                 {
                     printf("%02x", *(diag_rsp + data_offset_val + i));
-                    if ( ((i % 32) == 0) && (i != 0) )
+                    if (((i % 32) == 0) && (i != 0))
                     {
                         printf("\n");
                     }
@@ -550,24 +557,25 @@ void dg_test_client_print_diag_rsp(UINT8* diag_rsp, UINT32 rsp_len)
 BOOL dg_test_client_api_timeout_test(void)
 {
     DG_CLIENT_API_STATUS_T status;
-    UINT8 diag_req_data[8]; /* = {0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x0F, 0xA0};*/ // 4000msec wait
-    UINT32 rsp_len;
-    UINT8 *rsp_ptr = NULL;
-    BOOL is_success = FALSE;
-    
-    UINT32 action = 0x00000002;
+    UINT8                  diag_req_data[8]; /* = {0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x0F, 0xA0};*/ /* 4000msec wait */
+    UINT32                 rsp_len;
+    UINT8*                 rsp_ptr    = NULL;
+    BOOL                   is_success = FALSE;
+
+    UINT32 action   = 0x00000002;
     UINT32 time_out = 4000;
-    action = htonl(action);
+
+    action   = htonl(action);
     time_out = htonl(time_out);
     memcpy(diag_req_data, &action, sizeof(action));
-    memcpy(diag_req_data+4, &time_out, sizeof(time_out));
-    
+    memcpy(diag_req_data + 4, &time_out, sizeof(time_out));
+
     /* Send 4000 msec delay command */
     if (DG_CLIENT_API_send_diag_req(dg_test_client_server_cs, 0x0ffe, dg_test_client_timestamp,
                                     sizeof(diag_req_data), diag_req_data) == DG_CLIENT_API_STATUS_SUCCESS)
     {
         /* Wait only 1 second for response */
-        rsp_ptr = DG_CLIENT_API_rcv_desired_diag_rsp(dg_test_client_server_cs, 0x0ffe, 
+        rsp_ptr = DG_CLIENT_API_rcv_desired_diag_rsp(dg_test_client_server_cs, 0x0ffe,
                                                      dg_test_client_timestamp,
                                                      FALSE, 1000, &rsp_len, &status);
         if (rsp_ptr)
@@ -579,14 +587,14 @@ BOOL dg_test_client_api_timeout_test(void)
         {
             printf("Did not get response, status = %d\n", status);
             /* Wait 4 second for response */
-            rsp_ptr = DG_CLIENT_API_rcv_desired_diag_rsp(dg_test_client_server_cs, 0x0ffe, 
+            rsp_ptr = DG_CLIENT_API_rcv_desired_diag_rsp(dg_test_client_server_cs, 0x0ffe,
                                                          dg_test_client_timestamp++,
                                                          FALSE, 4000, &rsp_len, &status);
             if (rsp_ptr)
             {
                 printf("Got response!\n");
                 dg_test_client_print_diag_rsp(rsp_ptr, rsp_len);
-                free(rsp_ptr);                
+                free(rsp_ptr);
                 is_success = TRUE;
             }
         }
@@ -596,21 +604,21 @@ BOOL dg_test_client_api_timeout_test(void)
         printf("Error: Failed sending DIAG request\n");
     }
 
-    return(is_success);    
+    return is_success;
 }
 
 BOOL dg_test_client_mass_connection_test(void)
 {
-    BOOL is_success = TRUE;
-    UINT8 index = 0;
+    BOOL      is_success = TRUE;
+    UINT8     index      = 0;
     pthread_t thread_id[DG_TEST_CLIENT_MASS_CONNECT_NUM_CLIENTS];
-    int thread_status;
-    int *thread_ret_value = 0;
-    
+    int       thread_status;
+    int*      thread_ret_value = 0;
+
     for (index = 0; index < DG_TEST_CLIENT_MASS_CONNECT_NUM_CLIENTS; index++)
     {
-        if ( (thread_status = pthread_create(&thread_id[index], NULL, 
-                                             dg_test_client_mass_connection_test_thread, NULL)) != 0)
+        if ((thread_status = pthread_create(&thread_id[index], NULL,
+                                            dg_test_client_mass_connection_test_thread, NULL)) != 0)
         {
             printf("Error: Error creating client thread #%d\n", index);
             is_success = FALSE;
@@ -623,12 +631,12 @@ BOOL dg_test_client_mass_connection_test(void)
         for (index = 0; index < DG_TEST_CLIENT_MASS_CONNECT_NUM_CLIENTS; index++)
         {
             thread_ret_value = NULL;
-            if ( (thread_status = pthread_join(thread_id[index], (void **)&thread_ret_value)) != 0)
+            if ((thread_status = pthread_join(thread_id[index], (void**)&thread_ret_value)) != 0)
             {
                 printf("Error: Joining client thread #%d\n", index);
                 is_success = FALSE;
             }
-            else if ( thread_ret_value != 0)
+            else if (thread_ret_value != 0)
             {
                 printf("Error: Client thread #%d returned failure status of %d\n", index, *thread_ret_value);
                 is_success = FALSE;
@@ -636,36 +644,36 @@ BOOL dg_test_client_mass_connection_test(void)
         }
     }
 
-    return(is_success);
-            
+    return is_success;
+
 }
 
-void *dg_test_client_mass_connection_test_thread(void* p)
+void* dg_test_client_mass_connection_test_thread(void* p)
 {
     DG_COMPILE_UNUSED(p);
-    int thread_ret = 0;
-    UINT8 timestamp = 0;
+    int                     thread_ret = 0;
+    UINT8                   timestamp  = 0;
     DG_CLIENT_API_SESSION_T diag_cs;
-    UINT8 diag_req_data[] = {0x00, 0x00, 0x00, 0x00, 0xDE, 0xAD, 0xBE, 0xEF};
-    UINT8 *rsp_ptr;
-    UINT32 rsp_len;
-    DG_CLIENT_API_STATUS_T status;
-    int num_commands = 0;
-    int num_connects = 0;
-    int num_loops = 0;
+    UINT8                   diag_req_data[] = { 0x00, 0x00, 0x00, 0x00, 0xDE, 0xAD, 0xBE, 0xEF };
+    UINT8*                  rsp_ptr;
+    UINT32                  rsp_len;
+    DG_CLIENT_API_STATUS_T  status;
+    int                     num_commands = 0;
+    int                     num_connects = 0;
+    int                     num_loops    = 0;
 
     printf("Created client thread %p, doing %d loop(s) of %d connect(s), each connect sending %d diag(s)\n",
            (void*)pthread_self(), DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS, DG_TEST_CLIENT_MASS_CONNECT_NUM_CONNECT_PER_LOOP,
            DG_TEST_CLIENT_MASS_CONNECT_NUM_CMD_PER_CONNECT);
 
-    for (num_loops = 0; ( (num_loops < DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS) &&
-                          (thread_ret == 0)); num_loops++)
+    for (num_loops = 0; ((num_loops < DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS) &&
+                         (thread_ret == 0)); num_loops++)
     {
-        /* Connect number of times per loop */        
-        for (num_connects = 0; ( (num_connects < DG_TEST_CLIENT_MASS_CONNECT_NUM_CONNECT_PER_LOOP) && (thread_ret == 0));
+        /* Connect number of times per loop */
+        for (num_connects = 0; ((num_connects < DG_TEST_CLIENT_MASS_CONNECT_NUM_CONNECT_PER_LOOP) && (thread_ret == 0));
              num_connects++)
         {
-            timestamp = 0;        
+            timestamp = 0;
             if (DG_CLIENT_API_connect_to_server(20000, &diag_cs) != DG_CLIENT_API_STATUS_SUCCESS)
             {
                 printf("Error: Failed to send DIAG request on client thread %p, diag_cs = %d\n",
@@ -675,27 +683,31 @@ void *dg_test_client_mass_connection_test_thread(void* p)
             else
             {
                 /* Send the number of commands for this loop */
-                for (num_commands = 0; ((num_commands < DG_TEST_CLIENT_MASS_CONNECT_NUM_CMD_PER_CONNECT) && (thread_ret == 0));
+                for (num_commands = 0;
+                     ((num_commands < DG_TEST_CLIENT_MASS_CONNECT_NUM_CMD_PER_CONNECT) && (thread_ret == 0));
                      num_commands++)
                 {
                     if (DG_CLIENT_API_send_diag_req(diag_cs, 0x0ffe, timestamp,
-                                                    sizeof(diag_req_data), diag_req_data) != DG_CLIENT_API_STATUS_SUCCESS)
+                                                    sizeof(diag_req_data),
+                                                    diag_req_data) != DG_CLIENT_API_STATUS_SUCCESS)
                     {
-                        printf("Error: Failed to send DIAG request on client thread %p, diag_cs = %d\n", (void*)pthread_self(), diag_cs);
+                        printf("Error: Failed to send DIAG request on client thread %p, diag_cs = %d\n",
+                               (void*)pthread_self(), diag_cs);
                         thread_ret = 1;
                     }
                     else
                     {
-                        rsp_ptr = DG_CLIENT_API_rcv_desired_diag_rsp(diag_cs, 0x0ffe, 
+                        rsp_ptr = DG_CLIENT_API_rcv_desired_diag_rsp(diag_cs, 0x0ffe,
                                                                      timestamp,
                                                                      FALSE, 5000, &rsp_len, &status);
                         if (!rsp_ptr)
                         {
-                            printf("Error: Failed to receive DIAG response on client thread %p, diag_cs = %d, status = %d\n", (void*)pthread_self(), diag_cs, status);
+                            printf("Error: Failed to receive DIAG response on client thread %p, diag_cs = %d, status = %d\n",
+                                   (void*)pthread_self(), diag_cs, status);
                             thread_ret = 1;
                         }
                         else
-                        {                
+                        {
                             timestamp++;
                             free(rsp_ptr);
                         }
@@ -704,53 +716,56 @@ void *dg_test_client_mass_connection_test_thread(void* p)
                 DG_CLIENT_API_disconnect_from_server(diag_cs);
             }
         } /* End number of commands per loop */
-        
+
         /* If we are not done with the test loops, wait a bit.  Done to allow sockets to free up */
-        if ( (num_loops != (DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS - 1)) &&
-             (thread_ret == 0))
+        if ((num_loops != (DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS - 1)) &&
+            (thread_ret == 0))
         {
             printf("Client thread %p completed loop #%d of %d, sleeping %d seconds before next loop\n",
-                   (void*)pthread_self(), (num_loops+1),  DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS,
+                   (void*)pthread_self(), (num_loops + 1),  DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS,
                    DG_TEST_CLIENT_MASS_CONNECT_LOOP_SLEEP);
             sleep(DG_TEST_CLIENT_MASS_CONNECT_LOOP_SLEEP);
         }
     }
-    return((int *)(intptr_t)thread_ret);
+    return (int*)(intptr_t)thread_ret;
 }
 
 #define DG_TEST_AUX_THREAD_NUM 2
 BOOL dg_test_client_multi_aux_test(void)
 {
-    BOOL is_success = TRUE;
-    UINT8 index = 0;
+    BOOL      is_success = TRUE;
+    UINT8     index      = 0;
     pthread_t thread_id[DG_TEST_AUX_THREAD_NUM];
-    int thread_status;
-    int thread_ret_value = 0;
-    UINT16 opcode = 0xbeef;
-    
+    int       thread_status;
+    int       thread_ret_value = 0;
+    UINT16    opcode           = 0xbeef;
+
     for (index = 0; index < DG_TEST_AUX_THREAD_NUM; index++)
     {
-        if ( (thread_status = pthread_create(&thread_id[index], NULL, 
-                                             dg_test_client_multi_aux_test_thread,  (void*)(long)opcode)) != 0)
+        if ((thread_status = pthread_create(&thread_id[index], NULL,
+                                            dg_test_client_multi_aux_test_thread,  (void*)(long)opcode)) != 0)
         {
             printf("Error: Error creating client thread #%d\n", index);
             is_success = FALSE;
             break;
         }
 
-        if (index == 0) opcode = 0xdead;
+        if (index == 0)
+        {
+            opcode = 0xdead;
+        }
     }
-    
+
     if (is_success == TRUE)
     {
         for (index = 0; index < DG_TEST_AUX_THREAD_NUM; index++)
         {
-            if ( (thread_status = pthread_join(thread_id[index], (void **)&thread_ret_value)) != 0)
+            if ((thread_status = pthread_join(thread_id[index], (void**)&thread_ret_value)) != 0)
             {
                 printf("Error: Joining client thread #%d\n", index);
                 is_success = FALSE;
             }
-            else if ( thread_ret_value != 0)
+            else if (thread_ret_value != 0)
             {
                 printf("Error: Client thread #%d returned failure status of %d\n", index, thread_ret_value);
                 is_success = FALSE;
@@ -758,27 +773,27 @@ BOOL dg_test_client_multi_aux_test(void)
         }
     }
 
-    return(is_success);           
+    return is_success;
 }
 
-void *dg_test_client_multi_aux_test_thread(void *data)
+void* dg_test_client_multi_aux_test_thread(void* data)
 {
-    int thread_ret = 0;
-    UINT8 timestamp = 0;
+    int                     thread_ret = 0;
+    UINT8                   timestamp  = 0;
     DG_CLIENT_API_SESSION_T diag_cs;
-    UINT8 *diag_req_data;
-    UINT32 diag_req_data_len = 0;
-    UINT8 *rsp_ptr;
-    UINT32 rsp_len;
-    DG_CLIENT_API_STATUS_T status;
-    int num_commands = 0;
-    UINT16 opcode = *(UINT16*)(&data);
+    UINT8*                  diag_req_data;
+    UINT32                  diag_req_data_len = 0;
+    UINT8*                  rsp_ptr;
+    UINT32                  rsp_len;
+    DG_CLIENT_API_STATUS_T  status;
+    int                     num_commands = 0;
+    UINT16                  opcode       = *(UINT16*)(&data);
 
     printf("Created client thread %p, doing %d loop(s) of %d connect(s), each connect sending %d diag(s)\n",
            (void*)pthread_self(), DG_TEST_CLIENT_MASS_CONNECT_NUM_LOOPS, DG_TEST_CLIENT_MASS_CONNECT_NUM_CONNECT_PER_LOOP,
            DG_TEST_CLIENT_MASS_CONNECT_NUM_CMD_PER_CONNECT);
 
-    timestamp = 0;        
+    timestamp = 0;
     if (DG_CLIENT_API_connect_to_server(20000, &diag_cs) != DG_CLIENT_API_STATUS_SUCCESS)
     {
         printf("Error: Failed to send DIAG request on client thread %p, diag_cs = %d\n",
@@ -791,25 +806,28 @@ void *dg_test_client_multi_aux_test_thread(void *data)
         for (num_commands = 0; ((num_commands < DG_TEST_CLIENT_MASS_CONNECT_NUM_CMD_PER_CONNECT) && (thread_ret == 0));
              num_commands++)
         {
-            if ( (diag_req_data = dg_test_client_create_random_data(&diag_req_data_len)) == NULL)
+            if ((diag_req_data = dg_test_client_create_random_data(&diag_req_data_len)) == NULL)
             {
-                printf("Error: Failed to send create random DIAG request on client thread %p, diag_cs = %d\n", (void*)pthread_self(), diag_cs);
-                thread_ret = 1; 
-            }            
+                printf("Error: Failed to send create random DIAG request on client thread %p, diag_cs = %d\n",
+                       (void*)pthread_self(), diag_cs);
+                thread_ret = 1;
+            }
             else if (DG_CLIENT_API_send_diag_req(diag_cs, opcode, timestamp,
-                                            diag_req_data_len, diag_req_data) != DG_CLIENT_API_STATUS_SUCCESS)
+                                                 diag_req_data_len, diag_req_data) != DG_CLIENT_API_STATUS_SUCCESS)
             {
-                printf("Error: Failed to send DIAG request on client thread %p, diag_cs = %d\n", (void*)pthread_self(), diag_cs);
+                printf("Error: Failed to send DIAG request on client thread %p, diag_cs = %d\n",
+                       (void*)pthread_self(), diag_cs);
                 thread_ret = 1;
             }
             else
             {
-                rsp_ptr = DG_CLIENT_API_rcv_desired_diag_rsp(diag_cs, opcode, 
+                rsp_ptr = DG_CLIENT_API_rcv_desired_diag_rsp(diag_cs, opcode,
                                                              timestamp,
                                                              FALSE, 5000, &rsp_len, &status);
                 if (!rsp_ptr)
                 {
-                    printf("Error: Failed to receive DIAG response on client thread %p, diag_cs = %d, status = %d\n", (void*)pthread_self(), diag_cs, status);
+                    printf("Error: Failed to receive DIAG response on client thread %p, diag_cs = %d, status = %d\n",
+                           (void*)pthread_self(), diag_cs, status);
                     thread_ret = 1;
                 }
                 else
@@ -832,16 +850,17 @@ void *dg_test_client_multi_aux_test_thread(void *data)
         } /* End sending commands per connect */
         DG_CLIENT_API_disconnect_from_server(diag_cs);
     }
-    return((int *)(intptr_t)thread_ret);
+    return (int*)(intptr_t)thread_ret;
 }
 
-UINT8 *dg_test_client_create_random_data(UINT32 *diag_req_data_len)
+UINT8* dg_test_client_create_random_data(UINT32* diag_req_data_len)
 {
     UINT32 index;
-    UINT8 *req_data = NULL;
+    UINT8* req_data = NULL;
+
     *diag_req_data_len = rand() % 2000;
-    
-    req_data = (UINT8 *) malloc(*diag_req_data_len);
+
+    req_data = (UINT8*)malloc(*diag_req_data_len);
     if (req_data != NULL)
     {
         for (index = 0; index < *diag_req_data_len; index++)
@@ -850,5 +869,6 @@ UINT8 *dg_test_client_create_random_data(UINT32 *diag_req_data_len)
         }
     }
 
-    return(req_data);   
+    return req_data;
 }
+

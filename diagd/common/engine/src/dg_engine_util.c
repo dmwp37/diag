@@ -22,11 +22,13 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protoco
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include <math.h>
 #include <string.h>
 #include <pthread.h>
 #include "dg_defs.h"
 #include "dg_dbg.h"
+#include "dg_drv_util.h"
 #include "dg_engine_util.h"
 #include "dg_client_comm.h"
 #include "dg_pal_util.h"
@@ -35,7 +37,6 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protoco
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-#define DG_ENGINE_UTIL_ERROR_STRING_MAX_CHAR  1000 /**< Arbitary max size of ascii error string */
 
 /*==================================================================================================
                                             LOCAL MACROS
@@ -412,6 +413,7 @@ BOOL DG_ENGINE_UTIL_req_remain_len_check_equal(DG_DEFS_DIAG_REQ_T* req, UINT32 r
 UINT8 DG_ENGINE_UTIL_req_parse_1_byte_ntoh(DG_DEFS_DIAG_REQ_T* req)
 {
     UINT8 val = *(req->data_ptr + req->data_offset);
+
     req->data_offset += 1;
     return val;
 }
@@ -426,6 +428,7 @@ UINT8 DG_ENGINE_UTIL_req_parse_1_byte_ntoh(DG_DEFS_DIAG_REQ_T* req)
 UINT16 DG_ENGINE_UTIL_req_parse_2_bytes_ntoh(DG_DEFS_DIAG_REQ_T* req)
 {
     UINT16 val = ntohs(*(UINT16*)(req->data_ptr + req->data_offset));
+
     req->data_offset += 2;
     return val;
 }
@@ -440,6 +443,7 @@ UINT16 DG_ENGINE_UTIL_req_parse_2_bytes_ntoh(DG_DEFS_DIAG_REQ_T* req)
 UINT32 DG_ENGINE_UTIL_req_parse_4_bytes_ntoh(DG_DEFS_DIAG_REQ_T* req)
 {
     UINT32 val = ntohl(*(UINT32*)(req->data_ptr + req->data_offset));
+
     req->data_offset += 4;
     return val;
 }
@@ -516,6 +520,7 @@ UINT8* DG_ENGINE_UTIL_req_get_remain_data_ptr(DG_DEFS_DIAG_REQ_T* req)
 DG_DEFS_DIAG_RSP_BUILDER_T* DG_ENGINE_UTIL_rsp_init(void)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = NULL;
+
     if ((real_rsp = (dg_engine_util_diag_rsp_builder_t*)
                     malloc(sizeof(dg_engine_util_diag_rsp_builder_t))) == NULL)
     {
@@ -549,14 +554,14 @@ void DG_ENGINE_UTIL_rsp_free(DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
     if (real_rsp != NULL)
     {
         free(real_rsp->data_ptr);
-        real_rsp->data_ptr        = NULL;
+        real_rsp->data_ptr = NULL;
 
         free(real_rsp->err_text_string);
         real_rsp->err_text_string = NULL;
 
-        real_rsp->data_max_len    = 0;
-        real_rsp->data_cur_len    = 0;
-        real_rsp->init_marker     = 0x00000000;
+        real_rsp->data_max_len = 0;
+        real_rsp->data_cur_len = 0;
+        real_rsp->init_marker  = 0x00000000;
         free(rsp);
     }
 }
@@ -623,6 +628,7 @@ BOOL DG_ENGINE_UTIL_rsp_data_alloc(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UINT32 max_s
 void DG_ENGINE_UTIL_rsp_append_1_byte_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UINT8 val)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     DG_ENGINE_UTIL_buf_append_1_byte_hton(real_rsp->data_ptr, &real_rsp->data_cur_len, val);
 }
 
@@ -641,6 +647,7 @@ void DG_ENGINE_UTIL_rsp_append_1_byte_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UINT
 void DG_ENGINE_UTIL_rsp_append_2_bytes_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UINT16 val)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     DG_ENGINE_UTIL_buf_append_2_bytes_hton(real_rsp->data_ptr, &real_rsp->data_cur_len, val);
 }
 
@@ -659,6 +666,7 @@ void DG_ENGINE_UTIL_rsp_append_2_bytes_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UIN
 void DG_ENGINE_UTIL_rsp_append_4_bytes_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UINT32 val)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     DG_ENGINE_UTIL_buf_append_4_bytes_hton(real_rsp->data_ptr, &real_rsp->data_cur_len, val);
 }
 
@@ -677,6 +685,7 @@ void DG_ENGINE_UTIL_rsp_append_4_bytes_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UIN
 void DG_ENGINE_UTIL_rsp_append_buf(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UINT8* src, UINT32 num_bytes)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     DG_ENGINE_UTIL_buf_append_buf(real_rsp->data_ptr, &real_rsp->data_cur_len, src, num_bytes);
 }
 
@@ -696,6 +705,7 @@ void DG_ENGINE_UTIL_rsp_append_buf(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UINT8* src, 
 void DG_ENGINE_UTIL_rsp_replace_1_byte_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UINT32 offset, UINT8 val)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     DG_ENGINE_UTIL_buf_replace_1_byte_hton(real_rsp->data_ptr, offset, val);
 }
 
@@ -715,6 +725,7 @@ void DG_ENGINE_UTIL_rsp_replace_1_byte_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UIN
 void DG_ENGINE_UTIL_rsp_replace_2_bytes_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UINT32 offset, UINT16 val)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     DG_ENGINE_UTIL_buf_replace_2_bytes_hton(real_rsp->data_ptr, offset, val);
 }
 
@@ -734,6 +745,7 @@ void DG_ENGINE_UTIL_rsp_replace_2_bytes_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UI
 void DG_ENGINE_UTIL_rsp_replace_4_bytes_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UINT32 offset, UINT32 val)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     DG_ENGINE_UTIL_buf_replace_4_bytes_hton(real_rsp->data_ptr, offset, val);
 }
 /*=============================================================================================*//**
@@ -749,6 +761,7 @@ void DG_ENGINE_UTIL_rsp_replace_4_bytes_hton(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, UI
 void DG_ENGINE_UTIL_rsp_set_len_zero(DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     real_rsp->data_cur_len = 0;
 }
 /*=============================================================================================*//**
@@ -864,6 +877,7 @@ void DG_ENGINE_UTIL_buf_replace_4_bytes_hton(UINT8* buf, UINT32 offset, UINT32 v
 UINT8 DG_ENGINE_UTIL_buf_parse_1_byte_ntoh(UINT8** buf_ptr)
 {
     UINT8 val = **buf_ptr;
+
     *buf_ptr += 1;
     return val;
 }
@@ -878,6 +892,7 @@ UINT8 DG_ENGINE_UTIL_buf_parse_1_byte_ntoh(UINT8** buf_ptr)
 UINT16 DG_ENGINE_UTIL_buf_parse_2_bytes_ntoh(UINT8** buf_ptr)
 {
     UINT16 val = ntohs(*(UINT16*)(*buf_ptr));
+
     *buf_ptr += 2;
     return val;
 }
@@ -892,6 +907,7 @@ UINT16 DG_ENGINE_UTIL_buf_parse_2_bytes_ntoh(UINT8** buf_ptr)
 UINT32 DG_ENGINE_UTIL_buf_parse_4_bytes_ntoh(UINT8** buf_ptr)
 {
     UINT32 val = ntohl(*(UINT32*)(*buf_ptr));
+
     *buf_ptr += 4;
     return val;
 }
@@ -930,6 +946,7 @@ UINT8* DG_ENGINE_UTIL_alloc_mem(UINT32 max_size, DG_DEFS_DIAG_RSP_BUILDER_T* rsp
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
     UINT8*                             buffer   = (UINT8*)malloc(max_size);
+
     if (buffer == NULL)
     {
         if (real_rsp)
@@ -961,6 +978,7 @@ W_CHAR* DG_ENGINE_UTIL_process_unicode_filename_no_null(DG_DEFS_DIAG_REQ_T* req,
     W_CHAR*                     ret_wchar      = NULL;      /*return value,must be initialized to NULL*/
     UINT32                      size           = 0;         /*Store filename size*/
     UINT32                      i              = 0;
+
     size = DG_ENGINE_UTIL_req_get_remain_len(req);
     /* + 2 for append null termination */
     if ((filename = (W_CHAR*)DG_ENGINE_UTIL_alloc_mem(size + 2, rsp)) != NULL)
@@ -1012,6 +1030,7 @@ W_CHAR* DG_ENGINE_UTIL_process_unicode_filename(DG_DEFS_DIAG_REQ_T* req, DG_DEFS
     W_CHAR*                     ret_wchar      = NULL;      /*return value,must be initialized to NULL*/
     UINT32                      size           = 0;         /*Store filename size*/
     UINT32                      i              = 0;
+
     size = DG_ENGINE_UTIL_req_get_remain_len(req);
     if ((filename = (W_CHAR*)DG_ENGINE_UTIL_alloc_mem(size, rsp)) != NULL)
     {
@@ -1062,15 +1081,15 @@ W_CHAR* DG_ENGINE_UTIL_process_unicode_filename(DG_DEFS_DIAG_REQ_T* req, DG_DEFS
 char* DG_ENGINE_UTIL_process_ascii_filename(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 {
 
-    DG_PAL_UTIL_ABSOLUTE_PATH_T ret            = DG_PAL_UTIL_ABSOLUTE_PATH_ERROR;
+    DG_PAL_UTIL_ABSOLUTE_PATH_T ret = DG_PAL_UTIL_ABSOLUTE_PATH_ERROR;
     /** all of the pointers must be set to NULL*/
-    W_CHAR*                     filename       = NULL;
-    W_CHAR*                     full_filename  = NULL;
-    W_CHAR*                     alias_filename = NULL;
-    W_CHAR*                     ret_wchar      = NULL;
-    char*                       ret_char       = NULL;
-    UINT32                      size           = 0;
-    UINT16                      i              = 0;
+    W_CHAR* filename       = NULL;
+    W_CHAR* full_filename  = NULL;
+    W_CHAR* alias_filename = NULL;
+    W_CHAR* ret_wchar      = NULL;
+    char*   ret_char       = NULL;
+    UINT32  size           = 0;
+    UINT16  i              = 0;
 
     /**file size including the end NULL */
     size = DG_ENGINE_UTIL_req_get_remain_len(req);
@@ -1194,6 +1213,7 @@ W_CHAR* DG_ENGINE_UTIL_prepend_default_path_unicode(W_CHAR* src, DG_DEFS_DIAG_RS
     int     src_len = 0;
     int     i       = 0;
     W_CHAR* ret_val = NULL;
+
     while (src[src_len] != 0x0000)
     {
         src_len++;
@@ -1350,6 +1370,7 @@ void DG_ENGINE_UTIL_rsp_send(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, DG_DEFS_DIAG_REQ_T
 void DG_ENGINE_UTIL_rsp_set_code(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, DG_RSP_CODE_T code)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     real_rsp->code = code;
 }
 
@@ -1393,6 +1414,7 @@ BOOL DG_ENGINE_UTIL_rsp_is_failure(DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 void DG_ENGINE_UTIL_rsp_set_flag(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, DG_DEFS_RSP_FLAG_T flag)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     if (flag == DG_DEFS_RSP_FLAG_NONE)
     {
         /* If the specified flag is DG_DEFS_RSP_FLAG_NONE, remove all flags */
@@ -1423,6 +1445,7 @@ void DG_ENGINE_UTIL_rsp_set_error_string(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
     dg_engine_util_diag_rsp_builder_t* real_rsp           = (dg_engine_util_diag_rsp_builder_t*)rsp;
     char*                              ascii_error_string = NULL; /* Temporary buffer for error string in ascii */
     va_list                            args;                      /* Variable arg list                          */
+    int                                str_len;
 
     /* Init variable arg list */
     va_start(args, format);
@@ -1433,23 +1456,23 @@ void DG_ENGINE_UTIL_rsp_set_error_string(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
         DG_DBG_TRACE("Tried to set error string while one already existed. Try to set: %s, Current: %s",
                      format, real_rsp->err_text_string);
     }
+    else if ((str_len = vsnprintf(NULL, 0, format, args)) < 0)
+    {
+        DG_DBG_ERROR("vsnprintf() get string length failed. errno=%d (%s)",
+                     errno, strerror(errno));
+    }
+    else if ((ascii_error_string = (char*)malloc(str_len + 1)) == NULL)
+    {
+        real_rsp->code = code;
+        /* If malloc fails, leave response code set */
+        DG_DBG_TRACE("Failed to allocate memory for string: %s", format);
+    }
     else
     {
-        /* Set the response code and allocate the max size of an error string */
         real_rsp->code = code;
-
-        if ((ascii_error_string = (char*)malloc(DG_ENGINE_UTIL_ERROR_STRING_MAX_CHAR)) != NULL)
-        {
-            memset(ascii_error_string, 0x00, DG_ENGINE_UTIL_ERROR_STRING_MAX_CHAR);
-            vsnprintf(ascii_error_string, DG_ENGINE_UTIL_ERROR_STRING_MAX_CHAR, format, args);
-            DG_DBG_TRACE("Error string set to: %s", ascii_error_string);
-            real_rsp->err_text_string = ascii_error_string;
-        }
-        else
-        {
-            /* If malloc fails, leave response code set */
-            DG_DBG_TRACE("Failed to allocate memory for string: %s", format);
-        }
+        vsnprintf(ascii_error_string, str_len + 1, format, args);
+        DG_DBG_TRACE("Error string set to: %s", ascii_error_string);
+        real_rsp->err_text_string = ascii_error_string;
     }
 
     va_end(args);
@@ -1461,67 +1484,58 @@ void DG_ENGINE_UTIL_rsp_set_error_string(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
 
 @param[in] rsp    - The response builder to update
 @param[in] code   - The response code to set
-@param[in] fptr   - Pointer to function to retreive driver error string
 @param[in] format - printf style format string for error message
 @param[in] ...    - Variable argument, used to popluated format string
 
 @note
   - rsp must have been initialized by DG_ENGINE_UTIL_rsp_init() before using this function
   - This will cause any previous response builder information to be overwritten
+  - This function would retrieve the correct driver error string from thread specific data
 *//*==============================================================================================*/
 void DG_ENGINE_UTIL_rsp_set_error_string_drv(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
                                              DG_RSP_CODE_T code,
-                                             DG_ENGINE_UTIL_DRV_ERR_STRING_FUNC_T fptr,
                                              const char* format, ...)
 {
-    DG_CMN_DRV_ERR_T err;
-    char*            ascii_error_string = NULL; /* Temporary buffer for error string in ascii */
-    char*            drv_error_string   = NULL; /* Temporary buffer for driver error string in ascii */
-    va_list          args;                      /* Variable arg list                          */
+    char*   ascii_error_string = NULL; /* Temporary buffer for error string in ascii */
+    char*   drv_error_string   = NULL; /* Temporary buffer for driver error string in ascii */
+    va_list args;                      /* Variable arg list                          */
+    int     str_len;                   /* the whole error string length              */
 
     /* Init variable arg list */
     va_start(args, format);
 
-    if (((ascii_error_string = (char*)malloc(DG_ENGINE_UTIL_ERROR_STRING_MAX_CHAR)) != NULL) &&
-        ((drv_error_string = (char*)malloc(DG_ENGINE_UTIL_ERROR_STRING_MAX_CHAR)) != NULL))
+    drv_error_string = DG_DRV_UTIL_get_error_string();
+
+    str_len = vsnprintf(NULL, 0, format, args);
+
+    if (str_len < 0)
+    {
+        DG_DBG_ERROR("vsnprintf() get string length failed. errno=%d (%s)",
+                     errno, strerror(errno));
+    }
+    else if ((ascii_error_string = (char*)malloc(str_len + 1)) == NULL)
+    {
+        DG_DBG_ERROR("Failed to create ascii error string");
+    }
+    else
     {
         /* Set error string passed in */
-        memset(ascii_error_string, 0x00, DG_ENGINE_UTIL_ERROR_STRING_MAX_CHAR);
-        vsnprintf(ascii_error_string, DG_ENGINE_UTIL_ERROR_STRING_MAX_CHAR, format, args);
+        vsnprintf(ascii_error_string, str_len + 1, format, args);
 
-        /* If fptr is null, just set the passed in error string */
-        if (fptr == NULL)
+        /* If driver error string is null, just set the passed in error string */
+        if (drv_error_string == NULL)
         {
             DG_ENGINE_UTIL_rsp_set_error_string(rsp, code,
-                                                "%s; Driver function pointer null",
+                                                "%s; Driver error string not set",
                                                 ascii_error_string);
         }
         else
         {
-            /* Get the driver error string */
-            err = fptr(DG_ENGINE_UTIL_ERROR_STRING_MAX_CHAR, drv_error_string);
-            if (err != DG_CMN_DRV_ERR_NONE)
-            {
-                DG_ENGINE_UTIL_rsp_set_error_string(rsp, code,
-                                                    "%s; Error getting driver error string = %d",
-                                                    ascii_error_string, err);
-            }
-            else
-            {
-                DG_ENGINE_UTIL_rsp_set_error_string(rsp, code, "%s; %s",
-                                                    ascii_error_string, drv_error_string);
-            }
+            DG_ENGINE_UTIL_rsp_set_error_string(rsp, code, "%s; %s",
+                                                ascii_error_string, drv_error_string);
         }
-    }
 
-    if (ascii_error_string != NULL)
-    {
         free(ascii_error_string);
-    }
-
-    if (drv_error_string != NULL)
-    {
-        free(drv_error_string);
     }
 
     va_end(args);
@@ -1542,6 +1556,7 @@ void DG_ENGINE_UTIL_rsp_set_error_string_drv(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
 DG_RSP_CODE_T DG_ENGINE_UTIL_rsp_get_code(DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     return real_rsp->code;
 }
 
@@ -1555,6 +1570,7 @@ DG_RSP_CODE_T DG_ENGINE_UTIL_rsp_get_code(DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 UINT32 DG_ENGINE_UTIL_rsp_get_curr_len(DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     return real_rsp->data_cur_len;
 }
 
@@ -1570,6 +1586,7 @@ UINT32 DG_ENGINE_UTIL_rsp_get_curr_len(DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 const UINT8* DG_ENGINE_UTIL_rsp_get_data_ptr(DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     return real_rsp->data_ptr;
 }
 
@@ -1583,6 +1600,7 @@ const UINT8* DG_ENGINE_UTIL_rsp_get_data_ptr(DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 DG_DEFS_RSP_FLAG_T DG_ENGINE_UTIL_rsp_get_flag(DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 {
     dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
     return real_rsp->flag;
 }
 
@@ -1643,7 +1661,7 @@ void dg_engine_util_send_response(DG_DEFS_DIAG_REQ_T* diag,
         final_rsp_code   = DG_RSP_CODE_CMD_INTL_ERR;
         final_rsp_length = 0;
     }
-    
+
     rsp.header.unsol_rsp_flag = (final_rsp_flags & DG_DEFS_RSP_FLAG_UNSOL) ?
                                 DG_DEFS_HDR_FLAG_RESPONSE_UNSOLICITED : DG_DEFS_HDR_FLAG_RESPONSE_SOLICITED;
     rsp.header.diag_version   = DG_DEFS_HDR_DIAG_VERSION_VALUE;
@@ -1700,3 +1718,4 @@ void dg_engine_util_send_response(DG_DEFS_DIAG_REQ_T* diag,
         }
     }
 }
+
