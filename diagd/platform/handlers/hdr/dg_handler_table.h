@@ -50,7 +50,6 @@ extern const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[];
  * we just keep the special handlers declaration here to remove compilation warnings
  */
 void DG_AUX_CMD_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
 #ifdef __cplusplus
 }
 #endif

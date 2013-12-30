@@ -18,8 +18,8 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protoco
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include <dg_cmn_drv_defs.h>
 #include "dg_defs.h"
+#include "dg_cmn_drv_defs.h"
 
 #ifdef __cplusplus
 extern "C" {

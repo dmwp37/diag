@@ -42,8 +42,10 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
    functions must have the name format/prototype of
    DG_<DIAG NAME>_handler_main(DG_DEFS_DIAG_REQ_T *req) */
 
-void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T *req);
-void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T *req);
+void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
 
 #endif
 

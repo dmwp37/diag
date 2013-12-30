@@ -4,7 +4,7 @@
 
     Module Name:  dg_pal_client_platform_inc.h
 
-    General Description: DIAG Client PAL - Includes header files needed for the Android platform
+    General Description: DIAG Client PAL - Includes header files needed for platform
 
 ====================================================================================================
 
@@ -17,7 +17,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include <dg_platform_defs.h>
+#include "dg_platform_defs.h"
 
 #ifdef __cplusplus  
 extern "C" {

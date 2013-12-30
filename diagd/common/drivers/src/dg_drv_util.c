@@ -24,11 +24,11 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 #include "dg_dbg.h"
 #include "dg_drv_util.h"
 
-/** @addtogroup util_android
+/** @addtogroup drv_util
 @{
 */
 
-/** @addtogroup DRV_util_android
+/** @addtogroup drv_util_error_string
 @{
 */
 

@@ -1,8 +1,8 @@
 /*==================================================================================================
 
-    Module Name:  dg_pal_client_api.c
+    Module Name:  dg_cmn_drv_led.c
 
-    General Description: Implements the PAL for Client API
+    General Description: Implements the LED common driver
 
 ====================================================================================================
 
@@ -10,20 +10,26 @@ Revision History:
                             Modification     Tracking
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
-Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/30     xxxxx-0000   Creation
 
 ====================================================================================================
-                                            INCLUDE FILES
+                                           INCLUDE FILES
 ==================================================================================================*/
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "dg_pal_client_platform_inc.h"
-#include "dg_pal_client_api.h"
+#include "dg_handler_inc.h"
+#include "dg_drv_util.h"
+#include "dg_cmn_drv_led.h"
+
+/** @addtogroup dg_common_drivers
+@{
+*/
+
+/** @addtogroup LED_driver
+@{
+implementation of the LED driver
+*/
 
 /*==================================================================================================
-                                           LOCAL CONSTANTS
+                                          LOCAL CONSTANTS
 ==================================================================================================*/
 
 /*==================================================================================================
@@ -35,7 +41,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 ==================================================================================================*/
 
 /*==================================================================================================
-                                      LOCAL FUNCTION PROTOTYPES
+                                     LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
 
 /*==================================================================================================
@@ -51,41 +57,40 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief Launches the DIAG application
+@brief Turn on the LED with specified color
 
-@return TRUE = successfully started the DIAG application, FALSE = failed to start application
+@param[in] led_id    - which LED to control
+@param[in] led_color - the color needs to be set 
 *//*==============================================================================================*/
-BOOL DG_PAL_CLIENT_API_start_diag_app(void)
+DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LED_COLOR_T led_color)
 {
-    /* Always return success, users must start DIAG engine manually on test platform */
-    return TRUE;
+    DG_CMN_DRV_ERR_T err = DG_CMN_DRV_ERR_FAIL;
+
+    DG_DRV_UTIL_set_error_string("Not implemented Enable LED driver: led_id=0x%02x, led_color=0x%02x",
+                                 led_id, led_color);
+
+    return err;
 }
 
 /*=============================================================================================*//**
-@brief Creates socket for use by internal DIAG clients
+@brief Turn off the LED
 
-@param[out] server - Socket address
-@param[out] len    - Length of the socket address
-
-@return File descriptor for the socket, -1 on fail
+@param[in] led_id - which LED to control
 *//*==============================================================================================*/
-int DG_PAL_CLIENT_API_create_int_diag_socket(struct sockaddr_storage *server, socklen_t *len)
+DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_disable(DG_CMN_DRV_LED_ID_T led_id)
 {
-    struct sockaddr_un *unix_srv = (struct sockaddr_un *)server;
-    int sock = -1;
-    
-    sock = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (sock != -1)
-    {
-        unix_srv->sun_family = AF_UNIX;
-        strcpy(unix_srv->sun_path, DG_CFG_INT_SOCKET);
-        *len = (sizeof(unix_srv->sun_family) + strlen(unix_srv->sun_path));
-    }
+    DG_CMN_DRV_ERR_T err = DG_CMN_DRV_ERR_FAIL;
 
-    return (sock);
+    DG_DRV_UTIL_set_error_string("Not implemented Disable LED driver: led_id=0x%02x", led_id);
+
+    return err;
 }
 
 /*==================================================================================================
-                                          LOCAL FUNCTIONS
+                                     LOCAL FUNCTION
 ==================================================================================================*/
+
+
+/** @} */
+/** @} */
 

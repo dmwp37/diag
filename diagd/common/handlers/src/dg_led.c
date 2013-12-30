@@ -1,8 +1,8 @@
 /*==================================================================================================
 
-    Module Name:  dg_debug_level.c
+    Module Name:  dg_led.c
 
-    General Description: Implements the DEBUG_LEVEL DIAG
+    General Description: Implements the LED test handler
 
 ====================================================================================================
 
@@ -10,12 +10,12 @@ Revision History:
                             Modification     Tracking
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
-Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/30     xxxxx-0000   Creation
 
 ====================================================================================================
                                         INCLUDE FILES
 ==================================================================================================*/
-#include <dg_cmn_drv_debug_level.h>
+#include <dg_cmn_drv_led.h>
 #include <dg_engine_util.h>
 #include "dg_handler_inc.h"
 
@@ -24,14 +24,14 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 @{
 */
 
-/** @addtogroup DEBUG_LEVEL
+/** @addtogroup LED
 @{
 
 @par
-<b>DEBUG_LEVEL - 0x0FFD</b>
+<b>LED - 0x0001</b>
 
 @par
-This command is responsible for control debug level of different component
+This command is responsible for LED test
 */
 
 /*==================================================================================================
@@ -41,19 +41,18 @@ This command is responsible for control debug level of different component
 /*==================================================================================================
                                             LOCAL MACROS
 ==================================================================================================*/
-#define DG_DEBUG_LEVEL_REQ_LEN_SET 3
-#define DG_DEBUG_LEVEL_REQ_LEN_GET 1
+#define DG_LED_REQ_LEN_MIN 2
 
 /*==================================================================================================
                              LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
 ==================================================================================================*/
-/** Actions for DEBUG_LEVEL command */
+/** Actions for LED command */
 enum
 {
-    DG_DEBUG_LEVEL_SET = 0x00,
-    DG_DEBUG_LEVEL_GET = 0x01
+    DG_LED_ENABLE  = 0x00,
+    DG_LED_DISABLE = 0x01
 };
-typedef UINT8 DG_DEBUG_LEVEL_ACTION_T;
+typedef UINT8 DG_LED_ACTION_T;
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -72,68 +71,53 @@ typedef UINT8 DG_DEBUG_LEVEL_ACTION_T;
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief Handler function for the DEBUG_LEVEL command
+@brief Handler function for the LED command
 
 @param[in] req - DIAG request
 *//*==============================================================================================*/
-void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req)
+void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req)
 {
-    DG_CMN_DRV_ERR_T                   err;
-    DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T comp;
-    DG_DEBUG_LEVEL_ACTION_T            action;
-    UINT16                             dbg_lvl;
-    DG_DEFS_DIAG_RSP_BUILDER_T*        rsp = DG_ENGINE_UTIL_rsp_init();
+    DG_CMN_DRV_ERR_T            err;
+    DG_LED_ACTION_T             action;
+    DG_CMN_DRV_LED_ID_T         led_id;
+    DG_CMN_DRV_LED_COLOR_T      led_color;
+    DG_DEFS_DIAG_RSP_BUILDER_T* rsp = DG_ENGINE_UTIL_rsp_init();
 
-    if (DG_ENGINE_UTIL_req_len_check_at_least(req, sizeof(action), rsp))
+    if (DG_ENGINE_UTIL_req_len_check_at_least(req, DG_LED_REQ_LEN_MIN, rsp))
     {
         action = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+        led_id = (DG_CMN_DRV_LED_ID_T)DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
 
         switch (action)
         {
-        case DG_DEBUG_LEVEL_SET:
-            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, DG_DEBUG_LEVEL_REQ_LEN_SET, rsp))
+        case DG_LED_ENABLE:
+            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(led_color), rsp))
             {
-                comp    = (DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T)DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
-                dbg_lvl = DG_ENGINE_UTIL_req_parse_2_bytes_ntoh(req);
-                err     = DG_CMN_DRV_DEBUG_LEVEL_set(comp, dbg_lvl);
+                led_color = (DG_CMN_DRV_LED_COLOR_T)DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+
+                err = DG_CMN_DRV_LED_enable(led_id, led_color);
 
                 if (err != DG_CMN_DRV_ERR_NONE)
                 {
                     DG_ENGINE_UTIL_rsp_set_error_string_drv(
                         rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                        "Failed to set debug level, err = %d", err);
+                        "Failed to Enable LED, err = %d", err);
                 }
-                else
-                {
-                    DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
-                }
-
             }
             break;
 
-        case DG_DEBUG_LEVEL_GET:
-            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, DG_DEBUG_LEVEL_REQ_LEN_GET, rsp))
+        case DG_LED_DISABLE:
+        {
+            err = DG_CMN_DRV_LED_disable(led_id);
+
+            if (err != DG_CMN_DRV_ERR_NONE)
             {
-                comp = (DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T)DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
-                err  = DG_CMN_DRV_DEBUG_LEVEL_get(comp, &dbg_lvl);
-
-                if (err != DG_CMN_DRV_ERR_NONE)
-                {
-                    DG_ENGINE_UTIL_rsp_set_error_string_drv(
-                        rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                        "Failed to get debug level, err = %d", err);
-                }
-                else
-                {
-                    if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, sizeof(UINT16)))
-                    {
-                        DG_ENGINE_UTIL_rsp_append_2_bytes_hton(rsp, dbg_lvl);
-                        DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
-                    }
-                }
-
+                DG_ENGINE_UTIL_rsp_set_error_string_drv(
+                    rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
+                    "Failed to Disable LED, err = %d", err);
             }
-            break;
+        }
+        break;
 
         default:
             DG_ENGINE_UTIL_rsp_set_error_string(rsp, DG_RSP_CODE_ASCII_ERR_PARM,

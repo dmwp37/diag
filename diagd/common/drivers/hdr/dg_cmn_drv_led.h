@@ -1,10 +1,10 @@
-#ifndef _DG_CMN_DRV_DBG_LVL_H_
-#define _DG_CMN_DRV_DBG_LVL_H_
+#ifndef _DG_CMN_DRV_LED_H_
+#define _DG_CMN_DRV_LED_H_
 /*==================================================================================================
 
-    Module Name:  dg_cmn_drv_debug_level.h
+    Module Name:  dg_cmn_drv_led.h
 
-    General Description: This file provides interface for DEBUG_LEVEL Driver
+    General Description: This file provides driver interface for LED test
 
 ====================================================================================================
 
@@ -12,7 +12,7 @@ Revision History:
                             Modification     Tracking
 Author                          Date          Number     Description of Changes
 -------------------------   ------------    ----------   -------------------------------------------
-Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
+Xudong Huang    - xudongh    2013/12/30     xxxxx-0000   Creation
 
 ====================================================================================================
                                          INCLUDE FILES
@@ -21,11 +21,11 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 @{
 */
 
-/** @addtogroup DEBUG_LEVEL_driver
+/** @addtogroup LED_driver
 @{
 
 @par
-Provide APIs for DEBUG_LEVEL
+Provide APIs for LED
 */
 
 #include "dg_cmn_drv_defs.h"
@@ -37,15 +37,26 @@ extern "C" {
 /*==================================================================================================
                                              ENUMS
 ==================================================================================================*/
-typedef enum
+enum
 {
-    DG_CMN_DRV_DEBUG_LEVEL_DIAG    = 0x00,
-    DG_CMN_DRV_DEBUG_LEVEL_MSL     = 0x01,
-    DG_CMN_DRV_DEBUG_LEVEL_RATC    = 0x02,
-    DG_CMN_DRV_DEBUG_LEVEL_CAT     = 0x03,
-    DG_CMN_DRV_DEBUG_LEVEL_SCIM    = 0x04,
-    DG_CMN_DRV_DEBUG_LEVEL_AUTOLOG = 0x05,
-} DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T;
+    DG_CMN_DRV_LED_001 = 0x00,
+    DG_CMN_DRV_LED_002 = 0x01,
+    DG_CMN_DRV_LED_003 = 0x02,
+    DG_CMN_DRV_LED_004 = 0x03,
+    DG_CMN_DRV_LED_005 = 0x04,
+    DG_CMN_DRV_LED_006 = 0x05,
+};
+typedef UINT8 DG_CMN_DRV_LED_ID_T;
+
+
+enum
+{
+    DG_CMN_DRV_LED_COLOR_DEFAULT = 0x00,
+    DG_CMN_DRV_LED_COLOR_RED = 0x01,
+    DG_CMN_DRV_LED_COLOR_GREEN = 0x02,
+    DG_CMN_DRV_LED_COLOR_YELLOW = 0x03,   
+};
+typedef UINT8 DG_CMN_DRV_LED_COLOR_T;
 
 
 /*==================================================================================================
@@ -56,24 +67,19 @@ typedef enum
                                      FUNCTION PROTOTYPES
 ==================================================================================================*/
 /*=============================================================================================*//**
-@brief Set debug level of the component
+@brief Turn on the LED with specified color
 
-@param[in]   component
-@param[in]   debug_level
-
+@param[in] led_id    - which LED to control
+@param[in] led_color - the color needs to be set 
 *//*==============================================================================================*/
-DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component,
-                                            UINT16                             debug_level);
+DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LED_COLOR_T led_color);
 
 /*=============================================================================================*//**
-@brief Get debug level of the component
+@brief Turn off the LED
 
-@param[in]   component
-@param[out]  debug_level
-
+@param[in] led_id - which LED to control
 *//*==============================================================================================*/
-DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_get(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component,
-                                            UINT16*                            debug_level);
+DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_disable(DG_CMN_DRV_LED_ID_T led_id);
 
 /** @} */
 /** @} */
@@ -82,5 +88,5 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_get(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T c
 }
 #endif
 
-#endif /* _DG_CMN_DRV_DBG_LVL_H_  */
+#endif /* _DG_CMN_DRV_LED_H_  */
 

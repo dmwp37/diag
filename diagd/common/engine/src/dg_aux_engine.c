@@ -748,7 +748,7 @@ void* dg_aux_engine_listener_thread(void* id)
 @param[in] sig - The signal
 
 @note
-  - This function is a way to implement pthread_cancel for Android
+  - This function is a way to implement pthread_cancel()
   - usually the signal will force the block read() return -1 and errno = EINTR
   - so we got a chance to exit the listener thread
 *//*==============================================================================================*/

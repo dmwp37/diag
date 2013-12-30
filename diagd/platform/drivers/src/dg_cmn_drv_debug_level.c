@@ -2,7 +2,7 @@
 
     Module Name:  dg_cmn_drv_debug_level.c
 
-    General Description: Implements the DEBUG_LEVEL common driver for Android
+    General Description: Implements the DEBUG_LEVEL common driver
 
 ====================================================================================================
 
@@ -19,13 +19,13 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 #include "dg_drv_util.h"
 #include "dg_cmn_drv_debug_level.h"
 
-/** @addtogroup dg_common_drivers_android
+/** @addtogroup dg_common_drivers
 @{
 */
 
-/** @addtogroup DEBUG_LEVEL_driver_android
+/** @addtogroup DEBUG_LEVEL_driver
 @{
-Android implementation of the DEBUG_LEVEL_driver
+implementation of the DEBUG_LEVEL_driver
 */
 
 /*==================================================================================================
@@ -61,16 +61,12 @@ Android implementation of the DEBUG_LEVEL_driver
 
 @param[in]   component
 @param[in]   debug_level
-@param[out]  status         - Status of operation
 
 *//*==============================================================================================*/
 DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component,
-                                            UINT16                             debug_level,
-                                            DG_CMN_DRV_DEBUG_LEVEL_STATUS_T*   status)
+                                            UINT16                             debug_level)
 {
-    DG_CMN_DRV_ERR_T err = DG_CMN_DRV_ERR_NONE;
-
-    *status = DG_CMN_DRV_DEBUG_LEVEL_FAIL;
+    DG_CMN_DRV_ERR_T err = DG_CMN_DRV_ERR_FAIL;
 
     if (component == DG_CMN_DRV_DEBUG_LEVEL_DIAG)
     {
@@ -85,7 +81,7 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T c
         else
         {
             dg_dbg_level = debug_level;
-            *status      = DG_CMN_DRV_DEBUG_LEVEL_SUCCESS;
+            err          = DG_CMN_DRV_ERR_NONE;
             DG_DBG_TRACE("successfully set debug level: %d", dg_dbg_level);
         }
     }
@@ -102,7 +98,7 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T c
         else
         {
             dg_dbg_autolog_level = debug_level;
-            *status              = DG_CMN_DRV_DEBUG_LEVEL_SUCCESS;
+            err                  = DG_CMN_DRV_ERR_NONE;
             DG_DBG_TRACE("successfully set autolog level: %d", dg_dbg_autolog_level);
         }
     }
@@ -120,28 +116,23 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T c
 
 @param[in]   component
 @param[out]  debug_level
-@param[out]  status         - Status of operation
 
-@Note debug_level is valid only when function return and status value indicate success
 *//*==============================================================================================*/
 DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_get(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component,
-                                            UINT16*                            debug_level,
-                                            DG_CMN_DRV_DEBUG_LEVEL_STATUS_T*   status)
+                                            UINT16*                            debug_level)
 {
-    DG_CMN_DRV_ERR_T err = DG_CMN_DRV_ERR_NONE;
-
-    *status = DG_CMN_DRV_DEBUG_LEVEL_FAIL;
+    DG_CMN_DRV_ERR_T err = DG_CMN_DRV_ERR_FAIL;
 
     if (component == DG_CMN_DRV_DEBUG_LEVEL_DIAG)
     {
         *debug_level = dg_dbg_level;
-        *status      = DG_CMN_DRV_DEBUG_LEVEL_SUCCESS;
+        err          = DG_CMN_DRV_ERR_NONE;
         DG_DBG_TRACE("successfully get debug level: %d", dg_dbg_level);
     }
     else if (component == DG_CMN_DRV_DEBUG_LEVEL_AUTOLOG)
     {
         *debug_level = dg_dbg_autolog_level;
-        *status      = DG_CMN_DRV_DEBUG_LEVEL_SUCCESS;
+        err          = DG_CMN_DRV_ERR_NONE;
         DG_DBG_TRACE("successfully get autolog level: %d", dg_dbg_level);
     }
     else
