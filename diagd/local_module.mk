@@ -93,11 +93,11 @@ DG_ENGINE_PAL_SRC := \
 #Common Handlers
 DG_HANDLERS_CMN_SRC := \
   common/handlers/src/dg_debug_level.c \
+  common/handlers/src/dg_ping.c \
   common/handlers/src/dg_test_engine.c
 
 #Platform Specific Handlers
 DG_HANDLERS_PLAT_SRC := \
-  platform/handlers/src/dg_ping.c \
   platform/handlers/src/dg_handler_table.c \
   platform/handlers/src/dg_aux_cmd.c
 

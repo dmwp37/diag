@@ -6,6 +6,9 @@
         <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h</itemPath>
         </logicalFolder>
+        <logicalFolder name="f1" displayName="src" projectFiles="true">
+          <itemPath>../../../diagd/common/drivers/src/dg_drv_util.c</itemPath>
+        </logicalFolder>
       </logicalFolder>
       <logicalFolder name="engine" displayName="engine" projectFiles="true">
         <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
@@ -44,6 +47,7 @@
         </logicalFolder>
         <logicalFolder name="src" displayName="src" projectFiles="true">
           <itemPath>../../../diagd/common/handlers/src/dg_debug_level.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_ping.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_test_engine.c</itemPath>
         </logicalFolder>
       </logicalFolder>
@@ -52,13 +56,9 @@
     <logicalFolder name="platform" displayName="platform" projectFiles="true">
       <logicalFolder name="drivers" displayName="drivers" projectFiles="true">
         <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
-          <itemPath>../../../diagd/platform/drivers/hdr/dg_util_drv.h</itemPath>
-          <itemPath>../../../diagd/platform/drivers/hdr/dg_util_drv_err_string.h</itemPath>
         </logicalFolder>
         <logicalFolder name="src" displayName="src" projectFiles="true">
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c</itemPath>
-          <itemPath>../../../diagd/platform/drivers/src/dg_util_drv.c</itemPath>
-          <itemPath>../../../diagd/platform/drivers/src/dg_util_drv_err_string.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="handlers" displayName="handlers" projectFiles="true">
@@ -68,7 +68,6 @@
         <logicalFolder name="src" displayName="src" projectFiles="true">
           <itemPath>../../../diagd/platform/handlers/src/dg_aux_cmd.c</itemPath>
           <itemPath>../../../diagd/platform/handlers/src/dg_handler_table.c</itemPath>
-          <itemPath>../../../diagd/platform/handlers/src/dg_ping.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="pal" displayName="pal" projectFiles="true">
@@ -162,6 +161,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/src/dg_drv_util.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/engine/hdr/dg_aux_engine.h"
             ex="false"
             tool="3"
@@ -277,6 +281,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_ping.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_test_engine.c"
             ex="false"
             tool="0"
@@ -288,27 +297,7 @@
       </item>
       <item path="../../../diagd/platform/README.txt" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../../diagd/platform/drivers/hdr/dg_util_drv.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/drivers/hdr/dg_util_drv_err_string.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/drivers/src/dg_util_drv.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/drivers/src/dg_util_drv_err_string.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -324,11 +313,6 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/handlers/src/dg_handler_table.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/handlers/src/dg_ping.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -388,6 +372,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/src/dg_drv_util.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/engine/hdr/dg_aux_engine.h"
             ex="false"
             tool="3"
@@ -503,6 +492,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_ping.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_test_engine.c"
             ex="false"
             tool="0"
@@ -514,27 +508,7 @@
       </item>
       <item path="../../../diagd/platform/README.txt" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../../diagd/platform/drivers/hdr/dg_util_drv.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/drivers/hdr/dg_util_drv_err_string.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/drivers/src/dg_util_drv.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/drivers/src/dg_util_drv_err_string.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -550,11 +524,6 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/handlers/src/dg_handler_table.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/handlers/src/dg_ping.c"
             ex="false"
             tool="0"
             flavor2="0">
