@@ -44,6 +44,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
+static void dg_main_exit_handler(int sig);
 static void dg_main_cleanup_engine(void);
 static void dg_main_log_exit_reason(const char* format, ...);
 
@@ -51,6 +52,7 @@ static void dg_main_log_exit_reason(const char* format, ...);
                                           GLOBAL VARIABLES
 ==================================================================================================*/
 BOOL DG_MAIN_engine_exit_flag = FALSE;
+
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
@@ -78,7 +80,6 @@ BOOL DG_MAIN_engine_exit_flag = FALSE;
 DG_DEFS_STATUS_T DG_MAIN_start_engine(const DG_DEFS_OPCODE_ENTRY_T* handler_tbl, int argc,
                                       char* argv[])
 {
-    pthread_t        thread_id;
     DG_DEFS_STATUS_T status = DG_DEFS_STATUS_GEN_ERROR;
 
     DG_COMPILE_UNUSED(argc);
@@ -91,6 +92,15 @@ DG_DEFS_STATUS_T DG_MAIN_start_engine(const DG_DEFS_OPCODE_ENTRY_T* handler_tbl,
     }
     else
     {
+        pthread_t        thread_id;
+        struct sigaction actions;
+
+        memset(&actions, 0, sizeof(actions));
+        sigemptyset(&actions.sa_mask);
+        actions.sa_flags   = 0;
+        actions.sa_handler = dg_main_exit_handler;
+        sigaction(SIGINT, &actions, NULL);
+
         /* Get default debug level gate */
         dg_dbg_level         = DG_PAL_DBG_load_dbg_lvl();
         dg_dbg_autolog_level = DG_PAL_DBG_load_autolog_lvl();
@@ -127,16 +137,28 @@ DG_DEFS_STATUS_T DG_MAIN_start_engine(const DG_DEFS_OPCODE_ENTRY_T* handler_tbl,
 ==================================================================================================*/
 
 /*=============================================================================================*//**
+@brief This function handle the SIGINT signal
+
+@param[in] sig - The signal
+
+@note
+  - This function is a way to exit the diag daemon
+*//*==============================================================================================*/
+void dg_main_exit_handler(int sig)
+{
+    DG_MAIN_engine_exit_flag = TRUE;
+    DG_DBG_TRACE("Diag daemon got signaled: sig = %d", sig);
+}
+
+/*=============================================================================================*//**
 @brief Cleans up the DIAG engine for shutdown
 *//*==============================================================================================*/
 void dg_main_cleanup_engine(void)
 {
-    /** @todo Need to determine how to clean up process */
-    /** @todo Kill off BP listener on shutdown? */
-    DG_MAIN_engine_exit_flag = TRUE;
-
+    remove(DG_CFG_PID_FILE);
+    remove(DG_CFG_INT_SOCKET);
+    sync();
     DG_DBG_TRACE("DIAG Engine cleanup complete");
-
 }
 
 /*=============================================================================================*//**
@@ -171,3 +193,4 @@ void dg_main_log_exit_reason(const char* format, ...)
     va_end(args);
 #endif
 }
+

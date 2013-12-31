@@ -15,6 +15,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 ====================================================================================================
                                             INCLUDE FILES
 ==================================================================================================*/
+#include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <stdio.h>
@@ -69,20 +70,23 @@ BOOL DG_PAL_CLIENT_API_start_diag_app(void)
 
 @return File descriptor for the socket, -1 on fail
 *//*==============================================================================================*/
-int DG_PAL_CLIENT_API_create_int_diag_socket(struct sockaddr_storage *server, socklen_t *len)
+int DG_PAL_CLIENT_API_create_int_diag_socket(struct sockaddr_storage* server, socklen_t* len)
 {
-    struct sockaddr_un *unix_srv = (struct sockaddr_un *)server;
-    int sock = -1;
-    
-    sock = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (sock != -1)
+    struct sockaddr_un* unix_srv = (struct sockaddr_un*)server;
+    int                 sock     = -1;
+
+    if (access(DG_CFG_INT_SOCKET, F_OK) == 0)
     {
-        unix_srv->sun_family = AF_UNIX;
-        strcpy(unix_srv->sun_path, DG_CFG_INT_SOCKET);
-        *len = (sizeof(unix_srv->sun_family) + strlen(unix_srv->sun_path));
+        sock = socket(AF_UNIX, SOCK_STREAM, 0);
+        if (sock != -1)
+        {
+            unix_srv->sun_family = AF_UNIX;
+            strcpy(unix_srv->sun_path, DG_CFG_INT_SOCKET);
+            *len = (sizeof(unix_srv->sun_family) + strlen(unix_srv->sun_path));
+        }
     }
 
-    return (sock);
+    return sock;
 }
 
 /*==================================================================================================

@@ -41,8 +41,8 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 /*==================================================================================================
                                             LOCAL MACROS
 ==================================================================================================*/
-#define DG_PAL_UTIL_ASCII_SLASH      0x002F
-#define DG_PAL_UTIL_DEFAULT_PATH     "/data/local/12m/"
+#define DG_PAL_UTIL_ASCII_SLASH       0x002F
+#define DG_PAL_UTIL_DEFAULT_PATH      "/data/local/diag/"
 
 
 /*==================================================================================================
@@ -124,10 +124,11 @@ DG_PAL_UTIL_ABSOLUTE_PATH_T DG_PAL_UTIL_check_absolute_path(W_CHAR* file_name)
 *//*==============================================================================================*/
 BOOL DG_PAL_UTIL_get_default_path(W_CHAR* default_path)
 {
-    BOOL   ret       = FALSE;
+    BOOL   ret = FALSE;
     char   default_path_ascii[DG_PAL_UTIL_DEFAULT_DIR_MAX_SIZE];
     UINT16 file_size = 0;
     UINT16 i         = 0;
+
     if (default_path != NULL)
     {
         file_size = sizeof(DG_PAL_UTIL_DEFAULT_PATH);
@@ -160,6 +161,7 @@ BOOL DG_PAL_UTIL_is_diag_process_exist(void)
     const char* pid_file     = DG_CFG_PID_FILE; /* Storage location of current PID */
     BOOL        is_server_up = TRUE;
     int         stored_pid   = dg_pal_util_read_pid_file(pid_file);
+
     if ((stored_pid == 0) || (stored_pid == getpid()))
     {
         /* There was no stored PID, or, the active process is the locked process */
@@ -169,7 +171,7 @@ BOOL DG_PAL_UTIL_is_diag_process_exist(void)
     {
         /* The stored process is not the active process. Verify if the stored process
            is actually running, or if the stored PID was invalid. Do this by sending a kill
-           with a siganl of 0 (do nothing, just do error checking).  If errno is set to
+           with a signal of 0 (do nothing, just do error checking).  If errno is set to
            ESRCH, then the process is not active */
         if ((kill(stored_pid, 0)) && (errno == ESRCH))
         {
@@ -225,10 +227,10 @@ BOOL DG_PAL_UTIL_is_socket_allowed(int socket)
 
     /* Fixed size of 32 is taken arbitrary but checked with TAPI team and 32 should be more than
        enough for DIAG*/
-    unsigned char           buff[sizeof(struct ifreq) * 32];
+    unsigned char buff[sizeof(struct ifreq) * 32];
 
-    struct ifconf           ifc;
-    struct sockaddr_in*     iface_addr;
+    struct ifconf       ifc;
+    struct sockaddr_in* iface_addr;
 
     /* Get local address of socket */
     if ((getsockname(socket, (struct sockaddr*)&sock_addr, &sock_addr_len)) != 0)
@@ -273,7 +275,7 @@ BOOL DG_PAL_UTIL_is_socket_allowed(int socket)
             DG_DBG_TRACE("Looking through %d interfaces (ifc_len=%d)...", num_iface, ifc.ifc_len);
             for (i = 0; i < num_iface; i++)
             {
-                iface_addr     = (struct sockaddr_in*)&ifc.ifc_req[i].ifr_addr;
+                iface_addr = (struct sockaddr_in*)&ifc.ifc_req[i].ifr_addr;
 
                 /* Does local address of socket match this interface? */
                 is_iface_match = (iface_addr->sin_addr.s_addr == serv_addr_iface->sin_addr.s_addr);
@@ -326,19 +328,19 @@ BOOL DG_PAL_UTIL_create_int_diag_listen_sock(int* sock)
 {
     struct sockaddr_un server;
 
-    if ( (*sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
+    if ((*sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
     {
         DG_DBG_ERROR("Failed to create socket, errno = %d (%s)", errno, strerror(errno));
     }
     else
     {
         server.sun_family = AF_UNIX;
-        strcpy (server.sun_path, DG_CFG_INT_SOCKET);
-        unlink (server.sun_path);
-        
-        if (bind(*sock, (const struct sockaddr *)&server, 
+        strcpy(server.sun_path, DG_CFG_INT_SOCKET);
+        unlink(server.sun_path);
+
+        if (bind(*sock, (const struct sockaddr*)&server,
                  (sizeof(server.sun_family) + strlen(server.sun_path))) < 0)
-        {            
+        {
             DG_DBG_ERROR("Error binding to DIAG socket, errno = %d (%s)", errno, strerror(errno));
             close(*sock);
             *sock = -1;
@@ -391,7 +393,7 @@ BOOL DG_PAL_UTIL_create_ext_diag_listen_sock(int* sock)
         /* Setup the socket for IPv4, bind to usblan address */
         serv_addr.sin_family = AF_INET;
         memcpy(&serv_addr.sin_addr, &iface.sin_addr, sizeof(serv_addr.sin_addr));
-        serv_addr.sin_port   = htons(DG_PAL_UTIL_CLIENT_TCPIP_PORT);
+        serv_addr.sin_port = htons(DG_PAL_UTIL_CLIENT_TCPIP_PORT);
 
         memset(&ifr, 0, sizeof(ifr));
         snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", iface_name);
@@ -446,7 +448,7 @@ BOOL DG_PAL_UTIL_create_update_sock(int* sock)
     sa_nl.nl_family = AF_NETLINK;
     sa_nl.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR;
 
-    *sock           = socket(PF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    *sock = socket(PF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
     if (*sock > -1)
     {
         /* Enable passing credentials to prevent message spoofing */
@@ -483,14 +485,15 @@ BOOL DG_PAL_UTIL_create_update_sock(int* sock)
 DG_PAL_UTIL_SOCKET_UPDATE_T DG_PAL_UTIL_handle_update_sock_event(int fd)
 {
     DG_PAL_UTIL_SOCKET_UPDATE_T status = DG_PAL_UTIL_SOCKET_UPDATE_NOOP;
+
 #if 0
-    struct sockaddr_nl          sock_nl;
-    char                        nl_buf[8192]; /* arbitary size */
-    struct iovec                iov    = { nl_buf, sizeof(nl_buf) };
-    char                        cred_msg[CMSG_SPACE(sizeof(struct ucred))];
-    struct nlmsghdr*            nlmsg;
-    struct msghdr               hdr    = { &sock_nl, sizeof(sock_nl), &iov, 1, cred_msg, sizeof(cred_msg), 0 };
-    ssize_t                     bytes_read;
+    struct sockaddr_nl sock_nl;
+    char               nl_buf[8192]; /* arbitary size */
+    struct iovec       iov = { nl_buf, sizeof(nl_buf) };
+    char               cred_msg[CMSG_SPACE(sizeof(struct ucred))];
+    struct nlmsghdr*   nlmsg;
+    struct msghdr      hdr = { &sock_nl, sizeof(sock_nl), &iov, 1, cred_msg, sizeof(cred_msg), 0 };
+    ssize_t            bytes_read;
 
     /* Read the netlink socket, do not block */
     bytes_read = recvmsg(fd, &hdr, MSG_DONTWAIT);
@@ -667,96 +670,97 @@ DG_PAL_UTIL_SOCKET_UPDATE_T dg_pal_util_parse_rtm_msg(struct nlmsghdr* nlmsg, in
     {
         switch (nlmsg->nlmsg_type)
         {
-            case RTM_NEWLINK:
-                DG_DBG_TRACE("NL - message type is RTM_NEWLINK");
-                /* Ensure the interface info is present */
-                if ((size_t)len >= sizeof(struct ifinfomsg))
+        case RTM_NEWLINK:
+            DG_DBG_TRACE("NL - message type is RTM_NEWLINK");
+            /* Ensure the interface info is present */
+            if ((size_t)len >= sizeof(struct ifinfomsg))
+            {
+                struct ifinfomsg* ifi = NLMSG_DATA(nlmsg);
+
+                /* Get the pointer to the start of the attributes */
+                attrib = IFLA_RTA(ifi);
+
+                /* Get the length of all of the attributes */
+                attrib_len = IFLA_PAYLOAD(nlmsg);
+
+                /* Loop through all of the attributes, looking for the one we care about */
+                while (RTA_OK(attrib, attrib_len))
                 {
-                    struct ifinfomsg* ifi = NLMSG_DATA(nlmsg);
-
-                    /* Get the pointer to the start of the attributes */
-                    attrib     = IFLA_RTA(ifi);
-
-                    /* Get the length of all of the attributes */
-                    attrib_len = IFLA_PAYLOAD(nlmsg);
-
-                    /* Loop through all of the attributes, looking for the one we care about */
-                    while (RTA_OK(attrib, attrib_len))
+                    /* Check for the interface name */
+                    if (attrib->rta_type == IFLA_IFNAME)
                     {
-                        /* Check for the interface name */
-                        if (attrib->rta_type == IFLA_IFNAME)
+                        /* Ensure it is usblan interface */
+                        if (strcmp(RTA_DATA(attrib), iface_name) == 0)
                         {
-                            /* Ensure it is usblan interface */
-                            if (strcmp(RTA_DATA(attrib), iface_name) == 0)
+                            if ((ifi->ifi_flags & (IFF_UP | IFF_RUNNING)) &&
+                                (ifi->ifi_change & (IFF_UP | IFF_RUNNING)))
                             {
-                                if ((ifi->ifi_flags & (IFF_UP | IFF_RUNNING)) &&
-                                    (ifi->ifi_change & (IFF_UP | IFF_RUNNING)))
-                                {
-                                    DG_DBG_TRACE("TCP Available!");
-                                    status = DG_PAL_UTIL_SOCKET_UPDATE_EXT_ADD;
-                                    break;
-                                }
-                                else if (((ifi->ifi_flags & (IFF_UP | IFF_RUNNING)) == 0) &&
-                                         (ifi->ifi_change & (IFF_UP | IFF_RUNNING)))
-                                {
-                                    DG_DBG_TRACE("TCP Removed!");
-                                    status = DG_PAL_UTIL_SOCKET_UPDATE_EXT_REMOVE;
-                                    break;
-                                }
+                                DG_DBG_TRACE("TCP Available!");
+                                status = DG_PAL_UTIL_SOCKET_UPDATE_EXT_ADD;
+                                break;
                             }
-                        }
-                        attrib = RTA_NEXT(attrib, attrib_len);
-                    }
-                }
-                break;
-
-            case RTM_NEWADDR:
-                DG_DBG_TRACE("NL - message type is RTM_NEWADDR");
-                /* Ensure the interface address is present */
-                if ((size_t)len >= sizeof(struct ifaddrmsg))
-                {
-                    struct ifaddrmsg* ifa = NLMSG_DATA(nlmsg);
-
-                    /* Get the pointer to the start of the attributes */
-                    attrib     = IFA_RTA(ifa);
-
-                    /* Get the length of all of the attributes */
-                    attrib_len = IFA_PAYLOAD(nlmsg);
-
-                    /* Loop through all of the attributes, looking for the one we care about */
-                    while (RTA_OK(attrib, attrib_len))
-                    {
-                        /* Check for the interface name */
-                        if (attrib->rta_type == IFA_LOCAL)
-                        {
-                            /* Ensure it is usblan interface */
-                            uint32_t ipaddr = htonl(*((uint32_t*)RTA_DATA(attrib)));
-                            char     name[IFNAMSIZ];
-                            if_indextoname(ifa->ifa_index, name);
-
-                            if (strcmp(name, iface_name) == 0)
+                            else if (((ifi->ifi_flags & (IFF_UP | IFF_RUNNING)) == 0) &&
+                                     (ifi->ifi_change & (IFF_UP | IFF_RUNNING)))
                             {
-                                DG_DBG_TRACE("TCP Updated!");
-                                DG_DBG_TRACE("%s is now %d.%d.%d.%d\n",
-                                             name,
-                                             (ipaddr >> 24) & 0xff,
-                                             (ipaddr >> 16) & 0xff,
-                                             (ipaddr >> 8) & 0xff,
-                                             ipaddr & 0xff);
-                                status = DG_PAL_UTIL_SOCKET_UPDATE_EXT_UPDATE;
+                                DG_DBG_TRACE("TCP Removed!");
+                                status = DG_PAL_UTIL_SOCKET_UPDATE_EXT_REMOVE;
                                 break;
                             }
                         }
-                        attrib = RTA_NEXT(attrib, attrib_len);
                     }
+                    attrib = RTA_NEXT(attrib, attrib_len);
                 }
+            }
+            break;
 
-                break;
+        case RTM_NEWADDR:
+            DG_DBG_TRACE("NL - message type is RTM_NEWADDR");
+            /* Ensure the interface address is present */
+            if ((size_t)len >= sizeof(struct ifaddrmsg))
+            {
+                struct ifaddrmsg* ifa = NLMSG_DATA(nlmsg);
 
-            default:
-                DG_DBG_TRACE("NL - ignore NL message, type = %d", nlmsg->nlmsg_type);
-                /* just ignore other RTM msg */
-                break;
+                /* Get the pointer to the start of the attributes */
+                attrib = IFA_RTA(ifa);
+
+                /* Get the length of all of the attributes */
+                attrib_len = IFA_PAYLOAD(nlmsg);
+
+                /* Loop through all of the attributes, looking for the one we care about */
+                while (RTA_OK(attrib, attrib_len))
+                {
+                    /* Check for the interface name */
+                    if (attrib->rta_type == IFA_LOCAL)
+                    {
+                        /* Ensure it is usblan interface */
+                        uint32_t ipaddr = htonl(*((uint32_t*)RTA_DATA(attrib)));
+                        char     name[IFNAMSIZ];
+
+                        if_indextoname(ifa->ifa_index, name);
+
+                        if (strcmp(name, iface_name) == 0)
+                        {
+                            DG_DBG_TRACE("TCP Updated!");
+                            DG_DBG_TRACE("%s is now %d.%d.%d.%d\n",
+                                         name,
+                                         (ipaddr >> 24) & 0xff,
+                                         (ipaddr >> 16) & 0xff,
+                                         (ipaddr >> 8) & 0xff,
+                                         ipaddr & 0xff);
+                            status = DG_PAL_UTIL_SOCKET_UPDATE_EXT_UPDATE;
+                            break;
+                        }
+                    }
+                    attrib = RTA_NEXT(attrib, attrib_len);
+                }
+            }
+
+            break;
+
+        default:
+            DG_DBG_TRACE("NL - ignore NL message, type = %d", nlmsg->nlmsg_type);
+            /* just ignore other RTM msg */
+            break;
         }
 
         free(iface_name);
@@ -846,3 +850,4 @@ char* dg_pal_util_get_ext_itfc_name(void)
 
 /** @} */
 /** @} */
+

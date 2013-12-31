@@ -112,16 +112,16 @@ static int dg_main_task_switch_to_user(void)
             struct __user_cap_header_struct header;
             struct __user_cap_data_struct   cap;
 
-            header.version  = _LINUX_CAPABILITY_VERSION;
-            header.pid      = 0;
+            header.version = _LINUX_CAPABILITY_VERSION;
+            header.pid     = 0;
 
-            cap.effective   = cap.permitted = (1 << CAP_SYS_BOOT) |
-                                              (1 << CAP_NET_ADMIN) |
-                                              (1 << CAP_NET_RAW) |
-                                              (1 << CAP_SYS_TIME);
+            cap.effective = cap.permitted = (1 << CAP_SYS_BOOT) |
+                                            (1 << CAP_NET_ADMIN) |
+                                            (1 << CAP_NET_RAW) |
+                                            (1 << CAP_SYS_TIME);
             cap.inheritable = 0;
 
-            status          = capset(&header, &cap);
+            status = capset(&header, &cap);
         }
     }
 
@@ -138,12 +138,12 @@ static int dg_main_task_switch_to_user(void)
 *//*=============================================================================================*/
 static int dg_check_for_stale_pid_file(void)
 {
-    const char* pid_file           = "/tmp/ap_diag.pid"; /* Storage location of current PID */
-    const char* identity_sig       = "/system/bin/diag";
+    const char* pid_file           = DG_CFG_PID_FILE; /* Storage location of current PID */
+    const char* identity_sig       = "diagd";
     char        identity_file[256] = { 0 };
     char        cmdline[256];
     FILE*       f;
-    int         stored_pid         = 0;
+    int         stored_pid = 0;
 
     if ((f = fopen(pid_file, "r")) != NULL)
     {
@@ -158,16 +158,18 @@ static int dg_check_for_stale_pid_file(void)
     {
         snprintf(identity_file, sizeof(identity_file), "/proc/%d/cmdline", stored_pid);
         /* process with the same pid exists */
-        if (!access(identity_file, F_OK))
+        if (access(identity_file, F_OK) == 0)
         {
             FILE* f;
+
             if ((f = fopen(identity_file, "r")) != NULL)
             {
                 fgets(cmdline, sizeof(cmdline), f);
                 fclose(f);
-                if (!memcmp(identity_sig, cmdline, strlen(identity_sig)))
+                if (strstr(cmdline, identity_sig) != NULL)
                 {
                     /* second instance of DIAG is being launched */
+                    DG_DBG_ERROR("diag daemon already started!");
                     return -1;
                 }
             }
@@ -175,7 +177,7 @@ static int dg_check_for_stale_pid_file(void)
         /* pid file exists while process does not - stale pid file */
         remove(pid_file);
         sync();
-        sleep(1);
+        usleep(1000);
         DG_DBG_TRACE("remove stale pid file with pid %d, launcher is %s", stored_pid, cmdline);
     }
 

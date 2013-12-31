@@ -120,6 +120,10 @@ int main(int argc, char** argv)
         }
         DG_CLIENT_API_disconnect_from_server(dg_test_client_server_cs);
     }
+    else
+    {
+        printf("can't connect to diag server!\n");
+    }
 
     printf("Press <ENTER> to exit!\n");
     fgets(junk, sizeof(junk), stdin);
@@ -229,68 +233,68 @@ int dg_test_client_menu(void)
     {
         switch (menu_choice[0])
         {
-            case '1':
-                dg_test_client_send_diag_req();
-                break;
+        case '1':
+            dg_test_client_send_diag_req();
+            break;
 
-            case '2':
-                if (dg_test_client_grow_diag_req_test() == TRUE)
-                {
-                    printf("Growing DIAG Response test passed!!!\n");
-                }
-                else
-                {
-                    printf("Growing DIAG Response test failed!!!\n");
-                }
-                break;
+        case '2':
+            if (dg_test_client_grow_diag_req_test() == TRUE)
+            {
+                printf("Growing DIAG Response test passed!!!\n");
+            }
+            else
+            {
+                printf("Growing DIAG Response test failed!!!\n");
+            }
+            break;
 
-            case '3':
-                if (dg_test_client_unsol_rsp_test() == TRUE)
-                {
-                    printf("Unsolicited DIAG Response test passed!!!\n");
-                }
-                else
-                {
-                    printf("Unsolicited DIAG Response test failed!!!\n");
-                }
-                break;
+        case '3':
+            if (dg_test_client_unsol_rsp_test() == TRUE)
+            {
+                printf("Unsolicited DIAG Response test passed!!!\n");
+            }
+            else
+            {
+                printf("Unsolicited DIAG Response test failed!!!\n");
+            }
+            break;
 
-            case '4':
-                if (dg_test_client_api_timeout_test() == TRUE)
-                {
-                    printf("Client API Timeout Test passed!!!\n");
-                }
-                else
-                {
-                    printf("Client API Timeout Test failed!!!\n");
-                }
-                break;
+        case '4':
+            if (dg_test_client_api_timeout_test() == TRUE)
+            {
+                printf("Client API Timeout Test passed!!!\n");
+            }
+            else
+            {
+                printf("Client API Timeout Test failed!!!\n");
+            }
+            break;
 
-            case '5':
-                if (dg_test_client_mass_connection_test() == TRUE)
-                {
-                    printf("Mass Connection Test passed!!!\n");
-                }
-                else
-                {
-                    printf("Mass Connection Test failed!!!\n");
-                }
-                break;
+        case '5':
+            if (dg_test_client_mass_connection_test() == TRUE)
+            {
+                printf("Mass Connection Test passed!!!\n");
+            }
+            else
+            {
+                printf("Mass Connection Test failed!!!\n");
+            }
+            break;
 
-            case '6':
-                if (dg_test_client_multi_aux_test() == TRUE)
-                {
-                    printf("Multiple Aux Engine Test passed!!!\n");
-                }
-                else
-                {
-                    printf("Multiple Aux Engine Test failed!!!\n");
-                }
-                break;
+        case '6':
+            if (dg_test_client_multi_aux_test() == TRUE)
+            {
+                printf("Multiple Aux Engine Test passed!!!\n");
+            }
+            else
+            {
+                printf("Multiple Aux Engine Test failed!!!\n");
+            }
+            break;
 
-            case '9':
-                ret_val = -1;
-                break;
+        case '9':
+            ret_val = -1;
+            break;
         }
 
     }

@@ -38,7 +38,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 #define DG_SEND_BUFFER_LEN_MAX           1024   /* Maximum reading buffer length */
 #define DG_SEND_DIAG_OPCODE_LEN          4      /* DIAG opcode length */
 #define DG_SEND_DIAG_DATA_BYTE_LEN       2      /* string length for each data byte */
-#define DG_SEND_CONNECT_MAX_TRY          30     /* Number of times to try to connect to diag engine*/
+#define DG_SEND_CONNECT_MAX_TRY          1      /* Number of times to try to connect to diag engine*/
 
 /*==================================================================================================
                              LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -106,16 +106,16 @@ int main(int argc, char* argv[])
     {
         switch (argv[argnum][1])
         {
-            case 'f':
-                filein = 1;
-                break;
+        case 'f':
+            filein = 1;
+            break;
 
-            case 'v':
-                break;
+        case 'v':
+            break;
 
-            default:
-                printf("-- Unknown option '%s'\n", argv[argnum]);
-                exit(1);
+        default:
+            printf("-- Unknown option '%s'\n", argv[argnum]);
+            exit(1);
         }
 
         argnum++;
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
         {
             printf(" -- Unable to establish connection with DIAG engine after try %d times\n",
                    try_count);
-            exit(0);
+            exit(1);
         }
         else
         {
@@ -354,8 +354,8 @@ static void dg_send_dump(const char* title, unsigned char* buf, UINT32 len)
         sprintf((char*)ptr, "%04x: ", (i * DG_SEND_DBG_MAX_DUMP_COLS));
 
         /* For all rows, the number of columns is the max number, except for the last row */
-        cur_max_col = (i == len / DG_SEND_DBG_MAX_DUMP_COLS) ? 
-		              (len % DG_SEND_DBG_MAX_DUMP_COLS) : DG_SEND_DBG_MAX_DUMP_COLS;
+        cur_max_col = (i == len / DG_SEND_DBG_MAX_DUMP_COLS) ?
+                      (len % DG_SEND_DBG_MAX_DUMP_COLS) : DG_SEND_DBG_MAX_DUMP_COLS;
         for (j = 0; j < cur_max_col; j++)
         {
             sprintf((char*)ptr, "%s%02x ", buffer, *(buf + i * DG_SEND_DBG_MAX_DUMP_COLS + j));
