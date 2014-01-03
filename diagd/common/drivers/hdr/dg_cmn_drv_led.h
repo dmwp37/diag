@@ -39,12 +39,20 @@ extern "C" {
 ==================================================================================================*/
 enum
 {
-    DG_CMN_DRV_LED_001 = 0x00,
-    DG_CMN_DRV_LED_002 = 0x01,
-    DG_CMN_DRV_LED_003 = 0x02,
-    DG_CMN_DRV_LED_004 = 0x03,
-    DG_CMN_DRV_LED_005 = 0x04,
-    DG_CMN_DRV_LED_006 = 0x05,
+    DG_CMN_DRV_LED_POWER   = 0x00,
+    DG_CMN_DRV_LED_STATUS  = 0x01,
+    DG_CMN_DRV_LED_ALARM   = 0x02,
+    DG_CMN_DRV_LED_HA      = 0x03,
+    DG_CMN_DRV_LED_STORAGE = 0x04,
+    DG_CMN_DRV_LED_RPS     = 0x05,
+    DG_CMN_DRV_LED_SFP0    = 0x10,
+    DG_CMN_DRV_LED_SFP1    = 0x11,
+    DG_CMN_DRV_LED_SFP2    = 0x12,
+    DG_CMN_DRV_LED_SFP3    = 0x13,
+    DG_CMN_DRV_LED_SFP4    = 0x14,
+    DG_CMN_DRV_LED_SFP5    = 0x15,
+    DG_CMN_DRV_LED_SFP6    = 0x16,
+    DG_CMN_DRV_LED_SFP7    = 0x17,
 };
 typedef UINT8 DG_CMN_DRV_LED_ID_T;
 
@@ -52,9 +60,9 @@ typedef UINT8 DG_CMN_DRV_LED_ID_T;
 enum
 {
     DG_CMN_DRV_LED_COLOR_DEFAULT = 0x00,
-    DG_CMN_DRV_LED_COLOR_RED = 0x01,
-    DG_CMN_DRV_LED_COLOR_GREEN = 0x02,
-    DG_CMN_DRV_LED_COLOR_YELLOW = 0x03,   
+    DG_CMN_DRV_LED_COLOR_RED     = 0x01,
+    DG_CMN_DRV_LED_COLOR_GREEN   = 0x02,
+    DG_CMN_DRV_LED_COLOR_YELLOW  = 0x03,
 };
 typedef UINT8 DG_CMN_DRV_LED_COLOR_T;
 
@@ -70,7 +78,7 @@ typedef UINT8 DG_CMN_DRV_LED_COLOR_T;
 @brief Turn on the LED with specified color
 
 @param[in] led_id    - which LED to control
-@param[in] led_color - the color needs to be set 
+@param[in] led_color - the color needs to be set
 *//*==============================================================================================*/
 DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LED_COLOR_T led_color);
 

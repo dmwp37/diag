@@ -4,22 +4,26 @@ SEC_NAME="LED Test"
 
 echo "#-----------------------$SEC_NAME-----------------------"
 
-#Define array for command and description: following Diag and DVT Spec 
+#Define array for command and description: following Diag and DVT Spec
 
 #command array
-array_command[0]=0001000100
-array_command[1]=00010101
+array_command[0]=0001000000
+array_command[1]=0001000100
+array_command[2]=00010100
+array_command[3]=00010101
 
-#command description array, need match with command array above. 
-array_des[0]="Enable LED 0x01"
-array_des[1]="Disable LED 0x01"
+#command description array, need match with command array above.
+array_des[0]="Enable Power LED"
+array_des[1]="Enable Status LED"
+array_des[2]="Disable Power LED"
+array_des[3]="Disable Status LED"
 
 FILE_FAILURE_LOG="$0"_failure_log.txt
-FILE_TEMP=temp_log.txt 
+FILE_TEMP=temp_log.txt
 
 #delete log file firstly if exist
 if [ -f $FILE_FAILURE_LOG ]; then
-    rm -rf $FILE_FAILURE_LOG 
+    rm -rf $FILE_FAILURE_LOG
 fi
 
 #define cmd
@@ -30,17 +34,17 @@ index=0;
 
 for var in ${array_command[@]}; do
 
-    echo ${array_des[$index]} : $var 
+    echo ${array_des[$index]} : $var
 
     $CMD $var > $FILE_TEMP
-    
-    grep success $FILE_TEMP > /dev/null 
+
+    grep success $FILE_TEMP > /dev/null
 
     if [ $? != 0 ]; then
         exit_status=-1;
 
         echo -e diag_send $var failed!!!!!!!!!!!!!!!!!! '\n'
-        echo -e '\n'$SEC_NAME ${array_des[$index]} : $var failed!!! '\n' >> $FILE_FAILURE_LOG 
+        echo -e '\n'$SEC_NAME ${array_des[$index]} : $var failed!!! '\n' >> $FILE_FAILURE_LOG
         cat $FILE_TEMP>>$FILE_FAILURE_LOG
 
         if [ ! -z $2 ]; then
@@ -56,7 +60,7 @@ done
 
 #delete temp log file
 if [ -f $FILE_TEMP ]; then
-    rm -rf $FILE_TEMP 
+    rm -rf $FILE_TEMP
 fi
 exit $exit_status
 

@@ -15,9 +15,9 @@ Xudong Huang    - xudongh    2013/12/30     xxxxx-0000   Creation
 ====================================================================================================
                                         INCLUDE FILES
 ==================================================================================================*/
-#include <dg_cmn_drv_led.h>
-#include <dg_engine_util.h>
 #include "dg_handler_inc.h"
+#include "dg_engine_util.h"
+#include "dg_cmn_drv_led.h"
 
 
 /** @addtogroup common_command_handlers
@@ -83,17 +83,19 @@ void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req)
     DG_CMN_DRV_LED_COLOR_T      led_color;
     DG_DEFS_DIAG_RSP_BUILDER_T* rsp = DG_ENGINE_UTIL_rsp_init();
 
+    DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
+    
     if (DG_ENGINE_UTIL_req_len_check_at_least(req, DG_LED_REQ_LEN_MIN, rsp))
     {
         action = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
-        led_id = (DG_CMN_DRV_LED_ID_T)DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+        led_id = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
 
         switch (action)
         {
         case DG_LED_ENABLE:
             if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(led_color), rsp))
             {
-                led_color = (DG_CMN_DRV_LED_COLOR_T)DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+                led_color = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
 
                 err = DG_CMN_DRV_LED_enable(led_id, led_color);
 
