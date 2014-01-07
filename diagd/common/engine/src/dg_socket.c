@@ -25,6 +25,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 #include <net/if.h>
 #include <errno.h>
 #include <pthread.h>
+#include <signal.h>
 #include "dg_defs.h"
 #include "dg_dbg.h"
 #include "dg_client_comm.h"
@@ -50,6 +51,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 static void dg_socket_listen_sock(int sock, int* max_fd, fd_set* socket_set);
 static void dg_socket_accept_client_connect(int client_sock, DG_CLIENT_COMM_CLIENT_TYPE_T type);
 static BOOL dg_socket_set_non_blocking_mode(int fd, BOOL on_off);
+static void dg_socket_exit_handler(int sig);
 
 /*==================================================================================================
                                           LOCAL VARIABLES
@@ -97,6 +99,14 @@ void DG_SOCKET_connection_listener(void)
     /* If max_fd is non-zero, there is a valid socket listening */
     if (max_fd != -1)
     {
+        struct sigaction actions;
+
+        memset(&actions, 0, sizeof(actions));
+        sigemptyset(&actions.sa_mask);
+        actions.sa_flags   = 0;
+        actions.sa_handler = dg_socket_exit_handler;
+        sigaction(SIGUSR1, &actions, NULL);
+
         /* Wait incoming connection requests until the diag engine is shutting down */
         while (DG_MAIN_engine_exit_flag == FALSE)
         {
@@ -127,6 +137,7 @@ void DG_SOCKET_connection_listener(void)
                 if ((up_sock != -1) && FD_ISSET(up_sock, &working_set))
                 {
                     DG_PAL_UTIL_SOCKET_UPDATE_T status;
+
                     status = DG_PAL_UTIL_handle_update_sock_event(up_sock);
                     /* If the external interface was added and we aren't open already, create
                        the external socket */
@@ -146,7 +157,7 @@ void DG_SOCKET_connection_listener(void)
                     {
                         /* Stop the listening socket */
                         DG_DBG_TRACE("Closing external listen socket");
-                        max_fd   = (int_sock > up_sock) ? int_sock : up_sock;
+                        max_fd = (int_sock > up_sock) ? int_sock : up_sock;
                         FD_CLR(ext_sock, &socket_set);
                         shutdown(ext_sock, SHUT_RDWR);
                         close(ext_sock);
@@ -162,7 +173,7 @@ void DG_SOCKET_connection_listener(void)
                     {
                         /* Stop the external listening socket */
                         DG_DBG_TRACE("Restarting external listen socket");
-                        max_fd   = (int_sock > up_sock) ? int_sock : up_sock;
+                        max_fd = (int_sock > up_sock) ? int_sock : up_sock;
                         FD_CLR(ext_sock, &socket_set);
                         shutdown(ext_sock, SHUT_RDWR);
                         close(ext_sock);
@@ -247,7 +258,7 @@ void dg_socket_accept_client_connect(int listen_sock, DG_CLIENT_COMM_CLIENT_TYPE
     BOOL            is_success  = FALSE;
     int             client_sock = -1;
     struct sockaddr serv_addr;
-    socklen_t       sock_len    = sizeof(serv_addr);
+    socklen_t       sock_len = sizeof(serv_addr);
     pthread_t       tid;
 
     /* Accept the incoming request */
@@ -350,4 +361,16 @@ BOOL dg_socket_set_non_blocking_mode(int fd, BOOL is_enable)
     return is_success;
 }
 
+/*=============================================================================================*//**
+@brief This function handle the SIGINT signal
+
+@param[in] sig - The signal
+
+@note
+  - This function is a way to let the select() api return thus we can exit thread safely
+*//*==============================================================================================*/
+void dg_socket_exit_handler(int sig)
+{
+    DG_DBG_TRACE("Diag socket listener got signaled: sig = %d", sig);
+}
 

@@ -56,6 +56,7 @@ BOOL DG_MAIN_engine_exit_flag = FALSE;
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
+static pthread_t dg_main_working_thread;
 
 /*==================================================================================================
                                           GLOBAL FUNCTIONS
@@ -92,7 +93,6 @@ DG_DEFS_STATUS_T DG_MAIN_start_engine(const DG_DEFS_OPCODE_ENTRY_T* handler_tbl,
     }
     else
     {
-        pthread_t        thread_id;
         struct sigaction actions;
 
         memset(&actions, 0, sizeof(actions));
@@ -109,7 +109,7 @@ DG_DEFS_STATUS_T DG_MAIN_start_engine(const DG_DEFS_OPCODE_ENTRY_T* handler_tbl,
 
         DG_CLIENT_COMM_set_handler_tbl(handler_tbl);
 
-        if (!pthread_create(&thread_id, NULL,
+        if (!pthread_create(&dg_main_working_thread, NULL,
                             DG_CLIENT_COMM_client_connection_listener, (void*)NULL))
         {
             DG_DBG_TRACE("Created connection handler thread");
@@ -119,7 +119,7 @@ DG_DEFS_STATUS_T DG_MAIN_start_engine(const DG_DEFS_OPCODE_ENTRY_T* handler_tbl,
                target to wakeup from deep sleep mode.  This is done by waiting for the
                child thread to return                                                   */
 
-            pthread_join(thread_id, NULL);
+            pthread_join(dg_main_working_thread, NULL);
         }
         else
         {
@@ -148,6 +148,12 @@ void dg_main_exit_handler(int sig)
 {
     DG_MAIN_engine_exit_flag = TRUE;
     DG_DBG_TRACE("Diag daemon got signaled: sig = %d", sig);
+
+    /*
+     * here we need to tell the socket listener thread to stop listening
+     * thus the diag main thread can have a chance to do the clean up work
+     */
+    pthread_kill(dg_main_working_thread, SIGUSR1);
 }
 
 /*=============================================================================================*//**
