@@ -1450,7 +1450,7 @@ void DG_ENGINE_UTIL_rsp_set_error_string(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
     /* Init variable arg list */
     va_start(args, format);
 
-    if (real_rsp->err_text_string)
+    if (real_rsp->err_text_string != NULL)
     {
         /* If an string exists, ignore it and use the already set one */
         DG_DBG_TRACE("Tried to set error string while one already existed. Try to set: %s, Current: %s",
@@ -1469,8 +1469,14 @@ void DG_ENGINE_UTIL_rsp_set_error_string(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
     }
     else
     {
+        va_list ap;
+
         real_rsp->code = code;
-        vsnprintf(ascii_error_string, str_len + 1, format, args);
+
+        va_start(ap, format);
+        vsnprintf(ascii_error_string, str_len + 1, format, ap);
+        va_end(ap);
+
         DG_DBG_TRACE("Error string set to: %s", ascii_error_string);
         real_rsp->err_text_string = ascii_error_string;
     }
@@ -1519,8 +1525,12 @@ void DG_ENGINE_UTIL_rsp_set_error_string_drv(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
     }
     else
     {
+        va_list ap;
+
         /* Set error string passed in */
-        vsnprintf(ascii_error_string, str_len + 1, format, args);
+        va_start(ap, format);
+        vsnprintf(ascii_error_string, str_len + 1, format, ap);
+        va_end(ap);
 
         /* If driver error string is null, just set the passed in error string */
         if (drv_error_string == NULL)

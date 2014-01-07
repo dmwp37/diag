@@ -99,9 +99,8 @@ void DG_DRV_UTIL_set_error_string(const char* format, ...)
 
     /* Init variable arg list */
     va_start(args, format);
-
-
     str_len = vsnprintf(NULL, 0, format, args);
+    va_end(args);
 
     if (str_len < 0)
     {
@@ -123,7 +122,10 @@ void DG_DRV_UTIL_set_error_string(const char* format, ...)
             free(old_err_str);
         }
 
+        va_start(args, format);
         vsnprintf(p_err_str, str_len + 1, format, args);
+        va_end(args);
+
         DG_DBG_ERROR("Driver error string set to: %s", p_err_str);
 
         /* Set new error string */
@@ -133,8 +135,6 @@ void DG_DRV_UTIL_set_error_string(const char* format, ...)
                          errno, strerror(errno));
         }
     }
-
-    va_end(args);
 }
 
 /*=============================================================================================*//**
