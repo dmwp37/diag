@@ -63,8 +63,7 @@ static int dg_check_for_stale_pid_file(void);
 *//*==============================================================================================*/
 int main(int argc, char* argv[])
 {
-    DG_DEFS_STATUS_T status;
-    int              rtn_val = 0;
+    int rtn_val = 0;
 
     /* need root priviledge to check the proc file system */
     rtn_val = dg_check_for_stale_pid_file();
@@ -74,17 +73,21 @@ int main(int argc, char* argv[])
         /* call function to switch diag from root to user */
         if (dg_main_task_switch_to_user() < 0)
         {
-            DG_DBG_ERROR("diag.security_critical_error!");
+            DG_DBG_ERROR("diag security_critical_error!");
             rtn_val = -1;
         }
         else
         {
             DG_DBG_TRACE("Starting DIAG Task!");
-            status = DG_MAIN_start_engine(DG_HANDLER_TABLE_data, argc, argv);
-
-            DG_DBG_TRACE("DIAG Task exit, status = %d", status);
+            
+            if (!DG_MAIN_start_engine(DG_HANDLER_TABLE_data, argc, argv))
+            {
+                rtn_val = -1;
+            }
         }
     }
+    
+    DG_DBG_TRACE("DIAG Task exit, rtn_val = %d", rtn_val);
 
     return rtn_val;
 }

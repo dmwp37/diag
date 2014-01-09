@@ -88,7 +88,7 @@ static const DG_DEFS_OPCODE_ENTRY_T* dg_client_comm_find_diag_handler(DG_DEFS_OP
 static void*                         dg_client_comm_diag_handler_exec(void* diag);
 static void                          dg_client_comm_diag_handler_create_thread(DG_DEFS_DIAG_REQ_T* diag);
 static DG_DEFS_DIAG_REQ_T*           dg_client_comm_read_diag_req(int fd);
-static DG_DEFS_STATUS_T              dg_client_comm_read_fd(int fd, void* buff, int len);
+static BOOL                          dg_client_comm_read_fd(int fd, void* buff, int len);
 static void                          dg_client_comm_remove_client_from_list(int socket);
 static void                          dg_client_comm_notify_client_update(BOOL is_add);
 static void                          dg_client_comm_alt_timer_create_thread(DG_DEFS_DIAG_REQ_T* diag);
@@ -170,7 +170,7 @@ void DG_CLIENT_COMM_send_rsp_to_all_clients(DG_DEFS_DIAG_RSP_T* rsp)
     node = dg_client_comm_client_list_head_ptr;
     while (node != NULL)
     {
-        if (DG_CLIENT_COMM_client_write(node->socket, rsp) != DG_DEFS_STATUS_SUCCESS)
+        if (!DG_CLIENT_COMM_client_write(node->socket, rsp))
         {
             DG_DBG_ERROR("Send response to fd %d failed", node->socket);
         }
@@ -279,11 +279,11 @@ BOOL DG_CLIENT_COMM_add_client_to_list(int socket, DG_CLIENT_COMM_CLIENT_TYPE_T 
 
 @return success/failure notification
 *//*==============================================================================================*/
-DG_DEFS_STATUS_T DG_CLIENT_COMM_client_write(int fd, DG_DEFS_DIAG_RSP_T* rsp)
+BOOL DG_CLIENT_COMM_client_write(int fd, DG_DEFS_DIAG_RSP_T* rsp)
 {
-    INT32            write_len = 0;
-    DG_DEFS_STATUS_T status    = DG_DEFS_STATUS_GEN_ERROR;
-    UINT8*           write_buff;
+    INT32  write_len = 0;
+    BOOL   status    = FALSE;
+    UINT8* write_buff;
 
     DG_DBG_TRACE("DIAG opcode = 0x%04x, length = %d, fd = %d",
                  rsp->header.opcode, rsp->header.length, fd);
@@ -311,7 +311,7 @@ DG_DEFS_STATUS_T DG_CLIENT_COMM_client_write(int fd, DG_DEFS_DIAG_RSP_T* rsp)
         {
             DG_DBG_TRACE("Sent %d byte(s) DIAG opcode = 0x%04x to fd:%d succeeded.",
                          write_len, rsp->header.opcode, fd);
-            status = DG_DEFS_STATUS_SUCCESS;
+            status = TRUE;
         }
         free(write_buff);
     }
@@ -520,7 +520,7 @@ DG_DEFS_DIAG_REQ_T* dg_client_comm_read_diag_req(int fd)
         diag_req->can_delete = FALSE;
         diag_req->is_handled = FALSE;
 
-        if (dg_client_comm_read_fd(fd, &diag_hdr, sizeof(diag_hdr)) == DG_DEFS_STATUS_SUCCESS)
+        if (dg_client_comm_read_fd(fd, &diag_hdr, sizeof(diag_hdr)))
         {
             /* Do endian conversion */
             DG_ENGINE_UTIL_hdr_req_ntoh(&diag_hdr, &(diag_req->header));
@@ -532,13 +532,12 @@ DG_DEFS_DIAG_REQ_T* dg_client_comm_read_diag_req(int fd)
             {
                 if ((diag_req->data_ptr = (UINT8*)malloc(diag_req->header.length)) == NULL)
                 {
-                    DG_DBG_ERROR("Out of memory - malloc failed resposne data size of %d",
+                    DG_DBG_ERROR("Out of memory - malloc failed response data size of %d",
                                  diag_req->header.length);
                 }
                 else
                 {
-                    if (dg_client_comm_read_fd(fd, diag_req->data_ptr, diag_req->header.length) !=
-                        DG_DEFS_STATUS_SUCCESS)
+                    if (!dg_client_comm_read_fd(fd, diag_req->data_ptr, diag_req->header.length))
                     {
                         DG_DBG_ERROR("Read payload data failed");
                     }
@@ -573,16 +572,16 @@ DG_DEFS_DIAG_REQ_T* dg_client_comm_read_diag_req(int fd)
 
 @return Success/failure of read
 *//*==============================================================================================*/
-DG_DEFS_STATUS_T dg_client_comm_read_fd(int fd, void* buff, int len)
+BOOL dg_client_comm_read_fd(int fd, void* buff, int len)
 {
-    DG_DEFS_STATUS_T status             = DG_DEFS_STATUS_SUCCESS;
-    int              total_bytes_read   = 0;
-    int              current_bytes_read = 0;
-    int              try_count          = 0;
+    BOOL status             = TRUE;
+    int  total_bytes_read   = 0;
+    int  current_bytes_read = 0;
+    int  try_count          = 0;
 
     DG_DBG_TRACE("Attempt to read %d bytes from client fd %d", len, fd);
     /* Continue to read until an error occurs or we read the desired number of bytes */
-    while ((status == DG_DEFS_STATUS_SUCCESS) && (total_bytes_read != len))
+    while (status && (total_bytes_read != len))
     {
         current_bytes_read = read(fd, ((UINT8*)buff + total_bytes_read), (len - total_bytes_read));
         if (current_bytes_read > 0)
@@ -603,7 +602,7 @@ DG_DEFS_STATUS_T dg_client_comm_read_fd(int fd, void* buff, int len)
             if (++try_count == DG_CLIENT_COMM_FD_READ_NUM_RETRY)
             {
                 DG_DBG_ERROR("Read Failed on fd %d, over number of retries.", fd);
-                status = DG_DEFS_STATUS_GEN_ERROR;
+                status = FALSE;
             }
         }
     }

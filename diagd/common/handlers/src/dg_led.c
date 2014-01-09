@@ -84,7 +84,7 @@ void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req)
     DG_DEFS_DIAG_RSP_BUILDER_T* rsp = DG_ENGINE_UTIL_rsp_init();
 
     DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
-    
+
     if (DG_ENGINE_UTIL_req_len_check_at_least(req, DG_LED_REQ_LEN_MIN, rsp))
     {
         action = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);

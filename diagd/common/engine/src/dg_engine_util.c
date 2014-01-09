@@ -1710,7 +1710,7 @@ void dg_engine_util_send_response(DG_DEFS_DIAG_REQ_T* diag,
         rsp.data_ptr = (UINT8*)rsp_pdata;
         if (final_rsp_flags & DG_DEFS_RSP_FLAG_UNSOL)
         {
-            /* For unsolicitied responses, set sequence tag to zero since there is no matching
+            /* For unsolicited responses, set sequence tag to zero since there is no matching
                request */
             rsp.header.seq_tag = 0;
 
@@ -1721,7 +1721,7 @@ void dg_engine_util_send_response(DG_DEFS_DIAG_REQ_T* diag,
             /* For solicited responses, send to client who originated the request */
             DG_DBG_TRACE("Sending res_code = 0x%02x, res_length = %d to sender_id = %d",
                          rsp.header.rsp_code, rsp.header.length, diag->sender_id);
-            if (DG_CLIENT_COMM_client_write(diag->sender_id, &rsp) != DG_DEFS_STATUS_SUCCESS)
+            if (!DG_CLIENT_COMM_client_write(diag->sender_id, &rsp))
             {
                 DG_DBG_ERROR("Send response to fd: %d failed", diag->sender_id);
             }

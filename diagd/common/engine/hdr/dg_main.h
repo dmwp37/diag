@@ -19,7 +19,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 ==================================================================================================*/
 #include "dg_defs.h"
 
-#ifdef __cplusplus  
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -38,15 +38,15 @@ extern "C" {
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-DG_DEFS_STATUS_T DG_MAIN_start_engine(const DG_DEFS_OPCODE_ENTRY_T* handler_tbl, int argc, 
-                                      char * argv[]);
+BOOL DG_MAIN_start_engine(const DG_DEFS_OPCODE_ENTRY_T* handler_tbl, int argc, char* argv[]);
 
 /*==================================================================================================
                                           GLOBAL VARIABLES
 ==================================================================================================*/
 extern BOOL DG_MAIN_engine_exit_flag;
 
-#ifdef __cplusplus  
-}       
+#ifdef __cplusplus
+}
 #endif
 #endif
+

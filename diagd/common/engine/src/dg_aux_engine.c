@@ -44,14 +44,14 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protoco
 #endif
 
 #define DG_AUX_ENGINE_CLEANUP_PUSH(routine, arg) pthread_cleanup_push(routine, arg)
-#define DG_AUX_ENGINE_CLEANUP_POP(execute) pthread_cleanup_pop(execute)
+#define DG_AUX_ENGINE_CLEANUP_POP(execute)       pthread_cleanup_pop(execute)
 
-#define DG_AUX_ENGINE_EXPECT_RSP_DEFAULT  0xFFFF /**< Default value to initalize expected
-                                                     response vars */
-#define DG_AUX_ENGINE_CLEAN_POP_NO_EXEC   0      /* Value used to indicate function popped from cleanup
-                                                stack should not be executed */
+#define DG_AUX_ENGINE_EXPECT_RSP_DEFAULT         0xFFFF /**< Default value to initalize expected
+                                                             response vars */
+#define DG_AUX_ENGINE_CLEAN_POP_NO_EXEC          0      /**< Value used to indicate function popped from cleanup
+                                                             stack should not be executed */
 
-#define DG_AUX_ENGINE_OVERRIDE_DISABLED   -1
+#define DG_AUX_ENGINE_OVERRIDE_DISABLED          -1
 
 /*==================================================================================================
                              LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -60,7 +60,7 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protoco
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
-static DG_DEFS_STATUS_T    dg_aux_engine_send_req_to_aux(int aux_id, DG_DEFS_DIAG_REQ_T* diag);
+static BOOL                dg_aux_engine_send_req_to_aux(int aux_id, DG_DEFS_DIAG_REQ_T* diag);
 static void*               dg_aux_engine_listener_thread(void* id);
 static void                dg_aux_engine_listener_thread_exit_handler(int sig);
 static DG_DEFS_DIAG_RSP_T* dg_aux_engine_read_aux_rsp(int aux_id);
@@ -68,9 +68,9 @@ static void                dg_aux_engine_handle_aux_cmd_impl(int                
                                                              DG_DEFS_DIAG_REQ_T*         diag,
                                                              DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
                                                              UINT32                      time_out);
-static void                dg_aux_engine_init_impl(int aux_id);
-static void                dg_aux_engine_close_impl(int aux_id);
-static int                 dg_aux_engine_handle_override(int aux_id);
+static void dg_aux_engine_init_impl(int aux_id);
+static void dg_aux_engine_close_impl(int aux_id);
+static int  dg_aux_engine_handle_override(int aux_id);
 
 /*==================================================================================================
                                       MODULE GLOBAL VARIABLES
@@ -95,6 +95,7 @@ static BOOL            dg_aux_engine_listener_run_ctrl[DG_CFG_AUX_NUM];
 void DG_AUX_ENGINE_init_available_state(void)
 {
     int index;
+
     for (index = 0; index < DG_CFG_AUX_NUM; index++)
     {
         dg_aux_engine_listener_thread_hndl[index] = 0;
@@ -528,7 +529,6 @@ void dg_aux_engine_handle_aux_cmd_impl(int                         aux_id,
                                        UINT32                      time_out)
 {
     DG_DEFS_DIAG_RSP_T* resp = NULL;
-    DG_DEFS_STATUS_T    send_status;
     DG_DEFS_OPCODE_T    opcode;
     UINT16              seq_tag;
 
@@ -552,11 +552,10 @@ void dg_aux_engine_handle_aux_cmd_impl(int                         aux_id,
             DG_AUX_UTIL_set_bp_req(aux_id, opcode, seq_tag);
         }
 
-        if ((send_status = dg_aux_engine_send_req_to_aux(aux_id, diag)) != DG_DEFS_STATUS_SUCCESS)
+        if (!dg_aux_engine_send_req_to_aux(aux_id, diag))
         {
             DG_ENGINE_UTIL_rsp_set_error_string(rsp, DG_RSP_CODE_ASCII_RSP_MUX_ERR,
-                                                "Failed to send request to aux diag engine %d, status = %d",
-                                                aux_id, send_status);
+                                                "Failed to send request to aux engine %d", aux_id);
         }
         else if (diag->header.no_rsp_reqd_flag != DG_DEFS_HDR_FLAG_RESPONSE_EXPECTED)
         {
@@ -615,9 +614,9 @@ void dg_aux_engine_handle_aux_cmd_impl(int                         aux_id,
 @note
   - This function assumes the aux engine interface has properly been opened
 *//*==============================================================================================*/
-DG_DEFS_STATUS_T dg_aux_engine_send_req_to_aux(int aux_id, DG_DEFS_DIAG_REQ_T* diag)
+BOOL dg_aux_engine_send_req_to_aux(int aux_id, DG_DEFS_DIAG_REQ_T* diag)
 {
-    DG_DEFS_STATUS_T        retval     = DG_DEFS_STATUS_GEN_ERROR;
+    BOOL                    retval     = FALSE;
     int                     write_len  = 0;
     UINT8*                  write_buff = NULL;
     DG_DEFS_DIAG_REQ_HDR_T* cmd_header = NULL;
@@ -626,15 +625,14 @@ DG_DEFS_STATUS_T dg_aux_engine_send_req_to_aux(int aux_id, DG_DEFS_DIAG_REQ_T* d
     DG_DBG_TRACE("DIAG opcode = 0x%04x, length = %d", cmd_header->opcode, cmd_header->length);
 
     /* Determine size of complete request to write */
-    write_len  = cmd_header->length + sizeof(DG_DEFS_DIAG_REQ_HDR_T);
+    write_len = cmd_header->length + sizeof(DG_DEFS_DIAG_REQ_HDR_T);
     if ((write_buff = (UINT8*)malloc(write_len)) == NULL)
     {
         DG_DBG_ERROR("Out of memory - malloc failed on write_buff, length = %d", write_len);
-        retval = DG_DEFS_STATUS_MALLOC_FAIL;
     }
     else
     {
-        /* Convert endianess of DIAG header */
+        /* Convert endianness of DIAG header */
         DG_ENGINE_UTIL_hdr_req_hton(cmd_header, (DG_DEFS_DIAG_REQ_HDR_T*)write_buff);
         if (cmd_header->length > 0)
         {
@@ -652,7 +650,7 @@ DG_DEFS_STATUS_T dg_aux_engine_send_req_to_aux(int aux_id, DG_DEFS_DIAG_REQ_T* d
         {
             DG_DBG_TRACE("Transferred %d byte(s) DIAG opcode = 0x%04x to aux engine %d succeeded.",
                          write_len, cmd_header->opcode, aux_id);
-            retval = DG_DEFS_STATUS_SUCCESS;
+            retval = TRUE;
         }
 
         free(write_buff);
@@ -685,8 +683,8 @@ void* dg_aux_engine_listener_thread(void* id)
     int                 failure_count = 0;
     DG_DEFS_OPCODE_T    opcode;
     UINT8               seq_tag;
-
     struct sigaction    actions;
+
     memset(&actions, 0, sizeof(actions));
     sigemptyset(&actions.sa_mask);
     actions.sa_flags   = 0;
@@ -715,8 +713,8 @@ void* dg_aux_engine_listener_thread(void* id)
         {
             failure_count = 0;
 
-            seq_tag       = resp->header.seq_tag;
-            opcode        = resp->header.opcode;
+            seq_tag = resp->header.seq_tag;
+            opcode  = resp->header.opcode;
 
             if (!DG_AUX_UTIL_set_bp_rsp(aux_id, opcode, seq_tag, resp))
             {
@@ -755,6 +753,7 @@ void* dg_aux_engine_listener_thread(void* id)
 void dg_aux_engine_listener_thread_exit_handler(int sig)
 {
     int aux_id;
+
     DG_DBG_TRACE("AUX listener thead got signaled: sig = %d", sig);
     for (aux_id = 0; aux_id < DG_CFG_AUX_NUM; aux_id++)
     {

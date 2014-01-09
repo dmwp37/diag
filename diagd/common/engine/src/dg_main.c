@@ -78,10 +78,10 @@ static pthread_t dg_main_working_thread;
       - Setting these siganls to SIG_IGN: SIGINT, SIGHUP, SIGCHLD, SIGTSTP, SIGTTOU, SIGTTIN
       - Power-up in suspend mode
 *//*==============================================================================================*/
-DG_DEFS_STATUS_T DG_MAIN_start_engine(const DG_DEFS_OPCODE_ENTRY_T* handler_tbl, int argc,
-                                      char* argv[])
+BOOL DG_MAIN_start_engine(const DG_DEFS_OPCODE_ENTRY_T* handler_tbl, int argc,
+                          char* argv[])
 {
-    DG_DEFS_STATUS_T status = DG_DEFS_STATUS_GEN_ERROR;
+    BOOL status = FALSE;
 
     DG_COMPILE_UNUSED(argc);
     DG_COMPILE_UNUSED(argv);
@@ -113,7 +113,7 @@ DG_DEFS_STATUS_T DG_MAIN_start_engine(const DG_DEFS_OPCODE_ENTRY_T* handler_tbl,
                             DG_CLIENT_COMM_client_connection_listener, (void*)NULL))
         {
             DG_DBG_TRACE("Created connection handler thread");
-            status = DG_DEFS_STATUS_SUCCESS;
+            status = TRUE;
 
             /* Need to stop running without exiting the main thread and without causing
                target to wakeup from deep sleep mode.  This is done by waiting for the
