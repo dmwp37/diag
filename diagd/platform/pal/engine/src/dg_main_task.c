@@ -79,14 +79,14 @@ int main(int argc, char* argv[])
         else
         {
             DG_DBG_TRACE("Starting DIAG Task!");
-            
+
             if (!DG_MAIN_start_engine(DG_HANDLER_TABLE_data, argc, argv))
             {
                 rtn_val = -1;
             }
         }
     }
-    
+
     DG_DBG_TRACE("DIAG Task exit, rtn_val = %d", rtn_val);
 
     return rtn_val;

@@ -49,8 +49,8 @@ This command is responsible for LED test
 /** Actions for LED command */
 enum
 {
-    DG_LED_ENABLE  = 0x00,
-    DG_LED_DISABLE = 0x01
+    DG_LED_DISABLE = 0x00,
+    DG_LED_ENABLE  = 0x01
 };
 typedef UINT8 DG_LED_ACTION_T;
 
