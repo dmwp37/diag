@@ -63,10 +63,9 @@ implementation of the DEBUG_LEVEL_driver
 @param[in]   debug_level
 
 *//*==============================================================================================*/
-DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component,
-                                            UINT16                             debug_level)
+BOOL DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component, UINT16 debug_level)
 {
-    DG_CMN_DRV_ERR_T err = DG_CMN_DRV_ERR_FAIL;
+    BOOL ret = FALSE;
 
     if (component == DG_CMN_DRV_DEBUG_LEVEL_DIAG)
     {
@@ -81,7 +80,7 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T c
         else
         {
             dg_dbg_level = debug_level;
-            err          = DG_CMN_DRV_ERR_NONE;
+            ret          = TRUE;
             DG_DBG_TRACE("successfully set debug level: %d", dg_dbg_level);
         }
     }
@@ -98,17 +97,16 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T c
         else
         {
             dg_dbg_autolog_level = debug_level;
-            err                  = DG_CMN_DRV_ERR_NONE;
+            ret                  = TRUE;
             DG_DBG_TRACE("successfully set autolog level: %d", dg_dbg_autolog_level);
         }
     }
     else
     {
         DG_DRV_UTIL_set_error_string("Invalid debug level component, %d", component);
-        err = DG_CMN_DRV_ERR_NOT_SUPPORTED;
     }
 
-    return err;
+    return ret;
 }
 
 /*=============================================================================================*//**
@@ -118,30 +116,28 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T c
 @param[out]  debug_level
 
 *//*==============================================================================================*/
-DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_get(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component,
-                                            UINT16*                            debug_level)
+BOOL DG_CMN_DRV_DEBUG_LEVEL_get(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component, UINT16* debug_level)
 {
-    DG_CMN_DRV_ERR_T err = DG_CMN_DRV_ERR_FAIL;
+    BOOL ret = FALSE;
 
     if (component == DG_CMN_DRV_DEBUG_LEVEL_DIAG)
     {
         *debug_level = dg_dbg_level;
-        err          = DG_CMN_DRV_ERR_NONE;
+        ret          = TRUE;
         DG_DBG_TRACE("successfully get debug level: %d", dg_dbg_level);
     }
     else if (component == DG_CMN_DRV_DEBUG_LEVEL_AUTOLOG)
     {
         *debug_level = dg_dbg_autolog_level;
-        err          = DG_CMN_DRV_ERR_NONE;
+        ret          = TRUE;
         DG_DBG_TRACE("successfully get autolog level: %d", dg_dbg_level);
     }
     else
     {
         DG_DRV_UTIL_set_error_string("Invalid debug level component, %d", component);
-        err = DG_CMN_DRV_ERR_NOT_SUPPORTED;
     }
 
-    return err;
+    return ret;
 }
 
 /*==================================================================================================

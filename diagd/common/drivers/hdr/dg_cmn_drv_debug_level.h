@@ -28,8 +28,6 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 Provide APIs for DEBUG_LEVEL
 */
 
-#include "dg_cmn_drv_defs.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,15 +35,12 @@ extern "C" {
 /*==================================================================================================
                                              ENUMS
 ==================================================================================================*/
-typedef enum
+enum
 {
     DG_CMN_DRV_DEBUG_LEVEL_DIAG    = 0x00,
-    DG_CMN_DRV_DEBUG_LEVEL_MSL     = 0x01,
-    DG_CMN_DRV_DEBUG_LEVEL_RATC    = 0x02,
-    DG_CMN_DRV_DEBUG_LEVEL_CAT     = 0x03,
-    DG_CMN_DRV_DEBUG_LEVEL_SCIM    = 0x04,
-    DG_CMN_DRV_DEBUG_LEVEL_AUTOLOG = 0x05,
-} DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T;
+    DG_CMN_DRV_DEBUG_LEVEL_AUTOLOG = 0x01,
+};
+typedef UINT8 DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T;
 
 
 /*==================================================================================================
@@ -62,8 +57,7 @@ typedef enum
 @param[in]   debug_level
 
 *//*==============================================================================================*/
-DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component,
-                                            UINT16                             debug_level);
+BOOL DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component, UINT16 debug_level);
 
 /*=============================================================================================*//**
 @brief Get debug level of the component
@@ -72,8 +66,7 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T c
 @param[out]  debug_level
 
 *//*==============================================================================================*/
-DG_CMN_DRV_ERR_T DG_CMN_DRV_DEBUG_LEVEL_get(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component,
-                                            UINT16*                            debug_level);
+BOOL DG_CMN_DRV_DEBUG_LEVEL_get(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component, UINT16* debug_level);
 
 /** @} */
 /** @} */

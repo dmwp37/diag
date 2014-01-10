@@ -62,9 +62,9 @@ implementation of the LED driver
 @param[in] led_id    - which LED to control
 @param[in] led_color - the color needs to be set
 *//*==============================================================================================*/
-DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LED_COLOR_T led_color)
+BOOL DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LED_COLOR_T led_color)
 {
-    DG_CMN_DRV_ERR_T err = DG_CMN_DRV_ERR_FAIL;
+    BOOL ret = FALSE;
 
     switch (led_id)
     {
@@ -88,7 +88,7 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LE
         case DG_CMN_DRV_LED_COLOR_RED:
         case DG_CMN_DRV_LED_COLOR_GREEN:
         case DG_CMN_DRV_LED_COLOR_YELLOW:
-            err = DG_CMN_DRV_ERR_NONE;
+            ret = TRUE;
             DG_DBG_TRACE("Enable LED driver: led_id=0x%02x, led_color=0x%02x",
                          led_id, led_color);
             break;
@@ -102,13 +102,13 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LE
         break;
     }
 
-    if (err != DG_CMN_DRV_ERR_NONE)
+    if (!ret)
     {
         DG_DRV_UTIL_set_error_string("Enable LED failed: led_id=0x%02x, led_color=0x%02x",
                                      led_id, led_color);
     }
 
-    return err;
+    return ret;
 }
 
 /*=============================================================================================*//**
@@ -116,9 +116,9 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LE
 
 @param[in] led_id - which LED to control
 *//*==============================================================================================*/
-DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_disable(DG_CMN_DRV_LED_ID_T led_id)
+BOOL DG_CMN_DRV_LED_disable(DG_CMN_DRV_LED_ID_T led_id)
 {
-    DG_CMN_DRV_ERR_T err = DG_CMN_DRV_ERR_FAIL;
+    BOOL ret = FALSE;
 
     switch (led_id)
     {
@@ -136,7 +136,7 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_disable(DG_CMN_DRV_LED_ID_T led_id)
     case DG_CMN_DRV_LED_SFP5:
     case DG_CMN_DRV_LED_SFP6:
     case DG_CMN_DRV_LED_SFP7:
-        err = DG_CMN_DRV_ERR_NONE;
+        ret = TRUE;
         DG_DBG_TRACE("Disable LED driver: led_id=0x%02x", led_id);
         break;
 
@@ -144,13 +144,14 @@ DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_disable(DG_CMN_DRV_LED_ID_T led_id)
         break;
     }
 
-
-    if (err != DG_CMN_DRV_ERR_NONE)
+    if (!ret)
     {
         DG_DRV_UTIL_set_error_string("Disable LED failed: led_id=0x%02x", led_id);
     }
 
-    return err;
+/*    DG_DBG_TRACE("ret = %d", ret); */
+
+    return ret;
 }
 
 /*==================================================================================================

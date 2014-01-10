@@ -19,7 +19,6 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protoco
                                            INCLUDE FILES
 ==================================================================================================*/
 #include "dg_defs.h"
-#include "dg_cmn_drv_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,9 +43,9 @@ extern "C" {
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-BOOL DG_ENGINE_UTIL_check_engine_mode(DG_DEFS_MODE_T desired_mode, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
-DG_DEFS_MODE_T DG_ENGINE_UTIL_get_engine_mode(void);
-void DG_ENGINE_UTIL_set_engine_mode(DG_DEFS_MODE_T mode);
+BOOL                   DG_ENGINE_UTIL_check_engine_mode(DG_DEFS_MODE_T desired_mode, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
+DG_DEFS_MODE_T         DG_ENGINE_UTIL_get_engine_mode(void);
+void                   DG_ENGINE_UTIL_set_engine_mode(DG_DEFS_MODE_T mode);
 DG_DEFS_SEC_IC_STATE_T DG_ENGINE_UTIL_get_sec_ic_state(void);
 
 void DG_ENGINE_UTIL_hdr_rsp_ntoh(DG_DEFS_DIAG_RSP_HDR_T* hdr_in, DG_DEFS_DIAG_RSP_HDR_T* hdr_out);
@@ -115,8 +114,8 @@ void DG_ENGINE_UTIL_rsp_set_error_string_drv(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
                                              DG_RSP_CODE_T code,
                                              const char* format, ...);
 DG_RSP_CODE_T DG_ENGINE_UTIL_rsp_get_code(DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
-UINT32 DG_ENGINE_UTIL_rsp_get_curr_len(DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
-const UINT8* DG_ENGINE_UTIL_rsp_get_data_ptr(DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
+UINT32        DG_ENGINE_UTIL_rsp_get_curr_len(DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
+const UINT8*  DG_ENGINE_UTIL_rsp_get_data_ptr(DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
 
 DG_DEFS_RSP_FLAG_T DG_ENGINE_UTIL_rsp_get_flag(DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
 /** @} */
@@ -126,18 +125,18 @@ void DG_ENGINE_UTIL_buf_append_2_bytes_hton(UINT8* buf, UINT32* cur_buf_len, UIN
 void DG_ENGINE_UTIL_buf_append_4_bytes_hton(UINT8* buf, UINT32* cur_buf_len, UINT32 val);
 void DG_ENGINE_UTIL_buf_append_buf(UINT8* dest_buff, UINT32* cur_buf_len, void* src,
                                    UINT32 num_bytes);
-void DG_ENGINE_UTIL_buf_replace_1_byte_hton(UINT8* buf, UINT32 offset, UINT8 val);
-void DG_ENGINE_UTIL_buf_replace_2_bytes_hton(UINT8* buf, UINT32 offset, UINT16 val);
-void DG_ENGINE_UTIL_buf_replace_4_bytes_hton(UINT8* buf, UINT32 offset, UINT32 val);
-UINT8 DG_ENGINE_UTIL_buf_parse_1_byte_ntoh(UINT8** buf_ptr);
-UINT16 DG_ENGINE_UTIL_buf_parse_2_bytes_ntoh(UINT8** buf_ptr);
-UINT32 DG_ENGINE_UTIL_buf_parse_4_bytes_ntoh(UINT8** buf_ptr);
-void DG_ENGINE_UTIL_buf_uint16_hton(UINT16* buf, UINT32 len);
-void DG_ENGINE_UTIL_buf_parse_buf(UINT8* dest, UINT8** buf_ptr, UINT32 num_bytes);
-UINT8* DG_ENGINE_UTIL_alloc_mem(UINT32 max_size, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
+void    DG_ENGINE_UTIL_buf_replace_1_byte_hton(UINT8* buf, UINT32 offset, UINT8 val);
+void    DG_ENGINE_UTIL_buf_replace_2_bytes_hton(UINT8* buf, UINT32 offset, UINT16 val);
+void    DG_ENGINE_UTIL_buf_replace_4_bytes_hton(UINT8* buf, UINT32 offset, UINT32 val);
+UINT8   DG_ENGINE_UTIL_buf_parse_1_byte_ntoh(UINT8** buf_ptr);
+UINT16  DG_ENGINE_UTIL_buf_parse_2_bytes_ntoh(UINT8** buf_ptr);
+UINT32  DG_ENGINE_UTIL_buf_parse_4_bytes_ntoh(UINT8** buf_ptr);
+void    DG_ENGINE_UTIL_buf_uint16_hton(UINT16* buf, UINT32 len);
+void    DG_ENGINE_UTIL_buf_parse_buf(UINT8* dest, UINT8** buf_ptr, UINT32 num_bytes);
+UINT8*  DG_ENGINE_UTIL_alloc_mem(UINT32 max_size, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
 W_CHAR* DG_ENGINE_UTIL_process_unicode_filename(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
-char* DG_ENGINE_UTIL_process_ascii_filename(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
-char* DG_ENGINE_UTIL_prepend_default_path_ascii(char* src, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
+char*   DG_ENGINE_UTIL_process_ascii_filename(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
+char*   DG_ENGINE_UTIL_prepend_default_path_ascii(char* src, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
 W_CHAR* DG_ENGINE_UTIL_process_unicode_filename_no_null(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
 W_CHAR* DG_ENGINE_UTIL_prepend_default_path_unicode(W_CHAR* src, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
 

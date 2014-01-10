@@ -15,9 +15,8 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 ====================================================================================================
                                         INCLUDE FILES
 ==================================================================================================*/
-#include <dg_cmn_drv_debug_level.h>
-#include <dg_engine_util.h>
 #include "dg_handler_inc.h"
+#include "dg_cmn_drv_debug_level.h"
 
 
 /** @addtogroup common_command_handlers
@@ -78,7 +77,6 @@ typedef UINT8 DG_DEBUG_LEVEL_ACTION_T;
 *//*==============================================================================================*/
 void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req)
 {
-    DG_CMN_DRV_ERR_T                   err;
     DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T comp;
     DG_DEBUG_LEVEL_ACTION_T            action;
     UINT16                             dbg_lvl;
@@ -93,15 +91,13 @@ void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req)
         case DG_DEBUG_LEVEL_SET:
             if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, DG_DEBUG_LEVEL_REQ_LEN_SET, rsp))
             {
-                comp    = (DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T)DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+                comp    = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
                 dbg_lvl = DG_ENGINE_UTIL_req_parse_2_bytes_ntoh(req);
-                err     = DG_CMN_DRV_DEBUG_LEVEL_set(comp, dbg_lvl);
 
-                if (err != DG_CMN_DRV_ERR_NONE)
+                if (!DG_CMN_DRV_DEBUG_LEVEL_set(comp, dbg_lvl))
                 {
-                    DG_ENGINE_UTIL_rsp_set_error_string_drv(
-                        rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                        "Failed to set debug level, err = %d", err);
+                    DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
+                                                            "Failed to set debug level");
                 }
                 else
                 {
@@ -114,14 +110,12 @@ void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req)
         case DG_DEBUG_LEVEL_GET:
             if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, DG_DEBUG_LEVEL_REQ_LEN_GET, rsp))
             {
-                comp = (DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T)DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
-                err  = DG_CMN_DRV_DEBUG_LEVEL_get(comp, &dbg_lvl);
+                comp = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
 
-                if (err != DG_CMN_DRV_ERR_NONE)
+                if (!DG_CMN_DRV_DEBUG_LEVEL_get(comp, &dbg_lvl))
                 {
-                    DG_ENGINE_UTIL_rsp_set_error_string_drv(
-                        rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                        "Failed to get debug level, err = %d", err);
+                    DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
+                                                            "Failed to get debug level");
                 }
                 else
                 {

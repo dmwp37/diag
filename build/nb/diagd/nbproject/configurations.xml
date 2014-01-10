@@ -5,7 +5,6 @@
       <logicalFolder name="drivers" displayName="drivers" projectFiles="true">
         <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h</itemPath>
-          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_defs.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_led.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_drv_util.h</itemPath>
         </logicalFolder>
@@ -162,11 +161,6 @@
       <item path="../../../diagd/common/README" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_defs.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -398,11 +392,6 @@
       <item path="../../../diagd/common/README" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_defs.h"
             ex="false"
             tool="3"
             flavor2="0">

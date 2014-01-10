@@ -28,8 +28,6 @@ Xudong Huang    - xudongh    2013/12/30     xxxxx-0000   Creation
 Provide APIs for LED
 */
 
-#include "dg_cmn_drv_defs.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -80,14 +78,14 @@ typedef UINT8 DG_CMN_DRV_LED_COLOR_T;
 @param[in] led_id    - which LED to control
 @param[in] led_color - the color needs to be set
 *//*==============================================================================================*/
-DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LED_COLOR_T led_color);
+BOOL DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LED_COLOR_T led_color);
 
 /*=============================================================================================*//**
 @brief Turn off the LED
 
 @param[in] led_id - which LED to control
 *//*==============================================================================================*/
-DG_CMN_DRV_ERR_T DG_CMN_DRV_LED_disable(DG_CMN_DRV_LED_ID_T led_id);
+BOOL DG_CMN_DRV_LED_disable(DG_CMN_DRV_LED_ID_T led_id);
 
 /** @} */
 /** @} */

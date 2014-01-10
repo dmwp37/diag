@@ -17,7 +17,6 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_cmn_drv_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,8 +41,8 @@ extern "C" {
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-void DG_DRV_UTIL_init_error_string();
-void DG_DRV_UTIL_set_error_string(const char* format, ...);
+void  DG_DRV_UTIL_init_error_string();
+void  DG_DRV_UTIL_set_error_string(const char* format, ...);
 char* DG_DRV_UTIL_get_error_string();
 
 #ifdef __cplusplus
