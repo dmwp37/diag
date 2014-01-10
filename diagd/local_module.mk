@@ -93,6 +93,7 @@ DG_ENGINE_PAL_SRC := \
 #Common Handlers
 DG_HANDLERS_CMN_SRC := \
   common/handlers/src/dg_debug_level.c \
+  common/handlers/src/dg_i2c.c \
   common/handlers/src/dg_led.c \
   common/handlers/src/dg_ping.c \
   common/handlers/src/dg_test_engine.c
@@ -108,6 +109,7 @@ DG_DRIVERS_CMN_SRC := \
 #Platform Specific Drivers
 DG_DRIVERS_PLAT_SRC := \
   platform/drivers/src/dg_cmn_drv_debug_level.c \
+  platform/drivers/src/dg_cmn_drv_i2c.c \
   platform/drivers/src/dg_cmn_drv_led.c
 
 LOCAL_SRC_FILES := \
