@@ -67,7 +67,14 @@ BOOL DG_CMN_DRV_I2C_read_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T add
 {
     BOOL ret = FALSE;
 
-    DG_COMPILE_UNUSED(read_data);
+    if (bus == 0)
+    {
+        memset(read_data, address, read_len);
+        DG_DBG_TRACE("Read I2C bus=%d, address=%d,read_len=%d",
+                     bus, address, read_len);
+        ret = TRUE;
+    }
+
     if (!ret)
     {
         DG_DRV_UTIL_set_error_string("Read I2C failed: bus=0x%02x, address=0x%02x, read_len=0x%02x",
@@ -90,7 +97,14 @@ BOOL DG_CMN_DRV_I2C_write_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T ad
 {
     BOOL ret = FALSE;
 
-    DG_COMPILE_UNUSED(write_data);
+    if (bus == 0)
+    {
+        DG_DBG_TRACE("Write I2C bus=%d, address=%d,read_len=%d",
+                     bus, address, write_len);
+        DG_DBG_DUMP(write_data, write_len);
+        ret = TRUE;
+    }
+
     if (!ret)
     {
         DG_DRV_UTIL_set_error_string("Write I2C failed: bus=0x%02x, address=0x%02x, write_len=0x%02x",
@@ -120,8 +134,15 @@ BOOL DG_CMN_DRV_I2C_write_read_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR
 {
     BOOL ret = FALSE;
 
-    DG_COMPILE_UNUSED(write_data);
-    DG_COMPILE_UNUSED(read_data);
+    if (bus == 0)
+    {
+        memset(read_data, address, read_len);
+        DG_DBG_TRACE("Write&Read I2C bus=%d, address=%d, write_len=%d, read_len=%d",
+                     bus, address, write_len, read_len);
+        DG_DBG_DUMP(write_data, write_len);
+        ret = TRUE;
+    }
+
     if (!ret)
     {
         DG_DRV_UTIL_set_error_string("Write&Read I2C failed: bus=0x%02x, address=0x%02x, "
