@@ -61,7 +61,7 @@
             <pElem>../../../diagd/platform/pal/client_api/hdr</pElem>
             <pElem>../../../diagd/common/engine/hdr</pElem>
           </incDir>
-          <commandLine>-pipe -fno-keep-inline-dllexport -Wall -Wextra</commandLine>
+          <commandLine>-pipe -Wall -Wextra</commandLine>
           <preprocessorList>
             <Elem>DG_CFG_INT_SOCKET="/tmp/diagd_local_socket"</Elem>
             <Elem>DG_DEBUG=1</Elem>

@@ -133,7 +133,7 @@
             <pElem>../../../diagd/platform/handlers/hdr</pElem>
             <pElem>../../../diagd/platform/drivers/hdr</pElem>
           </incDir>
-          <commandLine>-pipe -fno-keep-inline-dllexport -Wall -Wextra</commandLine>
+          <commandLine>-pipe -Wall -Wextra</commandLine>
           <preprocessorList>
             <Elem>DG_CFG_AUX_NUM=2</Elem>
             <Elem>DG_CFG_INT_SOCKET="/tmp/diagd_local_socket"</Elem>
@@ -155,6 +155,7 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdiagapi.a">
               </makeArtifact>
             </linkerLibProjectItem>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
           </linkerLibItems>
           <commandLine>-mconsole</commandLine>
         </linkerTool>

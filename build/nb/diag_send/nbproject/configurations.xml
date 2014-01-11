@@ -33,7 +33,7 @@
             <pElem>../../../diagd/common/client_api/pal/hdr</pElem>
             <pElem>../../../diagd/platform/pal/client_api/hdr</pElem>
           </incDir>
-          <commandLine>-pipe -fno-keep-inline-dllexport -Wall -Wextra</commandLine>
+          <commandLine>-pipe -Wall -Wextra</commandLine>
           <preprocessorList>
             <Elem>DG_DEBUG=1</Elem>
           </preprocessorList>
