@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 SEC_NAME="LED Test"
 
