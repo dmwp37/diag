@@ -66,21 +66,21 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0003   Enable aux engine
 /*==================================================================================================
                                       LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
-int dg_test_client_menu(void);
-void dg_test_client_remove_char(UINT8 to_remove, UINT8* string);
-void dg_test_client_send_diag_req(void);
-void dg_test_client_print_diag_rsp(UINT8* diag_rsp, UINT32 rsp_len);
-BOOL dg_test_client_grow_diag_req_test(void);
-BOOL dg_test_client_unsol_rsp_test(void);
-static UINT8* hexstr_to_hex(int length, UINT8* hexstr);
+int    dg_test_client_menu(void);
+void   dg_test_client_remove_char(UINT8 to_remove, UINT8* string);
+void   dg_test_client_send_diag_req(void);
+void   dg_test_client_print_diag_rsp(UINT8* diag_rsp, UINT32 rsp_len);
+BOOL   dg_test_client_grow_diag_req_test(void);
+BOOL   dg_test_client_unsol_rsp_test(void);
+UINT8* hexstr_to_hex(int length, UINT8* hexstr);
 
-BOOL dg_test_client_api_timeout_test(void);
+BOOL  dg_test_client_api_timeout_test(void);
 void* dg_test_client_mass_connection_test_thread(void* p);
 
 BOOL dg_test_client_mass_connection_test(void);
 
-BOOL dg_test_client_multi_aux_test(void);
-void* dg_test_client_multi_aux_test_thread(void*);
+BOOL   dg_test_client_multi_aux_test(void);
+void*  dg_test_client_multi_aux_test_thread(void*);
 UINT8* dg_test_client_create_random_data(UINT32* diag_req_data_len);
 
 /*==================================================================================================
@@ -640,9 +640,10 @@ BOOL dg_test_client_mass_connection_test(void)
                 printf("Error: Joining client thread #%d\n", index);
                 is_success = FALSE;
             }
-            else if (thread_ret_value != 0)
+            else
             {
-                printf("Error: Client thread #%d returned failure status of %d\n", index, *thread_ret_value);
+                printf("Error: Client thread #%d returned failure status of %d\n",
+                       index, (int)(intptr_t)thread_ret_value);
                 is_success = FALSE;
             }
         }
@@ -706,7 +707,8 @@ void* dg_test_client_mass_connection_test_thread(void* p)
                                                                      FALSE, 5000, &rsp_len, &status);
                         if (!rsp_ptr)
                         {
-                            printf("Error: Failed to receive DIAG response on client thread %p, diag_cs = %d, status = %d\n",
+                            printf("Error: Failed to receive DIAG response on client thread %p, "
+                                   "diag_cs = %d, status = %d\n",
                                    (void*)pthread_self(), diag_cs, status);
                             thread_ret = 1;
                         }
