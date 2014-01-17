@@ -3,6 +3,9 @@
 # start the diagd
 ../out/install/bin/diagd > /dev/null 2>&1 &
 
+# wait the daemon started
+sleep 1
+
 ../out/install/bin/diag_send 0fffaabbccdd
 if [ $? != 0 ]; then
   echo 1 test failed!
