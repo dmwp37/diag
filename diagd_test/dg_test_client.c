@@ -67,18 +67,16 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0003   Enable aux engine
                                       LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
 int    dg_test_client_menu(void);
+int    dg_test_sub_test(char sub_test);
 void   dg_test_client_remove_char(UINT8 to_remove, UINT8* string);
 void   dg_test_client_send_diag_req(void);
 void   dg_test_client_print_diag_rsp(UINT8* diag_rsp, UINT32 rsp_len);
 BOOL   dg_test_client_grow_diag_req_test(void);
 BOOL   dg_test_client_unsol_rsp_test(void);
 UINT8* hexstr_to_hex(int length, UINT8* hexstr);
-
-BOOL  dg_test_client_api_timeout_test(void);
-void* dg_test_client_mass_connection_test_thread(void* p);
-
-BOOL dg_test_client_mass_connection_test(void);
-
+BOOL   dg_test_client_api_timeout_test(void);
+void*  dg_test_client_mass_connection_test_thread(void* p);
+BOOL   dg_test_client_mass_connection_test(void);
 BOOL   dg_test_client_multi_aux_test(void);
 void*  dg_test_client_multi_aux_test_thread(void*);
 UINT8* dg_test_client_create_random_data(UINT32* diag_req_data_len);
@@ -103,20 +101,26 @@ static int                     dg_test_client_timestamp = 0;
 
 int main(int argc, char** argv)
 {
-    DG_COMPILE_UNUSED(argc);
-    DG_COMPILE_UNUSED(argv);
+    int ret_val = 0;
     srand(time(NULL));
     char junk[2];
 
     if ((DG_CLIENT_API_launch_server() == DG_CLIENT_API_STATUS_SUCCESS) &&
         (DG_CLIENT_API_connect_to_server(1000, &dg_test_client_server_cs) == DG_CLIENT_API_STATUS_SUCCESS))
     {
-        while (1)
+        if (argc < 2)
         {
-            if (dg_test_client_menu() == -1)
+            while (1)
             {
-                break;
+                if (dg_test_client_menu() == -1)
+                {
+                    break;
+                }
             }
+        }
+        else
+        {
+            ret_val = dg_test_sub_test(argv[1][0]);
         }
         DG_CLIENT_API_disconnect_from_server(dg_test_client_server_cs);
     }
@@ -125,10 +129,7 @@ int main(int argc, char** argv)
         printf("can't connect to diag server!\n");
     }
 
-    printf("Press <ENTER> to exit!\n");
-    fgets(junk, sizeof(junk), stdin);
-
-    return 0;
+    return ret_val;
 }
 
 
@@ -212,6 +213,87 @@ UINT8* hexstr_to_hex(int length, UINT8* hexstr)
     return new_buff;
 }
 
+int dg_test_sub_test(char sub_test)
+{
+    int ret_val = 0;
+    switch (sub_test)
+    {
+    case '1':
+        dg_test_client_send_diag_req();
+        break;
+
+    case '2':
+        if (dg_test_client_grow_diag_req_test() == TRUE)
+        {
+            printf("Growing DIAG Response test passed!!!\n");
+        }
+        else
+        {
+            ret_val = -1;
+            printf("Growing DIAG Response test failed!!!\n");
+        }
+        break;
+
+    case '3':
+        if (dg_test_client_unsol_rsp_test() == TRUE)
+        {
+            printf("Unsolicited DIAG Response test passed!!!\n");
+        }
+        else
+        {
+            ret_val = -1;
+            printf("Unsolicited DIAG Response test failed!!!\n");
+        }
+        break;
+
+    case '4':
+        if (dg_test_client_api_timeout_test() == TRUE)
+        {
+            printf("Client API Timeout Test passed!!!\n");
+        }
+        else
+        {
+            ret_val = -1;
+            printf("Client API Timeout Test failed!!!\n");
+        }
+        break;
+
+    case '5':
+        if (dg_test_client_mass_connection_test() == TRUE)
+        {
+            printf("Mass Connection Test passed!!!\n");
+        }
+        else
+        {
+            ret_val = -1;
+            printf("Mass Connection Test failed!!!\n");
+        }
+        break;
+
+    case '6':
+        if (dg_test_client_multi_aux_test() == TRUE)
+        {
+            printf("Multiple Aux Engine Test passed!!!\n");
+        }
+        else
+        {
+            ret_val = -1;
+            printf("Multiple Aux Engine Test failed!!!\n");
+        }
+        break;
+
+    case '9':
+        ret_val = -1;
+        break;
+
+    default:
+        ret_val = 0;
+        break;
+    }
+
+    return ret_val;
+}
+
 int dg_test_client_menu(void)
 {
     /* int menu_choice; */
@@ -231,72 +313,7 @@ int dg_test_client_menu(void)
     printf("Enter your choice: ");
     if (fgets(menu_choice, sizeof(menu_choice), stdin) != NULL)
     {
-        switch (menu_choice[0])
-        {
-        case '1':
-            dg_test_client_send_diag_req();
-            break;
-
-        case '2':
-            if (dg_test_client_grow_diag_req_test() == TRUE)
-            {
-                printf("Growing DIAG Response test passed!!!\n");
-            }
-            else
-            {
-                printf("Growing DIAG Response test failed!!!\n");
-            }
-            break;
-
-        case '3':
-            if (dg_test_client_unsol_rsp_test() == TRUE)
-            {
-                printf("Unsolicited DIAG Response test passed!!!\n");
-            }
-            else
-            {
-                printf("Unsolicited DIAG Response test failed!!!\n");
-            }
-            break;
-
-        case '4':
-            if (dg_test_client_api_timeout_test() == TRUE)
-            {
-                printf("Client API Timeout Test passed!!!\n");
-            }
-            else
-            {
-                printf("Client API Timeout Test failed!!!\n");
-            }
-            break;
-
-        case '5':
-            if (dg_test_client_mass_connection_test() == TRUE)
-            {
-                printf("Mass Connection Test passed!!!\n");
-            }
-            else
-            {
-                printf("Mass Connection Test failed!!!\n");
-            }
-            break;
-
-        case '6':
-            if (dg_test_client_multi_aux_test() == TRUE)
-            {
-                printf("Multiple Aux Engine Test passed!!!\n");
-            }
-            else
-            {
-                printf("Multiple Aux Engine Test failed!!!\n");
-            }
-            break;
-
-        case '9':
-            ret_val = -1;
-            break;
-        }
-
+        ret_val = dg_test_sub_test(menu_choice[0]);
     }
     else
     {
@@ -640,7 +657,7 @@ BOOL dg_test_client_mass_connection_test(void)
                 printf("Error: Joining client thread #%d\n", index);
                 is_success = FALSE;
             }
-            else
+            else if (thread_ret_value != 0)
             {
                 printf("Error: Client thread #%d returned failure status of %d\n",
                        index, (int)(intptr_t)thread_ret_value);

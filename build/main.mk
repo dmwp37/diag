@@ -24,8 +24,8 @@ TOPDIR :=
 BUILD_SYSTEM := $(TOPDIR)build
 
 # This is the default target.  It must be the first declared target.
-.PHONY: jdiag
-DEFAULT_GOAL := jdiag
+.PHONY: world
+DEFAULT_GOAL := world
 $(DEFAULT_GOAL):
 
 # Used to force goals to build.  Only use for conditionally defined goals.
