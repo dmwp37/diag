@@ -1,18 +1,28 @@
-#ifndef _DG_COMMON_HANDLER_TABLE_H
-#define _DG_COMMON_HANDLER_TABLE_H
+#ifndef _DG_CMN_DRV_SUSPEND_H_
+#define _DG_CMN_DRV_SUSPEND_H_
 /*==================================================================================================
 
-    Module Name:  dg_common_handler_table.h
+    Module Name:  dg_cmn_drv_suspend.h
 
-    General Description:  Header file for all common handler function prototypes
+    General Description: This file provides driver interface for diag suspend
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
 
+
+/** @addtogroup dg_common_drivers
+@{
+*/
+
+/** @addtogroup SUSPEND_driver
+@{
+
+@par
+Provide APIs for SUSPEND
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,6 +36,7 @@ extern "C" {
                                                ENUMS
 ==================================================================================================*/
 
+
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
@@ -37,20 +48,19 @@ extern "C" {
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-/* Important Note: Please add all handler functions to this list in alphabetical order.  All
-   functions must have the name format/prototype of
-   DG_<DIAG NAME>_handler_main(DG_DEFS_DIAG_REQ_T *req) */
 
-void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
+/*=============================================================================================*//**
+@brief Set the diag into suspend mode
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_SUSPEND_suspend();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _DG_COMMON_HANDLER_TABLE_H */
+/** @} */
+/** @} */
+
+#endif /* _DG_CMN_DRV_SUSPEND_H_  */
 
