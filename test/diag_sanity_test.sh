@@ -1,50 +1,50 @@
 #!/bin/bash
 
-# start the diagd
-../out/install/bin/diagd > /dev/null 2>&1 &
+CUR_PATH=$(dirname $0)
+CLIENT_CMD=$CUR_PATH/../out/install/bin/diag_send
+DIAGD_TEST=$CUR_PATH/../out/install/bin/diagd_test
 
-# wait the daemon started
-sleep 1
+#check the diag daemon first
+$CUR_PATH/start_diagd.sh
 
-../out/install/bin/diag_send 0fffaabbccdd
+$CLIENT_CMD 0fffaabbccdd
 if [ $? != 0 ]; then
   echo 1 test failed!
   exit -1
 fi
 
-../out/install/bin/diagd_test 2
+$DIAGD_TEST 2
 if [ $? != 0 ]; then
   echo 2 test failed!
   exit -1
 fi
 
-../out/install/bin/diagd_test 3
+$DIAGD_TEST 3
 if [ $? != 0 ]; then
   echo 3 test failed!
   exit -1
 fi
 
-../out/install/bin/diagd_test 4
+$DIAGD_TEST 4
 if [ $? != 0 ]; then
   echo 4 test failed!
   exit -1
 fi
 
-#../out/install/bin/diagd_test 5
+#$DIAGD_TEST 5
 #if [ $? != 0 ]; then
 #  echo 5 test failed!
 #  exit -1
 #fi
 
-../out/install/bin/diagd_test 6
+$DIAGD_TEST 6
 if [ $? != 0 ]; then
   echo 6 test failed!
   exit -1
 fi
 
 # stop the diagd
-PID=`cat /tmp/diagd.pid`
-kill -s SIGINT $PID
+$CUR_PATH/kill_diagd.sh
 
 echo test passed!
 exit 0
