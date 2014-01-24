@@ -339,7 +339,7 @@ BOOL DG_PAL_UTIL_create_int_diag_listen_sock(int* sock)
         unlink(server.sun_path);
 
         if (bind(*sock, (const struct sockaddr*)&server,
-                 (sizeof(server.sun_family) + strlen(server.sun_path))) < 0)
+                 (sizeof(server.sun_family) + strlen(server.sun_path)+1)) < 0)
         {
             DG_DBG_ERROR("Error binding to DIAG socket, errno = %d (%s)", errno, strerror(errno));
             close(*sock);

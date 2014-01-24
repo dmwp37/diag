@@ -83,7 +83,7 @@ int DG_PAL_CLIENT_API_create_int_diag_socket(struct sockaddr_storage* server, so
         {
             unix_srv->sun_family = AF_UNIX;
             strcpy(unix_srv->sun_path, DG_CFG_INT_SOCKET);
-            *len = (sizeof(unix_srv->sun_family) + strlen(unix_srv->sun_path));
+            *len = (sizeof(unix_srv->sun_family) + strlen(unix_srv->sun_path) + 1);
         }
     }
 
