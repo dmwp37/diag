@@ -24,9 +24,12 @@ TOPDIR :=
 BUILD_SYSTEM := $(TOPDIR)build
 
 # This is the default target.  It must be the first declared target.
-.PHONY: world
+.PHONY: world version
 DEFAULT_GOAL := world
-$(DEFAULT_GOAL):
+$(DEFAULT_GOAL): version
+
+version:
+	@$(BUILD_SYSTEM)/version.sh
 
 # Used to force goals to build.  Only use for conditionally defined goals.
 .PHONY: FORCE

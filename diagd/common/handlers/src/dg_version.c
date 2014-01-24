@@ -1,31 +1,31 @@
 /*==================================================================================================
 
-    Module Name:  dg_aux_cmd.c
+    Module Name:  dg_version.c
 
-    General Description: Handles DIAG requests destined for the aux DIAG engine
+    General Description: Implements the VERSION test handler
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
+#include <stdlib.h>
 #include "dg_handler_inc.h"
-#include "dg_aux_engine.h"
+#include "dg_cmn_drv_version.h"
 
 
 /** @addtogroup common_command_handlers
 @{
 */
 
-/** @addtogroup AUX
+/** @addtogroup VERSION
 @{
 
 @par
-<b>AUX - 0xDEAD</b>
+<b>VERSION - 0x0000</b>
 
 @par
-Handles AUX engine diag command
-engine
+This command is responsible for VERSION test
 */
 
 /*==================================================================================================
@@ -35,6 +35,7 @@ engine
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
+#define DG_VERSION_REQ_LEN_MIN 1
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -57,39 +58,41 @@ engine
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief Handler function for the DIAG requests being sent to aux diag engine
+@brief Handler function for the VERSION command
 
 @param[in] req - DIAG request
 *//*==============================================================================================*/
-void DG_AUX_CMD_handler_main(DG_DEFS_DIAG_REQ_T* req)
+void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req)
 {
-    /* Create response builder */
-    DG_DEFS_DIAG_RSP_BUILDER_T* rsp;
-    rsp = DG_ENGINE_UTIL_rsp_init();
+    DG_CMN_DRV_VERSION_TYPE_T   type;
+    DG_DEFS_DIAG_RSP_BUILDER_T* rsp = DG_ENGINE_UTIL_rsp_init();
 
-#if DG_CFG_AUX_NUM == 0
-    /* If no modem existing, return error opcode */
-    DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_PAR_ERR_OPCODE);
-    DG_ENGINE_UTIL_rsp_set_error_string(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                                        "Unsupported opcode detected! opcode=0x%04x",
-                                        req->header.opcode);
-#elif DG_CFG_AUX_NUM == 1
-    DG_AUX_ENGINE_handle_aux_cmd(DG_AUX_ENGINE_AUX_ID_AUX1, req, rsp);
-#else
-    /* Use an arbitrary opcode value to determine which aux engine to forward the request to */
-    if (req->header.opcode < 0xc000)
+    DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
+
+    if (DG_ENGINE_UTIL_req_len_check_at_least(req, DG_VERSION_REQ_LEN_MIN, rsp))
     {
-        DG_AUX_ENGINE_handle_aux_cmd(DG_AUX_ENGINE_AUX_ID_AUX1, req, rsp);
+        char* p_version_str = NULL;
+
+        type = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+
+        if (!DG_CMN_DRV_VERSION_get(type, &p_version_str))
+        {
+            DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
+                                                    "Failed to Get version string");
+        }
+        else
+        {
+            UINT32 str_len = (UINT32)strlen(p_version_str) + 1;
+            if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, str_len))
+            {
+                DG_ENGINE_UTIL_rsp_append_buf(rsp, (UINT8*)p_version_str, str_len);
+            }
+        }
+
+        free(p_version_str);
     }
-    else
-    {
-        DG_AUX_ENGINE_handle_aux_cmd(DG_AUX_ENGINE_AUX_ID_AUX2, req, rsp);
-    }
-#endif
 
     DG_ENGINE_UTIL_rsp_send(rsp, req);
-
-    /* Free response builder */
     DG_ENGINE_UTIL_rsp_free(rsp);
 }
 

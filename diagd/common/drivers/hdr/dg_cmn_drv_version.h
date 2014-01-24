@@ -1,18 +1,28 @@
-#ifndef _DG_COMMON_HANDLER_TABLE_H
-#define _DG_COMMON_HANDLER_TABLE_H
+#ifndef _DG_CMN_DRV_VERSION_H_
+#define _DG_CMN_DRV_VERSION_H_
 /*==================================================================================================
 
-    Module Name:  dg_common_handler_table.h
+    Module Name:  dg_cmn_drv_version.h
 
-    General Description:  Header file for all common handler function prototypes
+    General Description: This file provides driver interface for VERSION test
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
 
+
+/** @addtogroup dg_common_drivers
+@{
+*/
+
+/** @addtogroup VERSION_driver
+@{
+
+@par
+Provide APIs for VERSION
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +35,15 @@ extern "C" {
 /*==================================================================================================
                                                ENUMS
 ==================================================================================================*/
+enum
+{
+    DG_CMN_DRV_VERSION_DIAG = 0x00,
+    DG_CMN_DRV_VERSION_SW   = 0x01,
+    DG_CMN_DRV_VERSION_HW   = 0x02,
+    DG_CMN_DRV_VERSION_FPGA = 0x03,
+};
+typedef UINT8 DG_CMN_DRV_VERSION_TYPE_T;
+
 
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
@@ -37,21 +56,24 @@ extern "C" {
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-/* Important Note: Please add all handler functions to this list in alphabetical order.  All
-   functions must have the name format/prototype of
-   DG_<DIAG NAME>_handler_main(DG_DEFS_DIAG_REQ_T *req) */
 
-void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req);
+/*=============================================================================================*//**
+@brief Get the version string for different type
+
+@param[in]  type  - what kind of version to get
+@param[out] pp_str - the version string pointer
+
+@note the caller of the function is responsible to free the version string
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_VERSION_get(DG_CMN_DRV_VERSION_TYPE_T type, char** pp_str);
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _DG_COMMON_HANDLER_TABLE_H */
+/** @} */
+/** @} */
+
+#endif /* _DG_CMN_DRV_VERSION_H_  */
 
