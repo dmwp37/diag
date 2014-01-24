@@ -8,6 +8,7 @@
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_i2c.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_led.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_suspend.h</itemPath>
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_version.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_drv_util.h</itemPath>
         </logicalFolder>
         <logicalFolder name="f1" displayName="src" projectFiles="true">
@@ -56,6 +57,7 @@
           <itemPath>../../../diagd/common/handlers/src/dg_ping.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_suspend.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_test_engine.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_version.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <itemPath>../../../diagd/common/README</itemPath>
@@ -69,6 +71,7 @@
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_i2c.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_led.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_suspend.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_version.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="handlers" displayName="handlers" projectFiles="true">
@@ -135,6 +138,7 @@
             <pElem>../../../diagd/platform/pal/client_api/hdr</pElem>
             <pElem>../../../diagd/platform/handlers/hdr</pElem>
             <pElem>../../../diagd/platform/drivers/hdr</pElem>
+            <pElem>../../../out</pElem>
           </incDir>
           <commandLine>-pipe -Wall -Wextra</commandLine>
           <preprocessorList>
@@ -183,6 +187,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_suspend.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_version.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -337,6 +346,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_version.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/dg_cfg.mk" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../diagd/local_module.mk" ex="false" tool="3" flavor2="0">
@@ -359,6 +373,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_suspend.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_version.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -448,6 +467,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_version.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_drv_util.h"
             ex="false"
             tool="3"
@@ -598,6 +622,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_version.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/dg_cfg.mk" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../diagd/local_module.mk" ex="false" tool="3" flavor2="0">
@@ -620,6 +649,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_suspend.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_version.c"
             ex="false"
             tool="0"
             flavor2="0">

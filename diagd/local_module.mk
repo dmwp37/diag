@@ -58,6 +58,7 @@ ifeq ($(DG_DEBUG), 1)
 endif
 
 DG_DIAG_INC := \
+  ../out \
   common/engine/hdr \
   common/engine/pal/hdr \
   common/handlers/hdr \
@@ -97,6 +98,7 @@ DG_HANDLERS_CMN_SRC := \
   common/handlers/src/dg_led.c \
   common/handlers/src/dg_ping.c \
   common/handlers/src/dg_suspend.c \
+  common/handlers/src/dg_version.c \
   common/handlers/src/dg_test_engine.c
 
 #Platform Specific Handlers
@@ -112,7 +114,8 @@ DG_DRIVERS_PLAT_SRC := \
   platform/drivers/src/dg_cmn_drv_debug_level.c \
   platform/drivers/src/dg_cmn_drv_i2c.c \
   platform/drivers/src/dg_cmn_drv_led.c \
-  platform/drivers/src/dg_cmn_drv_suspend.c
+  platform/drivers/src/dg_cmn_drv_suspend.c \
+  platform/drivers/src/dg_cmn_drv_version.c
 
 LOCAL_SRC_FILES := \
   $(DG_ENGINE_SRC) \
