@@ -16,6 +16,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
                                             INCLUDE FILES
 ==================================================================================================*/
 #include <unistd.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <stdio.h>

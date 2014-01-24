@@ -90,6 +90,11 @@ DG_ENGINE_PAL_SRC := \
   platform/pal/engine/src/dg_pal_util.c \
   platform/pal/engine/src/dg_pal_security.c
 
+ifeq (Darwin, $(HOST_OS))
+  DG_ENGINE_PAL_SRC += platform/pal/engine/src/sem_timedwait.c
+endif
+
+
 #Common Handlers
 DG_HANDLERS_CMN_SRC := \
   common/handlers/src/dg_debug_level.c \

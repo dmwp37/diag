@@ -46,6 +46,10 @@ ifneq (,$(findstring Linux,$(UNAME)))
     HOST_OS := linux
 endif
 
+ifneq (,$(findstring Darwin,$(UNAME)))
+    HOST_OS := Darwin
+endif
+
 ifneq (,$(findstring CYGWIN,$(UNAME)))
     HOST_OS := windows
     GLOBAL_LDFLAGS += -mconsole
@@ -62,6 +66,9 @@ endif
 # ###############################################################
 # Set up final options.
 # ###############################################################
+CC := gcc
+CXX := g++
+AR := ar
 
 GLOBAL_INCLUDES :=
 GLOBAL_C_INCLUDES :=

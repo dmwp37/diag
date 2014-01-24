@@ -256,7 +256,7 @@ endef
 define transform-to-stripped
 @mkdir -p $(dir $@)
 @echo "Strip: $(PRIVATE_MODULE) ($@)"
-$(hide) strip --strip-debug $< -o $@
+$(hide) strip  $< -o $@
 endef
 
 
@@ -268,13 +268,13 @@ define transform-o-to-executable-inner
 $(hide) $(PRIVATE_CXX) \
 	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(PRIVATE_GLOBAL_LD_DIRS) \
-	-Wl,-rpath-link=$(OUT_INTERMEDIATE_LIBRARIES) \
+	-Wl, \
 	-Wl,-rpath,\$$ORIGIN/../lib \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_ALL_OBJECTS) \
-	-Wl,--whole-archive \
+	-Wl, \
 	$(call normalize-libraries,$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
-	-Wl,--no-whole-archive \
+	-Wl, \
 	$(if $(PRIVATE_GROUP_STATIC_LIBRARIES),-Wl$(comma)--start-group) \
 	$(call normalize-libraries,$(PRIVATE_ALL_STATIC_LIBRARIES)) \
 	$(if $(PRIVATE_GROUP_STATIC_LIBRARIES),-Wl$(comma)--end-group) \

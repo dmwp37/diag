@@ -64,6 +64,8 @@ struct DG_AUX_UTIL_BP_REQ_NODE_T
 
 typedef struct DG_AUX_UTIL_BP_REQ_NODE_T DG_AUX_UTIL_BP_REQ_LIST_T;
 
+extern int sem_timedwait (sem_t *sem, const struct timespec *abs_timeout);
+
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
