@@ -35,6 +35,43 @@ extern "C" {
 /*==================================================================================================
                                                MACROS
 ==================================================================================================*/
+#define DG_ENGINE_UTIL_req_parse_data_ntoh(req, data) \
+    do \
+    { \
+        switch (sizeof(data)) \
+        { \
+        case 1: \
+            data = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req); \
+            break; \
+        case 2: \
+            data = DG_ENGINE_UTIL_req_parse_2_bytes_ntoh(req); \
+            break; \
+        case 4: \
+            data = DG_ENGINE_UTIL_req_parse_4_bytes_ntoh(req); \
+            break; \
+        default: \
+            break; \
+        } \
+    } while (0)
+
+#define DG_ENGINE_UTIL_rsp_append_data_hton(rsp, data) \
+    do \
+    { \
+        switch (sizeof(data)) \
+        { \
+        case 1: \
+            DG_ENGINE_UTIL_rsp_append_1_byte_hton(rsp, data); \
+            break; \
+        case 2: \
+            DG_ENGINE_UTIL_rsp_append_2_bytes_hton(rsp, data); \
+            break; \
+        case 4: \
+            DG_ENGINE_UTIL_rsp_append_4_bytes_hton(rsp, data); \
+            break; \
+        default: \
+            break; \
+        } \
+    } while (0)
 
 /*==================================================================================================
                                 TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -43,7 +80,8 @@ extern "C" {
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-BOOL                   DG_ENGINE_UTIL_check_engine_mode(DG_DEFS_MODE_T desired_mode, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
+BOOL DG_ENGINE_UTIL_check_engine_mode(DG_DEFS_MODE_T desired_mode, DG_DEFS_DIAG_RSP_BUILDER_T* rsp);
+
 DG_DEFS_MODE_T         DG_ENGINE_UTIL_get_engine_mode(void);
 void                   DG_ENGINE_UTIL_set_engine_mode(DG_DEFS_MODE_T mode);
 DG_DEFS_SEC_IC_STATE_T DG_ENGINE_UTIL_get_sec_ic_state(void);
