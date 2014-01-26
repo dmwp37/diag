@@ -52,9 +52,9 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 /*==================================================================================================
                                       LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
-static BOOL dg_pal_util_lock_process(const char* pid_file);
-static int  dg_pal_util_read_pid_file(const char* pid_file);
-static BOOL dg_pal_util_get_ext_ip_address(int* sock, struct sockaddr_in* addr);
+static BOOL  dg_pal_util_lock_process(const char* pid_file);
+static int   dg_pal_util_read_pid_file(const char* pid_file);
+static BOOL  dg_pal_util_get_ext_ip_address(int* sock, struct sockaddr_in* addr);
 static char* dg_pal_util_get_ext_itfc_name(void);
 
 /*==================================================================================================
@@ -339,7 +339,7 @@ BOOL DG_PAL_UTIL_create_int_diag_listen_sock(int* sock)
         unlink(server.sun_path);
 
         if (bind(*sock, (const struct sockaddr*)&server,
-                 (sizeof(server.sun_family) + strlen(server.sun_path))) < 0)
+                 (sizeof(server.sun_family) + strlen(server.sun_path) + 1)) < 0)
         {
             DG_DBG_ERROR("Error binding to DIAG socket, errno = %d (%s)", errno, strerror(errno));
             close(*sock);

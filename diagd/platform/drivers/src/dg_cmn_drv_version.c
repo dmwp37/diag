@@ -43,11 +43,11 @@ implementation of the VERSION driver
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
-BOOL dg_cmn_drv_version_copy(char** pp_str, const char* version_str);
-BOOL dg_cmn_drv_version_diag(char** pp_str);
-BOOL dg_cmn_drv_version_sw(char** pp_str);
-BOOL dg_cmn_drv_version_hw(char** pp_str);
-BOOL dg_cmn_drv_version_fpga(char** pp_str);
+static BOOL dg_cmn_drv_version_copy(char** pp_str, const char* version_str);
+static BOOL dg_cmn_drv_version_diag(char** pp_str);
+static BOOL dg_cmn_drv_version_sw(char** pp_str);
+static BOOL dg_cmn_drv_version_hw(char** pp_str);
+static BOOL dg_cmn_drv_version_fpga(char** pp_str);
 
 /*==================================================================================================
                                          GLOBAL VARIABLES

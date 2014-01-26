@@ -42,7 +42,7 @@ include $(BUILD_SYSTEM)/config.mk
 # These are the modifier targets that don't do anything themselves, but
 # change the behavior of the build.
 # (must be defined before including definitions.make)
-INTERNAL_MODIFIER_TARGETS := showcommands all 
+INTERNAL_MODIFIER_TARGETS := showcommands all
 
 # Bring in standard build system definitions.
 include $(BUILD_SYSTEM)/definitions.mk
@@ -62,7 +62,7 @@ skip_serch_dir := .git .repo out
 
 find_cmd := find $(subdirs) -type d \( $(foreach d, $(skip_serch_dir),-name $(d) -o ) -name build \) -prune -o -type f -name $(LOCAL_MODULE_MAKEFILE_NAME) -printf "%p "
 
-subdir_makefiles := $(shell $(find_cmd)) 
+subdir_makefiles := $(shell $(find_cmd))
 include $(subdir_makefiles)
 
 

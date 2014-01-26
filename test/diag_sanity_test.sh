@@ -4,7 +4,8 @@ CUR_PATH=$(dirname $0)
 CLIENT_CMD=$CUR_PATH/../out/install/bin/diag_send
 DIAGD_TEST=$CUR_PATH/../out/install/bin/diagd_test
 
-#check the diag daemon first
+#need to restart the diag daemon
+$CUR_PATH/kill_diagd.sh
 $CUR_PATH/start_diagd.sh
 
 $CLIENT_CMD 0fffaabbccdd
