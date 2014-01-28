@@ -178,6 +178,14 @@ BOOL dg_cmn_drv_version_sw(char** pp_str)
         }
         else
         {
+            /* remove the tail '\n' */
+            int last = strlen(buf) - 1;
+
+            if (buf[last] == '\n')
+            {
+                buf[last] = '\0';
+            }
+
             ret = dg_cmn_drv_version_copy(pp_str, buf);
         }
     }

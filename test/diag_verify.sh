@@ -32,8 +32,6 @@ for var in ${__array_command[@]}; do
 
     $CLIENT_CMD $var > $FILE_TEMP
 
-    grep success $FILE_TEMP > /dev/null
-
     local test_pass=$?
 
     if [ $1 = "true" ]; then
