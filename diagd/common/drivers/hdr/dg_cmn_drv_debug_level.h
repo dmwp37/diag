@@ -46,6 +46,7 @@ typedef UINT8 DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T;
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
+typedef UINT8 DG_CMN_DRV_DEBUG_LEVEL_LEVEL_T;
 
 /*==================================================================================================
                                    GLOBAL VARIABLE DECLARATIONS
@@ -62,7 +63,8 @@ typedef UINT8 DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T;
 @param[in]   debug_level
 
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component, UINT16 debug_level);
+BOOL DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component,
+                                DG_CMN_DRV_DEBUG_LEVEL_LEVEL_T     debug_level);
 
 /*=============================================================================================*//**
 @brief Get debug level of the component
@@ -71,7 +73,8 @@ BOOL DG_CMN_DRV_DEBUG_LEVEL_set(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component, UI
 @param[out]  debug_level
 
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_DEBUG_LEVEL_get(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component, UINT16* debug_level);
+BOOL DG_CMN_DRV_DEBUG_LEVEL_get(DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T component,
+                                DG_CMN_DRV_DEBUG_LEVEL_LEVEL_T*    debug_level);
 
 #ifdef __cplusplus
 }

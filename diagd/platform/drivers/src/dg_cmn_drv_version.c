@@ -178,9 +178,12 @@ BOOL dg_cmn_drv_version_sw(char** pp_str)
         }
         else
         {
-            /* remove the tail '\n' */
-            int last = strlen(buf) - 1;
+            int last = sizeof(buf) - 1;
+            /* null terminate the string */
+            buf[last] = '\0';
 
+            /* remove the tail '\n' */
+            last = strlen(buf) - 1;
             if (buf[last] == '\n')
             {
                 buf[last] = '\0';

@@ -413,15 +413,16 @@ void* dg_client_comm_diag_handler_exec(void* diag_void)
     diag_handler = dg_client_comm_find_diag_handler(diag->header.opcode);
     if ((diag_handler == NULL) || (diag_handler->fptr == NULL))
     {
-        DG_DBG_ERROR("Opcode 0x%04x was not found", diag->header.opcode);
-        DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_PAR_ERR_OPCODE);
+        DG_ENGINE_UTIL_rsp_set_error_string(rsp, DG_RSP_CODE_ASCII_ERR_OPCODE,
+                                            "Opcode 0x%04x was not found",
+                                            diag->header.opcode);
     }
     else if ((diag_handler->mode != DG_DEFS_MODE_ALL) &&
              (diag_handler->mode != DG_ENGINE_UTIL_get_engine_mode()))
     {
-        DG_DBG_ERROR("DIAG Mode Error!  Current mode = %d, diag mode = %d",
-                     DG_ENGINE_UTIL_get_engine_mode(), diag_handler->mode);
-        DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_PAR_ERR_MODE);
+        DG_ENGINE_UTIL_rsp_set_error_string(rsp, DG_RSP_CODE_ASCII_ERR_MODE,
+                                            "DIAG Mode Error!  cur_mode=%d, desire_mode=%d",
+                                            DG_ENGINE_UTIL_get_engine_mode(), diag_handler->mode);
     }
     else
     {
