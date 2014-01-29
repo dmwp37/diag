@@ -25,13 +25,13 @@ echo "#-----------------------$SEC_NAME-----------------------"
 
 #command array
 array_command[0]=01000102
-array_command[1]=0ffd00000000
+array_command[1]=0ffd010000
 array_command[2]="$OPCODE""$RD_ACTION""$BUS""$ADDRESS""$RD_OFFSET""$RD_LEN"
 array_command[3]="$OPCODE""$WR_ACTION""$BUS""$ADDRESS""$WR_OFFSET""$WR_LEN""$WR_DATA1"
 array_command[4]="$OPCODE""$RD_ACTION""$BUS""$ADDRESS""$RD_OFFSET""$RD_LEN"
 array_command[5]="$OPCODE""$WR_ACTION""$BUS""$ADDRESS""$WR_OFFSET""$WR_LEN""$WR_DATA2"
 array_command[6]="$OPCODE""$RD_ACTION""$BUS""$ADDRESS""$RD_OFFSET""$RD_LEN"
-array_command[7]=0ffd00000001
+array_command[7]=0ffd010001
 
 #command description array, need match with command array above.
 array_des[0]="Suspend the DUT"

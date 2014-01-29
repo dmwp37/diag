@@ -30,14 +30,8 @@ Diag SUSPEND action.
 */
 
 /*==================================================================================================
-                                          LOCAL CONSTANTS
-==================================================================================================*/
-
-/*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_SUSPEND_REQ_LEN_MIN 1
-#define DG_SUSPEND_MODE_SIZE   1
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -49,6 +43,14 @@ enum
     DG_SUSPEND_ACTION_SET = 0x01,
 };
 typedef UINT8 DG_SUSPEND_ACTION_T;
+
+typedef UINT8 DG_SUSPEND_MODE_T;
+
+/*==================================================================================================
+                                          LOCAL CONSTANTS
+==================================================================================================*/
+const UINT32 DG_SUSPEND_REQ_LEN_MIN = sizeof(DG_SUSPEND_ACTION_T);
+const UINT32 DG_SUSPEND_MODE_SIZE   = sizeof(DG_SUSPEND_MODE_T);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -74,14 +76,14 @@ typedef UINT8 DG_SUSPEND_ACTION_T;
 void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req)
 {
     DG_SUSPEND_ACTION_T         action;
-    DG_DEFS_MODE_T              mode = DG_ENGINE_UTIL_get_engine_mode();
+    DG_SUSPEND_MODE_T           mode = DG_ENGINE_UTIL_get_engine_mode();
     DG_DEFS_DIAG_RSP_BUILDER_T* rsp  = DG_ENGINE_UTIL_rsp_init();
 
     DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
 
     if (DG_ENGINE_UTIL_req_len_check_at_least(req, DG_SUSPEND_REQ_LEN_MIN, rsp))
     {
-        action = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+        DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
 
         switch (action)
         {
@@ -89,7 +91,7 @@ void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req)
         {
             if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, DG_SUSPEND_MODE_SIZE))
             {
-                DG_ENGINE_UTIL_rsp_append_1_byte_hton(rsp, (UINT8)mode);
+                DG_ENGINE_UTIL_rsp_append_data_hton(rsp, mode);
             }
         }
         break;
@@ -98,7 +100,9 @@ void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req)
         {
             if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, DG_SUSPEND_MODE_SIZE, rsp))
             {
-                UINT8 new_mode = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+                DG_SUSPEND_MODE_T new_mode;
+
+                DG_ENGINE_UTIL_req_parse_data_ntoh(req, new_mode);
 
                 if ((mode == DG_DEFS_MODE_NORMAL) &&
                     (new_mode == DG_DEFS_MODE_NORMAL))

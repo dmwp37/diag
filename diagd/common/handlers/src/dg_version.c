@@ -29,17 +29,17 @@ This command is responsible for VERSION test
 */
 
 /*==================================================================================================
-                                          LOCAL CONSTANTS
-==================================================================================================*/
-
-/*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_VERSION_REQ_LEN_MIN 1
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
 ==================================================================================================*/
+
+/*==================================================================================================
+                                          LOCAL CONSTANTS
+==================================================================================================*/
+const UINT32 DG_VERSION_REQ_LEN = sizeof(DG_CMN_DRV_VERSION_TYPE_T);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -69,11 +69,11 @@ void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req)
 
     DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
 
-    if (DG_ENGINE_UTIL_req_len_check_at_least(req, DG_VERSION_REQ_LEN_MIN, rsp))
+    if (DG_ENGINE_UTIL_req_len_check_equal(req, DG_VERSION_REQ_LEN, rsp))
     {
         char* p_version_str = NULL;
 
-        type = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+        DG_ENGINE_UTIL_req_parse_data_ntoh(req, type);
 
         if (!DG_CMN_DRV_VERSION_get(type, &p_version_str))
         {

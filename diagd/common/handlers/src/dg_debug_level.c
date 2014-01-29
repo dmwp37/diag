@@ -28,14 +28,8 @@ This command is responsible for control debug level of different component
 */
 
 /*==================================================================================================
-                                          LOCAL CONSTANTS
-==================================================================================================*/
-
-/*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_DEBUG_LEVEL_REQ_LEN_SET 3
-#define DG_DEBUG_LEVEL_REQ_LEN_GET 1
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -43,10 +37,15 @@ This command is responsible for control debug level of different component
 /** Actions for DEBUG_LEVEL command */
 enum
 {
-    DG_DEBUG_LEVEL_SET = 0x00,
-    DG_DEBUG_LEVEL_GET = 0x01
+    DG_DEBUG_LEVEL_GET = 0x00,
+    DG_DEBUG_LEVEL_SET = 0x01,
+
 };
 typedef UINT8 DG_DEBUG_LEVEL_ACTION_T;
+
+/*==================================================================================================
+                                          LOCAL CONSTANTS
+==================================================================================================*/
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -73,20 +72,20 @@ void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req)
 {
     DG_CMN_DRV_DEBUG_LEVEL_COMPONENT_T comp;
     DG_DEBUG_LEVEL_ACTION_T            action;
-    UINT16                             dbg_lvl;
+    DG_CMN_DRV_DEBUG_LEVEL_LEVEL_T     dbg_lvl;
     DG_DEFS_DIAG_RSP_BUILDER_T*        rsp = DG_ENGINE_UTIL_rsp_init();
 
     if (DG_ENGINE_UTIL_req_len_check_at_least(req, sizeof(action), rsp))
     {
-        action = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+        DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
 
         switch (action)
         {
         case DG_DEBUG_LEVEL_SET:
-            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, DG_DEBUG_LEVEL_REQ_LEN_SET, rsp))
+            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(comp) + sizeof(dbg_lvl), rsp))
             {
-                comp    = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
-                dbg_lvl = DG_ENGINE_UTIL_req_parse_2_bytes_ntoh(req);
+                DG_ENGINE_UTIL_req_parse_data_ntoh(req, comp);
+                DG_ENGINE_UTIL_req_parse_data_ntoh(req, dbg_lvl);
 
                 if (!DG_CMN_DRV_DEBUG_LEVEL_set(comp, dbg_lvl))
                 {
@@ -102,9 +101,9 @@ void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req)
             break;
 
         case DG_DEBUG_LEVEL_GET:
-            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, DG_DEBUG_LEVEL_REQ_LEN_GET, rsp))
+            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(comp), rsp))
             {
-                comp = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+                DG_ENGINE_UTIL_req_parse_data_ntoh(req, comp);
 
                 if (!DG_CMN_DRV_DEBUG_LEVEL_get(comp, &dbg_lvl))
                 {
@@ -113,9 +112,9 @@ void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req)
                 }
                 else
                 {
-                    if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, sizeof(UINT16)))
+                    if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, sizeof(dbg_lvl)))
                     {
-                        DG_ENGINE_UTIL_rsp_append_2_bytes_hton(rsp, dbg_lvl);
+                        DG_ENGINE_UTIL_rsp_append_data_hton(rsp, dbg_lvl);
                         DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
                     }
                 }
