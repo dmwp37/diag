@@ -6,17 +6,24 @@ CUR_PATH=$(dirname $0)
 $CUR_PATH/kill_diagd.sh
 
 SEC_NAME="Suspend Test"
+OPCODE=0100
+
+GET=00
+SET=01
+
+NORMAL_MODE=01
+TEST_MODE=02
 
 echo "#-----------------------$SEC_NAME-----------------------"
 
 #Define array for command and description: following Diag and DVT Spec
 
 #command array
-array_command[0]=010000
-array_command[1]=01000101
-array_command[2]=01000102
-array_command[3]=01000102
-array_command[4]=010000
+array_command[0]="$OPCODE""$GET"
+array_command[1]="$OPCODE""$SET""$NORMAL_MODE"
+array_command[2]="$OPCODE""$SET""$TEST_MODE"
+array_command[3]="$OPCODE""$SET""$TEST_MODE"
+array_command[4]="$OPCODE""$GET"
 
 #command description array, need match with command array above.
 array_des[0]="Get suspend mode"
@@ -26,9 +33,9 @@ array_des[3]="Suspend to test mode"
 array_des[4]="Get suspend mode"
 
 
-array_command_fail[0]=010003
-array_command_fail[1]=01000104
-array_command_fail[2]=01000101
+array_command_fail[0]="$OPCODE"03
+array_command_fail[1]="$OPCODE""$SET"04
+array_command_fail[2]="$OPCODE""$SET""$NORMAL_MODE"
 
 array_des_fail[0]="Suspend invalid action"
 array_des_fail[1]="Suspend invalid mode"
