@@ -155,11 +155,10 @@ void diag_i2c_read_bus(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
             }
             else
             {
-                /* Allocate memory for read data (length + data) */
-                if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, sizeof(DG_CMN_DRV_I2C_SIZE_T) + read_length))
+                /* Allocate memory for read data */
+                if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, read_length))
                 {
                     DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
-                    DG_ENGINE_UTIL_rsp_append_data_hton(rsp, read_length);
                     DG_ENGINE_UTIL_rsp_append_buf(rsp, read_data, read_length);
                 }
             }

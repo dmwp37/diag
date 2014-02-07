@@ -17,16 +17,14 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include <sys/socket.h>
-
-#ifdef __cplusplus  
+#ifdef __cplusplus
 extern "C" {
 #endif
 
 /** @addtogroup Client_PAL
 @{
 
-@par 
+@par
 Functions for supporting the DIAG Client API
 
 */
@@ -66,12 +64,12 @@ BOOL DG_PAL_CLIENT_API_start_diag_app(void);
 
 @return File descriptor for the socket, -1 on fail
 *//*==============================================================================================*/
-int DG_PAL_CLIENT_API_create_int_diag_socket(struct sockaddr_storage *server, socklen_t *len);
+int DG_PAL_CLIENT_API_create_int_diag_socket(struct sockaddr_storage* server, socklen_t* len);
 
 /** @} */
 
-#ifdef __cplusplus  
-}       
+#ifdef __cplusplus
+}
 #endif
 
 #endif

@@ -373,17 +373,20 @@ void dg_send_dump(UINT8* buf, UINT32 len)
         /* Reset string buffer for each new row */
         memset(buffer, 0, sizeof(buffer));
 
-        /* Write the line header info */
-        sprintf((char*)ptr, "%04x: ", (i * DG_SEND_DBG_MAX_DUMP_COLS));
-
         /* For all rows, the number of columns is the max number, except for the last row */
         cur_max_col = (i == len / DG_SEND_DBG_MAX_DUMP_COLS) ?
                       (len % DG_SEND_DBG_MAX_DUMP_COLS) : DG_SEND_DBG_MAX_DUMP_COLS;
-        for (j = 0; j < cur_max_col; j++)
+
+        if (cur_max_col > 0)
         {
-            sprintf((char*)ptr, "%s%02x ", buffer, *(buf + i * DG_SEND_DBG_MAX_DUMP_COLS + j));
+            /* Write the line header info */
+            sprintf((char*)ptr, "%04x: ", (i * DG_SEND_DBG_MAX_DUMP_COLS));
+            for (j = 0; j < cur_max_col; j++)
+            {
+                sprintf((char*)ptr, "%s%02x ", buffer, *(buf + i * DG_SEND_DBG_MAX_DUMP_COLS + j));
+            }
+            DG_SEND_PRINT("%s", buffer);
         }
-        DG_SEND_PRINT("%s", buffer);
     }
 }
 
