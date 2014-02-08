@@ -8,17 +8,11 @@
 
 ====================================================================================================
 
-Revision History:
-                            Modification     Tracking
-Author                          Date          Number     Description of Changes
--------------------------   ------------    ----------   -------------------------------------------
-Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
-
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
 
-#ifdef __cplusplus  
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -26,8 +20,8 @@ extern "C" {
                                                MACROS
 ==================================================================================================*/
 #ifndef TRUE
-    #define TRUE   1 
-    #define FALSE  0 
+    #define TRUE   1
+    #define FALSE  0
 #endif
 
 #define DG_COMPILE_UNUSED(x) (void)(x)
@@ -60,8 +54,8 @@ typedef unsigned short       W_CHAR;     /**< Wide char */
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
 
-#ifdef __cplusplus  
-}       
+#ifdef __cplusplus
+}
 #endif
 
 #endif

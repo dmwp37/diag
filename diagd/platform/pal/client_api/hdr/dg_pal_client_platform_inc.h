@@ -8,24 +8,27 @@
 
 ====================================================================================================
 
-Revision History:
-                            Modification     Tracking
-Author                          Date          Number     Description of Changes
--------------------------   ------------    ----------   -------------------------------------------
-Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
-
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
 #include "dg_platform_defs.h"
 
-#ifdef __cplusplus  
+#ifdef __cplusplus
 extern "C" {
 #endif
 
 /*==================================================================================================
                                                MACROS
 ==================================================================================================*/
+#ifdef DG_DEBUG
+/* printf-style debug message print */
+    #define DG_CLIENT_API_TRACE(x ...) do { printf("DIAG API: "x); printf("\n"); } while (0)
+/* printf-style error message print */
+    #define DG_CLIENT_API_ERROR(x ...) do { printf("DIAG API ERROR: "x); printf("\n"); } while (0)
+#else
+    #define DG_CLIENT_API_TRACE(x ...)
+    #define DG_CLIENT_API_ERROR(x ...)
+#endif
 
 /*==================================================================================================
                                                ENUMS
@@ -43,8 +46,8 @@ extern "C" {
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
 
-#ifdef __cplusplus  
-}       
+#ifdef __cplusplus
+}
 #endif
 
 #endif

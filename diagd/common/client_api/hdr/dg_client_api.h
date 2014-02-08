@@ -8,18 +8,9 @@
 
 ====================================================================================================
 
-Revision History:
-                            Modification     Tracking
-Author                          Date          Number     Description of Changes
--------------------------   ------------    ----------   -------------------------------------------
-Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
-Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protocol
-
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include <dg_pal_client_platform_inc.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,46 +30,90 @@ extern "C" {
 /*==================================================================================================
                                 TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
 ==================================================================================================*/
-typedef int DG_CLIENT_API_SESSION_T;
-
-
-/** Return values for DIAG Client API */
-typedef enum
+typedef struct
 {
-    DG_CLIENT_API_STATUS_MALLOC_FAIL = -4, /**< Malloc failed */
-    DG_CLIENT_API_STATUS_ERR_PARM    = -3, /**< Invalid parameter used for function */
-    DG_CLIENT_API_STATUS_TIMEOUT     = -2, /**< Timeout occurred */
-    DG_CLIENT_API_STATUS_ERROR       = -1, /**< General error */
-    DG_CLIENT_API_STATUS_SUCCESS     = 0   /**< Success */
-} DG_CLIENT_API_STATUS_T;
+    UINT16 opcode;
+    UINT16 timestamp;
+    UINT32 data_len;
+    UINT8* data_ptr;
+} DG_CLIENT_API_REQ_T;
+
+typedef struct
+{
+    UINT16 opcode;
+    UINT16 timestamp;
+    UINT8  rsp_code;
+    BOOL   is_fail;
+    BOOL   is_unsol;
+    UINT32 data_len;
+    UINT8* data_ptr;
+    UINT8* raw_rsp;
+} DG_CLIENT_API_RSP_T;
 
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-DG_CLIENT_API_STATUS_T DG_CLIENT_API_launch_server(void);
-DG_CLIENT_API_STATUS_T DG_CLIENT_API_connect_to_server(int                      timeout_in_ms,
-                                                       DG_CLIENT_API_SESSION_T* socket_ptr);
-DG_CLIENT_API_STATUS_T DG_CLIENT_API_disconnect_from_server(DG_CLIENT_API_SESSION_T socket);
-DG_CLIENT_API_STATUS_T DG_CLIENT_API_send_diag_req(DG_CLIENT_API_SESSION_T socket, UINT16 opcode,
-                                                   UINT16 timestamp, UINT32 req_len,
-                                                   UINT8* req_data_ptr);
-DG_CLIENT_API_STATUS_T DG_CLIENT_API_send_diag_req_raw(DG_CLIENT_API_SESSION_T socket,
-                                                       UINT32 raw_data_len, UINT8* raw_data_ptr);
-UINT8* DG_CLIENT_API_rcv_desired_diag_rsp(DG_CLIENT_API_SESSION_T socket, UINT16 opcode,
-                                          UINT16 timestamp, BOOL is_unsol, UINT32 timeout_in_ms,
-                                          UINT32* rsp_len_ptr, DG_CLIENT_API_STATUS_T* status_ptr);
-UINT8* DG_CLIENT_API_rcv_diag_rsp(DG_CLIENT_API_SESSION_T socket, UINT32 timeout_in_ms,
-                                  UINT32* rsp_len_ptr, DG_CLIENT_API_STATUS_T* status_ptr);
-DG_CLIENT_API_STATUS_T DG_CLIENT_API_parse_diag_rsp(UINT8* rsp_ptr, UINT32 rsp_len,
-                                                    BOOL* diag_fail_ptr, BOOL* unsol_rsp_ptr,
-                                                    UINT16* timestamp_ptr, UINT16* opcode_ptr,
-                                                    UINT8* rsp_code_ptr,
-                                                    UINT32* data_offset_val_ptr,
-                                                    UINT32* data_len_ptr);
-BOOL DG_CLIENT_API_check_rsp_for_fail(UINT8* diag_rsp, UINT32 rsp_len);
-void DG_CLIENT_API_diag_rsp_free(UINT8* diag_rsp);
-DG_CLIENT_API_STATUS_T DG_CLIENT_API_echo_data(UINT8* data, UINT32 size,
-                                               UINT32 connect_timeout, UINT32 rsp_timeout);
+
+/*=============================================================================================*//**
+@brief Starts the DIAG server
+
+@return TRUE for success
+*//*==============================================================================================*/
+BOOL DG_CLIENT_API_launch_server(void);
+
+/*=============================================================================================*//**
+@brief Begins a client session with the DIAG server/engine
+
+@param [in] serv_addr - the diag server address, if NULL, internal socket would be used
+
+@return socket for server connection, -1 if failed
+*//*==============================================================================================*/
+int DG_CLIENT_API_connect_to_server(const char* serv_addr);
+
+/*=============================================================================================*//**
+@brief Ends a client sessions initiated by DG_CLIENT_API_connect_to_server()
+
+@param [in] socket - Socket to close
+
+*//*==============================================================================================*/
+void DG_CLIENT_API_disconnect_from_server(int socket);
+
+/*=============================================================================================*//**
+@brief Creates and sends a DIAG request to the server
+
+@param [in] socket   - Server connection socket
+@param [in] diag_req - diag request
+
+@return TRUE for success
+*//*==============================================================================================*/
+BOOL DG_CLIENT_API_send_diag_req(int socket, DG_CLIENT_API_REQ_T* diag_req);
+
+/*=============================================================================================*//**
+@brief Attempts to receive the desired DIAG response from the specified socket.
+
+@param [in] socket        - Server connection socket
+@param [in] diag_req      - the diag request for getting the response
+@param [in] is_unsol      - If the expected response is unsolicited or not
+@param [in] timeout_in_ms - Time to wait for a DIAG response (in msec), 0 means wait forever
+
+@return Pointer to DIAG response
+
+@note
+  - All non-desired DIAG responses that are received will be deleted
+  - The calling function is responsible for freeing the memory pointed to by the returned pointer
+    by using DG_CLIENT_API_diag_rsp_free()
+  - A valid diag response pointer is only returned in a success case
+  - If the expected response is unsolicited, the timestamp parameter is ignored
+*//*==============================================================================================*/
+DG_CLIENT_API_RSP_T* DG_CLIENT_API_recv_diag_rsp(int socket, DG_CLIENT_API_REQ_T* diag_req,
+                                                 BOOL is_unsol, UINT32 timeout_in_ms);
+
+/*=============================================================================================*//**
+@brief Frees a given DIAG response
+
+@param [in] diag_rsp - The DIAG response to free
+*//*==============================================================================================*/
+void DG_CLIENT_API_diag_rsp_free(DG_CLIENT_API_RSP_T* diag_rsp);
 
 /*==================================================================================================
                                           GLOBAL VARIABLES

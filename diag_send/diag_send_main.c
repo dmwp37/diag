@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include "dg_platform_defs.h"
 #include "dg_client_api.h"
 
 /*==================================================================================================
@@ -54,7 +55,7 @@
 ==================================================================================================*/
 static BOOL dg_send_read_raw_command(char* command, UINT32 str_len, UINT16* opcode,
                                      UINT8* data, UINT32* datalen);
-static BOOL dg_send_process_raw_command(DG_CLIENT_API_SESSION_T diag_session, char* command);
+static BOOL dg_send_process_raw_command(int diag_session, char* command);
 static void dg_send_dump(UINT8* buf, UINT32 len);
 static void dg_send_print_output(UINT16 opcode, UINT8* buf, UINT32 len);
 
@@ -78,15 +79,15 @@ static void dg_send_print_output(UINT16 opcode, UINT8* buf, UINT32 len);
 *//*==============================================================================================*/
 int main(int argc, char* argv[])
 {
-    int                     ret       = 0;
-    int                     filein    = 0;
-    int                     argnum    = 1;
-    UINT8                   try_count = 1;
-    int                     i;
-    char                    buffer[DG_SEND_BUFFER_LEN_MAX];
-    FILE*                   fp    = NULL;
-    FILE*                   input = stdin;
-    DG_CLIENT_API_SESSION_T diag_session;
+    int   ret       = 0;
+    int   filein    = 0;
+    int   argnum    = 1;
+    UINT8 try_count = 1;
+    int   i;
+    char  buffer[DG_SEND_BUFFER_LEN_MAX];
+    FILE* fp    = NULL;
+    FILE* input = stdin;
+    int   diag_session;
 
 #if DG_SEND_CHECK_ROOT_USER
     if (getuid() != DG_SEND_ROOT_UID)
@@ -145,7 +146,7 @@ int main(int argc, char* argv[])
 
     DG_SEND_TRACE("+++ Establishing connection...");
 
-    while (DG_CLIENT_API_connect_to_server(1000, &diag_session) != DG_CLIENT_API_STATUS_SUCCESS)
+    while ((diag_session = DG_CLIENT_API_connect_to_server(NULL)) < 0)
     {
         DG_SEND_ERROR("Connect to diag engine try %d fails", try_count);
         if (try_count == DG_SEND_CONNECT_MAX_TRY)
@@ -266,16 +267,16 @@ BOOL dg_send_read_raw_command(char* command, UINT32 str_len, UINT16* opcode,
 @param[in]   diag_session  - DIAG client connection handle
 @param[in]   command       - The raw command string pointer
 *//*==============================================================================================*/
-BOOL dg_send_process_raw_command(DG_CLIENT_API_SESSION_T diag_session, char* command)
+BOOL dg_send_process_raw_command(int diag_session, char* command)
 {
-    static UINT8           timestamp = 0;
-    UINT16                 opcode;
-    UINT32                 datalen;
-    UINT8                  data[DG_SEND_BUFFER_LEN_MAX];
-    DG_CLIENT_API_STATUS_T status;
-    UINT8*                 rsp        = NULL;
-    UINT32                 rsp_len    = 0;
-    BOOL                   is_success = FALSE;
+    static UINT8 timestamp = 0;
+    UINT16       opcode;
+    UINT32       datalen;
+    UINT8        data[DG_SEND_BUFFER_LEN_MAX];
+    BOOL         is_success = FALSE;
+
+    DG_CLIENT_API_REQ_T  diag_req;
+    DG_CLIENT_API_RSP_T* diag_rsp;
 
     if (dg_send_read_raw_command(command, strlen(command), &opcode, data, &datalen))
     {
@@ -283,61 +284,53 @@ BOOL dg_send_process_raw_command(DG_CLIENT_API_SESSION_T diag_session, char* com
         DG_SEND_PRINT("<- Data sent");
         dg_send_dump(data, datalen);
 
-        status = DG_CLIENT_API_send_diag_req(diag_session, opcode, timestamp, datalen, data);
-        if (status != DG_CLIENT_API_STATUS_SUCCESS)
+        diag_req.opcode    = opcode;
+        diag_req.timestamp = timestamp;
+        diag_req.data_len  = datalen;
+        diag_req.data_ptr  = data;
+
+        if (!DG_CLIENT_API_send_diag_req(diag_session, &diag_req))
         {
-            DG_SEND_PRINT("Sending DIAG 0x%04x failed, status = %d", opcode, status);
+            DG_SEND_PRINT("Sending DIAG 0x%04x failed", opcode);
         }
         else
         {
-            BOOL   is_fail;
-            UINT32 data_offset;
-            UINT8  rsp_code;
             /* Wait for a response */
-            rsp = DG_CLIENT_API_rcv_desired_diag_rsp(diag_session, opcode, timestamp, FALSE,
-                                                     DG_SEND_MAIN_DEFAULT_RSP_TIMEOUT,
-                                                     &rsp_len, &status);
-            if ((rsp == NULL) || (status != DG_CLIENT_API_STATUS_SUCCESS))
+            diag_rsp = DG_CLIENT_API_recv_diag_rsp(diag_session, &diag_req, FALSE,
+                                                   DG_SEND_MAIN_DEFAULT_RSP_TIMEOUT);
+            if (diag_rsp == NULL)
             {
-                DG_SEND_PRINT("Can't get DIAG response for opcode 0x%04x, status = %d",
-                              opcode, status);
-            }
-            else if (DG_CLIENT_API_parse_diag_rsp(rsp, rsp_len, &is_fail,
-                                                  NULL, NULL, NULL, &rsp_code,
-                                                  &data_offset, &datalen) !=
-                     DG_CLIENT_API_STATUS_SUCCESS)
-            {
-                DG_SEND_PRINT("Failed to parse diag rsp. opcode=0x%04x\n", opcode);
+                DG_SEND_PRINT("Can't get DIAG response for opcode 0x%04x", opcode);
             }
             /* Determine if the response indicates a failure */
-            else if (is_fail)
+            else if (diag_rsp->is_fail)
             {
                 char* err_str = NULL;
 
                 DG_SEND_ERROR("DIAG response for opcode 0x%04x indicates failure, rsp_len=%d",
-                              opcode, rsp_len);
+                              opcode, diag_rsp->data_len);
                 DG_SEND_PRINT("-> Failure data received");
                 /* If response code is an ASCII error string, print out the ascii response */
-                if ((rsp_code >= 0x80) &&
-                    ((err_str = (char*)(rsp + data_offset)) != NULL))
+                if ((diag_rsp->rsp_code >= 0x80) &&
+                    ((err_str = (char*)(diag_rsp->data_ptr)) != NULL))
                 {
                     DG_SEND_PRINT("%s", err_str);
                 }
                 else
                 {
-                    dg_send_dump(rsp + data_offset, datalen);
+                    dg_send_dump(diag_rsp->data_ptr, diag_rsp->data_len);
                 }
             }
             else
             {
                 DG_SEND_TRACE("DIAG 0x%04x success!", opcode);
-                dg_send_print_output(opcode, rsp + data_offset, datalen);
+                dg_send_print_output(opcode, diag_rsp->data_ptr, diag_rsp->data_len);
                 is_success = TRUE;
             }
 
-            if (rsp != NULL)
+            if (diag_rsp != NULL)
             {
-                DG_CLIENT_API_diag_rsp_free(rsp);
+                DG_CLIENT_API_diag_rsp_free(diag_rsp);
             }
         }
         timestamp++;

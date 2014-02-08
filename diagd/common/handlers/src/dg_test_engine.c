@@ -10,6 +10,8 @@
                                            INCLUDE FILES
 ==================================================================================================*/
 #include <unistd.h>
+#include <stdlib.h>
+#include <arpa/inet.h>
 #include "dg_handler_inc.h"
 #include "dg_client_api.h"
 #include "dg_aux_engine.h"
@@ -39,7 +41,8 @@ the following capabilites:
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_TEST_ENGINE_UNSOL_RSP_SIZE 6 /**< Response data size of unsolicited response */
+#define DG_TEST_ENGINE_UNSOL_RSP_SIZE 6      /**< Response data size of unsolicited response */
+#define DG_TEST_ENGINE_OPCODE_ECHO    0x0FFE /**< Opcode for ECHO command */
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -59,9 +62,18 @@ enum
     DG_TEST_ENGINE_AUX_DISABLE      = 0x00000005  /**< 'Disable Aux' action */
 };
 typedef UINT32 DG_TEST_ENGINE_ACTION_T;
+
+/** Structure for a ECHO diag request */
+typedef struct
+{
+    UINT32 sub_command;   /**< sub echocommand always 0x00000000      */
+    UINT8  echo_data[1];  /**< To be echoed data                      */
+} DG_TEST_ENGINE_REQ_ECHO_T;
+
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
+static BOOL dg_test_engine_echo_data(UINT8* data, UINT32 size, UINT32 rsp_timeout);
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -168,13 +180,10 @@ void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req)
 
         case DG_TEST_ENGINE_ACTION_LOOP:
         {
-            DG_CLIENT_API_STATUS_T status;
-            UINT8*                 data = DG_ENGINE_UTIL_req_get_remain_data_ptr(req);
-            UINT32                 size = DG_ENGINE_UTIL_req_get_remain_len(req);
+            UINT8* data = DG_ENGINE_UTIL_req_get_remain_data_ptr(req);
+            UINT32 size = DG_ENGINE_UTIL_req_get_remain_len(req);
 
-            status = DG_CLIENT_API_echo_data(data, size, 1000, 0);
-
-            if (status != DG_CLIENT_API_STATUS_SUCCESS)
+            if (!dg_test_engine_echo_data(data, size, 0))
             {
                 DG_ENGINE_UTIL_rsp_set_error_string(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
                                                     "client loop echo test failed");
@@ -255,6 +264,106 @@ void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req)
 /*==================================================================================================
                                           LOCAL FUNCTIONS
 ==================================================================================================*/
+
+/*=============================================================================================*//**
+@brief Echo data
+
+@param[in/out]  data        - data buffer to echo, when returned will fill responsed echo data
+@param[in]      size        - the size of the data buffer
+@param[in]  rsp_timeout     - Amount of time to wait for DIAG response (in msec, 0 means wait
+                              forever)
+
+@return TRUE for success
+
+@note
+- Calling function is responsible for allocating (and freeing)
+*//*==============================================================================================*/
+BOOL dg_test_engine_echo_data(UINT8* data, UINT32 size, UINT32 rsp_timeout)
+{
+    DG_TEST_ENGINE_REQ_ECHO_T* echo_req;
+    BOOL                       status = FALSE;
+    int                        diag_session;
+    UINT32                     cmd_len = 0;
+
+    DG_DBG_TRACE("Requested echo data size = %d", size);
+
+    cmd_len = offsetof(DG_TEST_ENGINE_REQ_ECHO_T, echo_data) + size;
+
+    if (data == NULL)
+    {
+        DG_DBG_ERROR("Invalid pass in parameter!");
+    }
+    else if ((diag_session = DG_CLIENT_API_connect_to_server(NULL)) == -1)
+    {
+        DG_DBG_ERROR("Connect to server failed!");
+    }
+    else if ((echo_req = (DG_TEST_ENGINE_REQ_ECHO_T*)malloc(cmd_len)) == NULL)
+    {
+        DG_DBG_ERROR("Malloc ECHO req failed! length = %d", cmd_len);
+        DG_CLIENT_API_disconnect_from_server(diag_session);
+    }
+    else
+    {
+        DG_CLIENT_API_REQ_T diag_req;
+
+        echo_req->sub_command = htonl(0x00000000); /* for echo request */
+        memcpy((UINT8*)(echo_req->echo_data), data, size);
+
+        diag_req.opcode    = DG_TEST_ENGINE_OPCODE_ECHO;
+        diag_req.timestamp = 0;
+        diag_req.data_len  = cmd_len;
+        diag_req.data_ptr  = (UINT8*)echo_req;
+
+        /* Send echo request */
+        status = DG_CLIENT_API_send_diag_req(diag_session, &diag_req);
+
+        /* after send the request we release the resource */
+        free(echo_req);
+
+        if (status != TRUE)
+        {
+            DG_DBG_ERROR("Send DIAG ECHO request failed!");
+            status = FALSE;
+        }
+        else
+        {
+            DG_CLIENT_API_RSP_T* diag_rsp = NULL;
+            /* Get the ECHO response */
+            diag_rsp = DG_CLIENT_API_recv_diag_rsp(diag_session, &diag_req, FALSE, rsp_timeout);
+            if (diag_rsp == NULL)
+            {
+                DG_DBG_ERROR("Receive DIAG ECHO response failed!");
+                status = FALSE;
+            }
+            else
+            {
+                if (diag_rsp->is_fail == TRUE)
+                {
+                    DG_DBG_ERROR("ECHO data failed!");
+                    status = FALSE;
+                }
+                else if (diag_rsp->data_len != size)
+                {
+                    DG_DBG_ERROR("ECHO data size mismatch! origin: %d, receive: %d",
+                                 size, diag_rsp->data_len);
+                    status = FALSE;
+                }
+                else
+                {
+                    memcpy(data, diag_rsp->data_ptr, size);
+                }
+
+                DG_CLIENT_API_diag_rsp_free(diag_rsp);
+            }
+        }
+
+        DG_CLIENT_API_disconnect_from_server(diag_session);
+    }
+
+    /* Return status code */
+    DG_DBG_TRACE("Return status = %d", status);
+    return status;
+}
 
 /** @} */
 /** @} */
