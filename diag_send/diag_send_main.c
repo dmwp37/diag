@@ -13,8 +13,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include "dg_platform_defs.h"
 #include "dg_client_api.h"
 
@@ -22,13 +20,13 @@
                                             LOCAL MACROS
 ==================================================================================================*/
 #if DG_DEBUG != 0
-    #define DG_SEND_TRACE(x ...) do { printf("DIAG_SEND: "x); printf("\n"); } while (0)
+    #define DG_SEND_TRACE(...) do { printf("DIAG_SEND: "__VA_ARGS__); printf("\n"); } while (0)
 #else
-    #define DG_SEND_TRACE(x ...)
+    #define DG_SEND_TRACE(...)
 #endif
 
-#define DG_SEND_ERROR(x ...) do { printf("DIAG_SEND ERROR: "x); printf("\n"); } while (0)
-#define DG_SEND_PRINT(x ...) do { printf(x); printf("\n"); } while (0)
+#define DG_SEND_ERROR(...) do { printf("DIAG_SEND ERROR: "__VA_ARGS__); printf("\n"); } while (0)
+#define DG_SEND_PRINT(...) do { printf(__VA_ARGS__); printf("\n"); } while (0)
 
 /*==================================================================================================
                              LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -162,7 +160,7 @@ int main(int argc, char* argv[])
         {
             /* Try to connect again, wait a bit before retry */
             try_count++;
-            sleep(1);
+            Sleep(1000);
         }
     }
 

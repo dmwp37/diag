@@ -9,19 +9,16 @@
 ====================================================================================================
                                             INCLUDE FILES
 ==================================================================================================*/
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <WinSock2.h>
 #include "dg_pal_client_platform_inc.h"
 #include "dg_defs.h"
 #include "dg_pal_client_api.h"
+
+#pragma comment(lib, "Ws2_32.lib")
 
 
 /*==================================================================================================
@@ -38,6 +35,7 @@
 /*==================================================================================================
                              LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
 ==================================================================================================*/
+typedef int socklen_t;
 
 /*==================================================================================================
                                       LOCAL FUNCTION PROTOTYPES
@@ -75,33 +73,7 @@ BOOL DG_PAL_CLIENT_API_start_diag_app(void)
 int DG_PAL_CLIENT_API_create_int_diag_socket()
 {
     int socket_fd = -1;
-
-    struct sockaddr_storage server;
-    struct sockaddr_un*     unix_srv = (struct sockaddr_un*)&server;
-    socklen_t               len      = 0;
-
-    if (access(DG_CFG_INT_SOCKET, F_OK) != 0)
-    {
-        DG_CLIENT_API_ERROR(DG_CFG_INT_SOCKET " is not exist!");
-        return -1;
-    }
-
-    if ((socket_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-    {
-        DG_CLIENT_API_ERROR("Can't create unix socket, errno=%d (%s)", errno, strerror(errno));
-        return -1;
-    }
-
-    unix_srv->sun_family = AF_UNIX;
-    strcpy(unix_srv->sun_path, DG_CFG_INT_SOCKET);
-    len = (sizeof(unix_srv->sun_family) + strlen(unix_srv->sun_path) + 1);
-
-    if (!dg_pal_client_api_connect_socket(socket_fd, (struct sockaddr*)&server, len))
-    {
-        DG_PAL_CLIENT_API_close_diag_socket(socket_fd);
-        socket_fd = -1;
-    }
-
+    DG_CLIENT_API_ERROR("Windows does not support unix socket, use external socket!");
     return socket_fd;
 }
 
@@ -118,6 +90,32 @@ int DG_PAL_CLIENT_API_create_ext_diag_socket(const char* serv_addr)
 
     struct hostent*    he;
     struct sockaddr_in address;
+
+    WORD    wVersionRequested;
+    WSADATA wsaData;
+    int     err;
+
+    wVersionRequested = MAKEWORD(2, 2);
+
+    err = WSAStartup(wVersionRequested, &wsaData);
+    if (err != 0)
+    {
+        DG_CLIENT_API_ERROR("Initializing Socket!");
+        return -1;
+    }
+
+    /* Confirm that the WinSock DLL supports 2.2.        */
+    /* Note that if the DLL supports versions greater    */
+    /* than 2.2 in addition to 2.2, it will still return */
+    /* 2.2 in wVersion since that is the version we      */
+    /* requested.                                        */
+    if (LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
+    {
+        /* Tell the user that we could not find a usable WinSock DLL.  */
+        DG_CLIENT_API_ERROR("Could not find a usable WinSock DLL!");
+        WSACleanup();
+        return -1;
+    }
 
     /* resolve hostname */
     if ((he = gethostbyname(serv_addr)) == NULL)
@@ -154,7 +152,8 @@ int DG_PAL_CLIENT_API_create_ext_diag_socket(const char* serv_addr)
 *//*==============================================================================================*/
 void DG_PAL_CLIENT_API_close_diag_socket(int socket)
 {
-    close(socket);
+    closesocket(socket);
+    WSACleanup();
 }
 
 /*=============================================================================================*//**
@@ -172,7 +171,7 @@ BOOL DG_PAL_CLIENT_API_wait(int socket, BOOL is_read, UINT32 timeout_in_ms)
 
     struct timeval  timeout;
     struct timeval* timeout_ptr = NULL;
-    fd_set          fd_set;
+    fd_set          fds;
     int             select_status;
 
     /* Convert the timeout (in milliseconds) to seconds & microseconds if timeout used */
@@ -190,16 +189,16 @@ BOOL DG_PAL_CLIENT_API_wait(int socket, BOOL is_read, UINT32 timeout_in_ms)
     }
 
     /* Wait for data to be available to read */
-    FD_ZERO(&fd_set);
-    FD_SET(socket, &fd_set);
+    FD_ZERO(&fds);
+    FD_SET(socket, &fds);
 
     if (is_read)
     {
-        select_status = select(socket + 1, &fd_set, NULL, NULL, timeout_ptr);
+        select_status = select(socket + 1, &fds, NULL, NULL, timeout_ptr);
     }
     else
     {
-        select_status = select(socket + 1, NULL, &fd_set, NULL, timeout_ptr);
+        select_status = select(socket + 1, NULL, &fds, NULL, timeout_ptr);
     }
     if (select_status == 0)
     {
@@ -330,15 +329,14 @@ void DG_PAL_CLIENT_API_rsp_hdr_ntoh(DG_DEFS_DIAG_RSP_HDR_T* hdr_in, DG_DEFS_DIAG
 *//*==============================================================================================*/
 BOOL dg_pal_client_api_connect_socket(int socket, struct sockaddr* addr, socklen_t len)
 {
-    BOOL      status = FALSE;
-    long      orig_flags;
-    int       error_value = 0;
+    BOOL      status      = FALSE;
+    u_long    orig_flags  = 1;
+    char      error_value = 0;
     socklen_t errval_size = sizeof(error_value);
 
-    orig_flags = fcntl(socket, F_GETFL);
-    if ((orig_flags == -1) || (fcntl(socket, F_SETFL, O_NONBLOCK) == -1))
+    if (ioctlsocket(socket, FIONBIO, &orig_flags) != NO_ERROR)
     {
-        DG_CLIENT_API_ERROR("Failed disabling blocking. errno=%d (%s)", errno, strerror(errno));
+        DG_CLIENT_API_ERROR("Failed to disable blocking. errno=%d (%s)", errno, strerror(errno));
     }
     else
     {
@@ -375,7 +373,8 @@ BOOL dg_pal_client_api_connect_socket(int socket, struct sockaddr* addr, socklen
                 else
                 {
                     DG_CLIENT_API_TRACE("Successfully connected!");
-                    fcntl(socket, F_SETFL, orig_flags);
+                    orig_flags = 0;
+                    ioctlsocket(socket, FIONBIO, &orig_flags);
                     status = TRUE;
                 }
             }
