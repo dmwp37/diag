@@ -88,6 +88,7 @@ int main(int argc, char* argv[])
     FILE* fp    = NULL;
     FILE* input = stdin;
     int   diag_session;
+    char* server_name = NULL;
 
 #if DG_SEND_CHECK_ROOT_USER
     if (getuid() != DG_SEND_ROOT_UID)
@@ -101,7 +102,8 @@ int main(int argc, char* argv[])
 
     if (argc < 2)
     {
-        DG_SEND_PRINT("Usage: %s cmd1 ... cmdN | -f [file_name]", argv[0]);
+        DG_SEND_PRINT("Usage: %s [-l<server>] cmd1 ... cmdN | -f [file_name]", argv[0]);
+        DG_SEND_PRINT("Where:\n\t-l<server> - specify the diag server address");
         DG_SEND_PRINT("Where:\n\t cmdN     - AAAA[B...]");
         DG_SEND_PRINT("\t\tAAAA    - opcode has to be 4 hex digits (for instance 0039)");
         DG_SEND_PRINT("\t\t[B...]  - optional data payload of 1 or more hex digits");
@@ -114,6 +116,10 @@ int main(int argc, char* argv[])
     {
         switch (argv[argnum][1])
         {
+        case 'l':
+            server_name = &argv[argnum][2];
+            break;
+
         case 'f':
             filein = 1;
             break;
@@ -146,7 +152,7 @@ int main(int argc, char* argv[])
 
     DG_SEND_TRACE("+++ Establishing connection...");
 
-    while ((diag_session = DG_CLIENT_API_connect_to_server(NULL)) < 0)
+    while ((diag_session = DG_CLIENT_API_connect_to_server(server_name)) < 0)
     {
         DG_SEND_ERROR("Connect to diag engine try %d fails", try_count);
         if (try_count == DG_SEND_CONNECT_MAX_TRY)

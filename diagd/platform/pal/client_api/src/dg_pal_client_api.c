@@ -16,6 +16,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "dg_pal_client_platform_inc.h"
@@ -32,7 +33,7 @@
 ==================================================================================================*/
 #define DG_PAL_CLIENT_API_READ_TCP_RETRY_NUM 3     /**< Number of times to retry reading a socket  */
 #define DG_PAL_CLIENT_API_CONNECT_WAIT       5000  /**< Max wait time in ms to connect diag socket */
-#define DG_CLIENT_API_SERVER_PORT            11000 /**< Port of DIAG server       */
+#define DG_PAL_CLIENT_API_SERVER_PORT        11000 /**< Port of DIAG server       */
 
 /*==================================================================================================
                              LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -73,12 +74,11 @@ BOOL DG_PAL_CLIENT_API_start_diag_app(void)
 *//*==============================================================================================*/
 int DG_PAL_CLIENT_API_create_int_diag_socket()
 {
+    int socket_fd = -1;
 
     struct sockaddr_storage server;
     struct sockaddr_un*     unix_srv = (struct sockaddr_un*)&server;
     socklen_t               len      = 0;
-
-    int socket_fd = -1;
 
     if (access(DG_CFG_INT_SOCKET, F_OK) != 0)
     {
@@ -86,7 +86,7 @@ int DG_PAL_CLIENT_API_create_int_diag_socket()
         return -1;
     }
 
-    if ((socket_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+    if ((socket_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
     {
         DG_CLIENT_API_ERROR("Can't create unix socket, errno=%d (%s)", errno, strerror(errno));
         return -1;
@@ -108,11 +108,41 @@ int DG_PAL_CLIENT_API_create_int_diag_socket()
 /*=============================================================================================*//**
 @brief Creates socket for use by external DIAG clients
 
+@param [in] serv_addr - the diag server address
+
 @return File descriptor for the socket, -1 on fail
 *//*==============================================================================================*/
-int DG_PAL_CLIENT_API_create_ext_diag_socket()
+int DG_PAL_CLIENT_API_create_ext_diag_socket(const char* serv_addr)
 {
     int socket_fd = -1;
+
+    struct hostent*    he;
+    struct sockaddr_in address;
+
+    /* resolve hostname */
+    if ((he = gethostbyname(serv_addr)) == NULL)
+    {
+        DG_CLIENT_API_ERROR("Invalid server addrres: %s", serv_addr);
+        return -1;
+    }
+
+    socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (socket_fd < 0)
+    {
+        DG_CLIENT_API_ERROR("Can't create INET socket, errno=%d (%s)", errno, strerror(errno));
+        return -1;
+    }
+
+    memcpy(&address.sin_addr, he->h_addr_list[0], he->h_length);
+    address.sin_family = AF_INET;
+    address.sin_port   = htons(DG_PAL_CLIENT_API_SERVER_PORT);
+
+    if (!dg_pal_client_api_connect_socket(socket_fd, (struct sockaddr*)&address, sizeof(address)))
+    {
+        DG_PAL_CLIENT_API_close_diag_socket(socket_fd);
+        socket_fd = -1;
+    }
+
     return socket_fd;
 }
 

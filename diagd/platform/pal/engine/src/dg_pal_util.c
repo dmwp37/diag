@@ -259,13 +259,14 @@ BOOL DG_PAL_UTIL_is_socket_allowed(int socket)
         ifc.ifc_len = sizeof(buff);
 
         /* Get list of interfaces from the OS */
-        if ((ioctl(socket, SIOCGIFCONF, (caddr_t)&ifc) != 0))
+        if ((iface_name = dg_pal_util_get_ext_itfc_name()) == NULL)
+        {
+            DG_DBG_TRACE("external peer is allowed to connect");
+            is_allowed = TRUE;
+        }
+        else if ((ioctl(socket, SIOCGIFCONF, (caddr_t)&ifc) != 0))
         {
             DG_DBG_ERROR("failed to SIOCGIFCONF");
-        }
-        else if ((iface_name = dg_pal_util_get_ext_itfc_name()) == NULL)
-        {
-            DG_DBG_ERROR("Failed to get interface name while checking allowed socket");
         }
         else
         {
@@ -368,7 +369,6 @@ BOOL DG_PAL_UTIL_create_ext_diag_listen_sock(int* sock)
 {
     struct sockaddr_in serv_addr;
     int                sock_options;
-    struct ifreq       ifr;
     struct sockaddr_in iface;
     char*              iface_name;
 
@@ -384,19 +384,12 @@ BOOL DG_PAL_UTIL_create_ext_diag_listen_sock(int* sock)
         close(*sock);
         *sock = -1;
     }
-    else if ((iface_name = dg_pal_util_get_ext_itfc_name()) == NULL)
-    {
-        DG_DBG_ERROR("Failed to get interface name while creating ext socket");
-    }
     else
     {
         /* Setup the socket for IPv4, bind to usblan address */
         serv_addr.sin_family = AF_INET;
         memcpy(&serv_addr.sin_addr, &iface.sin_addr, sizeof(serv_addr.sin_addr));
         serv_addr.sin_port = htons(DG_PAL_UTIL_CLIENT_TCPIP_PORT);
-
-        memset(&ifr, 0, sizeof(ifr));
-        snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", iface_name);
 
         /* Set value for socket options and set the options.
            SO_REUSEADDR = Allow re-use of local addresses
@@ -422,7 +415,7 @@ BOOL DG_PAL_UTIL_create_ext_diag_listen_sock(int* sock)
         }
         else
         {
-            DG_DBG_TRACE("Succesfully created external listener DIAG socket: %d", *sock);
+            DG_DBG_TRACE("Successfully created external listener DIAG socket: %d", *sock);
         }
     }
 
@@ -805,7 +798,9 @@ BOOL dg_pal_util_get_ext_ip_address(int* sock, struct sockaddr_in* addr)
         }
         else if ((iface_name = dg_pal_util_get_ext_itfc_name()) == NULL)
         {
-            DG_DBG_ERROR("Failed to get interface name while getting ext IP address");
+            DG_DBG_TRACE("allow all connections for external interface");
+            addr->sin_addr.s_addr = htonl(INADDR_ANY);
+            is_success            = TRUE;
         }
         else
         {
@@ -836,16 +831,14 @@ BOOL dg_pal_util_get_ext_ip_address(int* sock, struct sockaddr_in* addr)
 /*=============================================================================================*//**
 @brief Gets the external client network interface name
 
-@return Pointer to the interface name, NULL on error.  Calling function must free
+@return Pointer to the interface name, NULL for all connection
 
 @note
- - Calling function must free return pointer if non-null
+ - If NULL is returned means all interface connections are allowed
 *//*==============================================================================================*/
 char* dg_pal_util_get_ext_itfc_name(void)
 {
-    char* name = "{A4856C8D-6E55-4FA7-ABE9-4981835C7CA3}";
-
-    return name;
+    return NULL;
 }
 
 /** @} */

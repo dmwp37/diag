@@ -60,9 +60,11 @@ int DG_PAL_CLIENT_API_create_int_diag_socket();
 /*=============================================================================================*//**
 @brief Creates socket for use by external DIAG clients
 
+@param [in] serv_addr - the diag server address
+
 @return File descriptor for the socket, -1 on fail
 *//*==============================================================================================*/
-int DG_PAL_CLIENT_API_create_ext_diag_socket();
+int DG_PAL_CLIENT_API_create_ext_diag_socket(const char* serv_addr);
 
 /*=============================================================================================*//**
 @brief Close the client socket
