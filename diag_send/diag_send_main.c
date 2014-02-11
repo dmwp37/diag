@@ -22,15 +22,12 @@
                                             LOCAL MACROS
 ==================================================================================================*/
 #if DG_DEBUG != 0
-/* printf-style debug message print */
     #define DG_SEND_TRACE(x ...) do { printf("DIAG_SEND: "x); printf("\n"); } while (0)
-/* printf-style error message print */
-    #define DG_SEND_ERROR(x ...) do { printf("DIAG_SEND ERROR: "x); printf("\n"); } while (0)
 #else
     #define DG_SEND_TRACE(x ...)
-    #define DG_SEND_ERROR(x ...)
 #endif
 
+#define DG_SEND_ERROR(x ...) do { printf("DIAG_SEND ERROR: "x); printf("\n"); } while (0)
 #define DG_SEND_PRINT(x ...) do { printf(x); printf("\n"); } while (0)
 
 /*==================================================================================================

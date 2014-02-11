@@ -21,14 +21,12 @@ extern "C" {
                                                MACROS
 ==================================================================================================*/
 #ifdef DG_DEBUG
-/* printf-style debug message print */
     #define DG_CLIENT_API_TRACE(x ...) do { printf("DIAG API: "x); printf("\n"); } while (0)
-/* printf-style error message print */
-    #define DG_CLIENT_API_ERROR(x ...) do { printf("DIAG API ERROR: "x); printf("\n"); } while (0)
 #else
     #define DG_CLIENT_API_TRACE(x ...)
-    #define DG_CLIENT_API_ERROR(x ...)
 #endif
+
+#define DG_CLIENT_API_ERROR(x ...) do { printf("DIAG API ERROR: "x); printf("\n"); } while (0)
 
 /*==================================================================================================
                                                ENUMS
