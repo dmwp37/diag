@@ -44,6 +44,7 @@ extern "C" {
 void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_PCI_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
