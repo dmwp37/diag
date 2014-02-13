@@ -181,7 +181,6 @@ int main(int argc, char* argv[])
             }
             if (!dg_send_process_raw_command(diag_session, buffer))
             {
-                DG_SEND_ERROR("dg_send_process_raw_command failed");
                 ret = -1;
                 break;
             }
@@ -197,7 +196,6 @@ int main(int argc, char* argv[])
         {
             if (!dg_send_process_raw_command(diag_session, argv[i]))
             {
-                DG_SEND_ERROR("dg_send_process_raw_command failed");
                 ret = -1;
                 break;
             }
@@ -310,8 +308,8 @@ BOOL dg_send_process_raw_command(int diag_session, char* command)
             {
                 char* err_str = NULL;
 
-                DG_SEND_ERROR("DIAG response for opcode 0x%04x indicates failure, rsp_len=%d",
-                              opcode, diag_rsp->data_len);
+                DG_SEND_ERROR("DIAG response for opcode 0x%04x indicates failure, rsp_code=%d",
+                              opcode, diag_rsp->rsp_code);
                 DG_SEND_PRINT("-> Failure data received");
                 /* If response code is an ASCII error string, print out the ascii response */
                 if ((diag_rsp->rsp_code >= 0x80) &&

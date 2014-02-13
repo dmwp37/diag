@@ -11,6 +11,7 @@
 ==================================================================================================*/
 #include <unistd.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <arpa/inet.h>
 #include "dg_handler_inc.h"
 #include "dg_client_api.h"

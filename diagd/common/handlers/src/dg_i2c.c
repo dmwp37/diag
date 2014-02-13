@@ -46,21 +46,21 @@ typedef UINT8 DG_I2C_ACTION_T;
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-const UINT32 DG_I2C_REQ_LEN_MIN = sizeof(DG_I2C_ACTION_T) +
-                                  sizeof(DG_CMN_DRV_I2C_BUS_T) +
-                                  sizeof(DG_CMN_DRV_I2C_ADDR_T) +
-                                  sizeof(DG_CMN_DRV_I2C_OFFSET_T);
+static const UINT32 DG_I2C_REQ_LEN_MIN = sizeof(DG_I2C_ACTION_T) +
+                                         sizeof(DG_CMN_DRV_I2C_BUS_T) +
+                                         sizeof(DG_CMN_DRV_I2C_ADDR_T) +
+                                         sizeof(DG_CMN_DRV_I2C_OFFSET_T);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
-static void diag_i2c_read_bus(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
-                              DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address,
-                              DG_CMN_DRV_I2C_OFFSET_T offset);
+static void dg_i2c_read_bus(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
+                            DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address,
+                            DG_CMN_DRV_I2C_OFFSET_T offset);
 
-static void diag_i2c_write_bus(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
-                               DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address,
-                               DG_CMN_DRV_I2C_OFFSET_T offset);
+static void dg_i2c_write_bus(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
+                             DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address,
+                             DG_CMN_DRV_I2C_OFFSET_T offset);
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -103,11 +103,11 @@ void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req)
         switch (action)
         {
         case DG_I2C_ACTION_READ:
-            diag_i2c_read_bus(req, rsp, bus, address, offset);
+            dg_i2c_read_bus(req, rsp, bus, address, offset);
             break;
 
         case DG_I2C_ACTION_WRITE:
-            diag_i2c_write_bus(req, rsp, bus, address, offset);
+            dg_i2c_write_bus(req, rsp, bus, address, offset);
             break;
 
         default:
@@ -133,9 +133,9 @@ void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req)
 @param[in]     bus     - I2C bus number in the system
 @param[in]     address - slave device address
 *//*==============================================================================================*/
-void diag_i2c_read_bus(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
-                       DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address,
-                       DG_CMN_DRV_I2C_OFFSET_T offset)
+void dg_i2c_read_bus(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
+                     DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address,
+                     DG_CMN_DRV_I2C_OFFSET_T offset)
 {
     DG_CMN_DRV_I2C_SIZE_T read_length = 0;
     UINT8*                read_data   = NULL;
@@ -176,9 +176,9 @@ void diag_i2c_read_bus(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
 @param[in]     bus     - I2C bus number in the system
 @param[in]     address - slave device address
 *//*==============================================================================================*/
-void diag_i2c_write_bus(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
-                        DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address,
-                        DG_CMN_DRV_I2C_OFFSET_T offset)
+void dg_i2c_write_bus(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
+                      DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address,
+                      DG_CMN_DRV_I2C_OFFSET_T offset)
 {
     DG_CMN_DRV_I2C_SIZE_T write_length = 0;
     UINT8*                write_data   = NULL;
