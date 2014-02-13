@@ -1,18 +1,27 @@
-#ifndef _DG_COMMON_HANDLER_TABLE_H
-#define _DG_COMMON_HANDLER_TABLE_H
+#ifndef _DG_CMN_DRV_RESET_H_
+#define _DG_CMN_DRV_RESET_H_
 /*==================================================================================================
 
-    Module Name:  dg_common_handler_table.h
+    Module Name:  dg_cmn_drv_reset.h
 
-    General Description:  Header file for all common handler function prototypes
+    General Description: This file provides driver interface for RESET test
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
 
+/** @addtogroup dg_common_drivers
+@{
+*/
+
+/** @addtogroup RESET_driver
+@{
+
+@par
+Provide APIs for RESET
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +34,16 @@ extern "C" {
 /*==================================================================================================
                                                ENUMS
 ==================================================================================================*/
+/** RESET Chip Selection */
+enum
+{
+    DG_CMN_DRV_RESET_PCH    = 0x00,
+    DG_CMN_DRV_RESET_FPGA   = 0x01,
+    DG_CMN_DRV_RESET_SWITCH = 0x02,
+    DG_CMN_DRV_RESET_PHY    = 0x03,
+    DG_CMN_DRV_RESET_SYS    = 0xFF,
+};
+typedef UINT8 DG_CMN_DRV_RESET_COMP_T;
 
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
@@ -37,23 +56,24 @@ extern "C" {
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-/* Important Note: Please add all handler functions to this list in alphabetical order.  All
-   functions must have the name format/prototype of
-   DG_<DIAG NAME>_handler_main(DG_DEFS_DIAG_REQ_T *req) */
 
-void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PCI_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req);
+/*=============================================================================================*//**
+@brief Reads data from a given address on the given RESET bus
+
+@param[in]  comp       - Which component to reset
+@param[in]  is_reset   - TRUE to reset and FALSE to recover
+
+@note
+- Read data is only valid when the function returns with a success
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_RESET_reset(DG_CMN_DRV_RESET_COMP_T comp, BOOL is_reset);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _DG_COMMON_HANDLER_TABLE_H */
+/** @} */
+/** @} */
+
+#endif /* _DG_CMN_DRV_DBG_LVL_H_  */
 
