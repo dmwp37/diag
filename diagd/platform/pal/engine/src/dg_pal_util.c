@@ -22,6 +22,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 #include <sys/file.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <net/if.h>
@@ -348,6 +349,7 @@ BOOL DG_PAL_UTIL_create_int_diag_listen_sock(int* sock)
         }
         else
         {
+            chmod(server.sun_path, DEFFILEMODE);
             DG_DBG_TRACE("Successfully setup internal DIAG socket %d", *sock);
         }
     }
@@ -370,7 +372,6 @@ BOOL DG_PAL_UTIL_create_ext_diag_listen_sock(int* sock)
     struct sockaddr_in serv_addr;
     int                sock_options;
     struct sockaddr_in iface;
-    char*              iface_name;
 
     /* Create the socket */
     *sock = socket(AF_INET, SOCK_STREAM, 0);
