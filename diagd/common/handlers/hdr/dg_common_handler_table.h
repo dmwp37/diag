@@ -42,6 +42,7 @@ extern "C" {
    DG_<DIAG NAME>_handler_main(DG_DEFS_DIAG_REQ_T *req) */
 
 void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_FPGA_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PCI_handler_main(DG_DEFS_DIAG_REQ_T* req);

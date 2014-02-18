@@ -5,6 +5,7 @@
       <logicalFolder name="drivers" displayName="drivers" projectFiles="true">
         <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h</itemPath>
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_fpga.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_i2c.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_led.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_pci.h</itemPath>
@@ -54,6 +55,7 @@
         </logicalFolder>
         <logicalFolder name="src" displayName="src" projectFiles="true">
           <itemPath>../../../diagd/common/handlers/src/dg_debug_level.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_fpga.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_i2c.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_led.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_pci.c</itemPath>
@@ -72,6 +74,7 @@
         </logicalFolder>
         <logicalFolder name="src" displayName="src" projectFiles="true">
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_fpga.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_i2c.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_led.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_pci.c</itemPath>
@@ -182,6 +185,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_fpga.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_i2c.h"
             ex="false"
             tool="3"
@@ -337,6 +345,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_fpga.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_i2c.c"
             ex="false"
             tool="0"
@@ -384,6 +397,11 @@
       <item path="../../../diagd/platform/README.txt" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_fpga.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -488,6 +506,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_fpga.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_i2c.h"
             ex="false"
             tool="3"
@@ -643,6 +666,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_fpga.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_i2c.c"
             ex="false"
             tool="0"
@@ -690,6 +718,11 @@
       <item path="../../../diagd/platform/README.txt" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_fpga.c"
             ex="false"
             tool="0"
             flavor2="0">
