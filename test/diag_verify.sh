@@ -27,6 +27,7 @@ declare -a __array_command=("${!2}")
 declare -a __array_des=("${!3}")
 
 for var in ${__array_command[@]}; do
+    echo -e "$index)"
 
     echo ${__array_des[$index]} : $var
 
@@ -57,7 +58,6 @@ for var in ${__array_command[@]}; do
             cat $FILE_TEMP>>$FILE_FAILURE_LOG
         fi
     fi
-
     let index+=1;
 done
 

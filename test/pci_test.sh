@@ -9,10 +9,10 @@ RD_CFG_ACTION=00
 RD_MEM_ACTION=01
 
 DOMAIN=00
-BUS=02
-DEV=03
-FUNC=04
-OFFSET=00000005
+BUS=00
+DEV=1f
+FUNC=03
+OFFSET=00000001
 LEN=00000006
 
 echo "#-----------------------$SEC_NAME-----------------------"
@@ -22,23 +22,18 @@ echo "#-----------------------$SEC_NAME-----------------------"
 #command array
 array_command[0]=0ffd010000
 array_command[1]="$OPCODE""$RD_CFG_ACTION""$DOMAIN""$BUS""$DEV""$FUNC""$OFFSET""$LEN"
-array_command[2]="$OPCODE""$RD_MEM_ACTION""$DOMAIN""$BUS""$DEV""$FUNC""$OFFSET""$LEN"
-array_command[3]=0ffd010001
+array_command[2]=0ffd010001
 
 #command description array, need match with command array above.
 array_des[0]="Enable Data Dump"
 array_des[1]="Read PCI config space=$DOMAIN:$BUS:$DEV.$FUNC Offset=$OFFSET Len=$LEN"
-array_des[2]="Read PCI memory space=$DOMAIN:$BUS:$DEV.$FUNC Offset=$OFFSET Len=$LEN"
-array_des[3]="Disable Data Dump"
+array_des[2]="Disable Data Dump"
 
 DOMAIN=01
-BUS=02
-DEV=03
-FUNC=04
-OFFSET=00000005
-LEN=00000006
 array_command_fail[0]="$OPCODE""$RD_CFG_ACTION""$DOMAIN""$BUS""$DEV""$FUNC""$OFFSET""$LEN"
-array_des_fail[0]="Read invalid domain.  $DOMAIN:$BUS:$DEV.$FUNC Offset=$OFFSET Len=$LEN"
+array_command_fail[1]="$OPCODE""$RD_MEM_ACTION""$DOMAIN""$BUS""$DEV""$FUNC""$OFFSET""$LEN"
+array_des_fail[0]="Read PCI config space, Invalid parameter. $DOMAIN_INVALID:$BUS:$DEV.$FUNC Offset=$OFFSET Len=$LEN"
+array_des_fail[1]="Unsupport memory space read.$DOMAIN:$BUS:$DEV.$FUNC Offset=$OFFSET Len=$LEN"
 
 . $CUR_PATH/diag_verify.sh
 
