@@ -50,7 +50,7 @@ implementation of the FPGA driver
                                           LOCAL VARIABLES
 ==================================================================================================*/
 /* simulate the FPGA register set */
-static DG_CMN_DRV_FPGA_REG_T dg_cmn_drv_fpga_reg[DG_CMN_DRV_FPGA_MAX_REG];
+static DG_CMN_DRV_FPGA_REG_VALUE_T dg_cmn_drv_fpga_reg[DG_CMN_DRV_FPGA_MAX_REG];
 
 /* simulate the FPGA memory set */
 static UINT8 dg_cmn_drv_fpga_mem[DG_CMN_DRV_FPGA_MAX_MEM];
@@ -62,20 +62,20 @@ static UINT8 dg_cmn_drv_fpga_mem[DG_CMN_DRV_FPGA_MAX_MEM];
 /*=============================================================================================*//**
 @brief Reads specified FPGA register
 
-@param[in]  addr     - The offset of the FPGA register
-@param[out] reg_data - The data read from the register
+@param[in]  addr  - The offset of the FPGA register
+@param[out] value - The data read from the register
 
 @note
 - Read data is only valid when the function returns with a success
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_FPGA_read_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_REG_T* reg_data)
+BOOL DG_CMN_DRV_FPGA_read_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_REG_VALUE_T* value)
 {
     BOOL ret = FALSE;
 
     if (addr < DG_CMN_DRV_FPGA_MAX_REG)
     {
-        *reg_data = dg_cmn_drv_fpga_reg[addr];
-        DG_DBG_TRACE("Read FPGA register: address=0x%04x, value=0x%08x", addr, *reg_data);
+        *value = dg_cmn_drv_fpga_reg[addr];
+        DG_DBG_TRACE("Read FPGA register: address=0x%04x, value=0x%08x", addr, *value);
 
         ret = TRUE;
     }
@@ -90,17 +90,17 @@ BOOL DG_CMN_DRV_FPGA_read_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_R
 /*=============================================================================================*//**
 @brief Writes specified FPGA register
 
-@param[in] addr     - The offset of the FPGA register
-@param[in] reg_data - The data write to the register
+@param[in] addr  - The offset of the FPGA register
+@param[in] value - The data write to the register
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_FPGA_write_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_REG_T reg_data)
+BOOL DG_CMN_DRV_FPGA_write_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_REG_VALUE_T value)
 {
     BOOL ret = FALSE;
 
     if (addr < DG_CMN_DRV_FPGA_MAX_REG)
     {
-        dg_cmn_drv_fpga_reg[addr] = reg_data;
-        DG_DBG_TRACE("Write FPGA register address=0x%04x, value=0x%08x", addr, reg_data);
+        dg_cmn_drv_fpga_reg[addr] = value;
+        DG_DBG_TRACE("Write FPGA register address=0x%04x, value=0x%08x", addr, value);
 
         ret = TRUE;
     }

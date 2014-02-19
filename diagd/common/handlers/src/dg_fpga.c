@@ -161,8 +161,8 @@ void DG_FPGA_handler_main(DG_DEFS_DIAG_REQ_T* req)
 *//*==============================================================================================*/
 void dg_fpga_read_reg(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 {
-    DG_CMN_DRV_FPGA_REG_ADDR_T addr;
-    DG_CMN_DRV_FPGA_REG_T      reg_data;
+    DG_CMN_DRV_FPGA_REG_ADDR_T  addr;
+    DG_CMN_DRV_FPGA_REG_VALUE_T reg_data;
 
     if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(addr), rsp))
     {
@@ -193,8 +193,8 @@ void dg_fpga_read_reg(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 *//*==============================================================================================*/
 void dg_fpga_write_reg(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 {
-    DG_CMN_DRV_FPGA_REG_ADDR_T addr;
-    DG_CMN_DRV_FPGA_REG_T      reg_data;
+    DG_CMN_DRV_FPGA_REG_ADDR_T  addr;
+    DG_CMN_DRV_FPGA_REG_VALUE_T reg_data;
 
     const UINT32 min_len = sizeof(addr) + sizeof(reg_data);
 

@@ -39,7 +39,7 @@ extern "C" {
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
 /** FPGA Register */
-typedef UINT32 DG_CMN_DRV_FPGA_REG_T;
+typedef UINT32 DG_CMN_DRV_FPGA_REG_VALUE_T;
 
 /** FPGA Register offset */
 typedef UINT16 DG_CMN_DRV_FPGA_REG_ADDR_T;
@@ -98,7 +98,7 @@ typedef UINT8 DG_CMN_DRV_FPGA_IMAGE_T;
 @note
 - Read data is only valid when the function returns with a success
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_FPGA_read_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_REG_T* reg_data);
+BOOL DG_CMN_DRV_FPGA_read_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_REG_VALUE_T* reg_data);
 
 /*=============================================================================================*//**
 @brief Writes specified FPGA register
@@ -106,7 +106,7 @@ BOOL DG_CMN_DRV_FPGA_read_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_R
 @param[in] addr     - The offset of the FPGA register
 @param[in] reg_data - The data write to the register
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_FPGA_write_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_REG_T reg_data);
+BOOL DG_CMN_DRV_FPGA_write_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_REG_VALUE_T reg_data);
 
 /*=============================================================================================*//**
 @brief Reads data from the FPGA memory
