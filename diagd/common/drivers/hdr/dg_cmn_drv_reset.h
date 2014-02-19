@@ -75,5 +75,5 @@ BOOL DG_CMN_DRV_RESET_reset(DG_CMN_DRV_RESET_COMP_T comp, BOOL is_reset);
 /** @} */
 /** @} */
 
-#endif /* _DG_CMN_DRV_DBG_LVL_H_  */
+#endif /* _DG_CMN_DRV_RESET_H_  */
 

@@ -94,5 +94,5 @@ BOOL DG_CMN_DRV_I2C_write_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T ad
 /** @} */
 /** @} */
 
-#endif /* _DG_CMN_DRV_DBG_LVL_H_  */
+#endif /* _DG_CMN_DRV_I2C_H_  */
 

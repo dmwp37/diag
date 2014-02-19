@@ -189,5 +189,5 @@ BOOL DG_CMN_DRV_FPGA_download_image(DG_CMN_DRV_FPGA_IMAGE_T image);
 /** @} */
 /** @} */
 
-#endif /* _DG_CMN_DRV_DBG_LVL_H_  */
+#endif /* _DG_CMN_DRV_FPGA_H_  */
 
