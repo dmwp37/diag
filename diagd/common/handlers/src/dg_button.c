@@ -1,45 +1,49 @@
 /*==================================================================================================
 
-    Module Name:  dg_handler_table.c
+    Module Name:  dg_button.c
 
-    General Description: Table for DIAG handlers
+    General Description: Implements the BUTTON test handler
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
-#include "dg_common_handler_table.h"
-#include "dg_handler_table.h"
+#include <stdlib.h>
+#include "dg_handler_inc.h"
+#include "dg_cmn_drv_button.h"
 
 
 /** @addtogroup common_command_handlers
 @{
 */
 
-/** @addtogroup Handler_Table
+/** @addtogroup BUTTON
 @{
 
 @par
-<b>Handler_Table</b>
+<b>BUTTON - 0x000F</b>
 
 @par
-Static Handler Table for the diag opcode dispatching
-engine
+Get the last pressed BUTTON.
 */
-
-/*==================================================================================================
-                                          LOCAL CONSTANTS
-==================================================================================================*/
 
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_HANDLER_TABLE_DEFAULT_TIMEOUT 10000 /**< Default timeout used for DIAGs */
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
+==================================================================================================*/
+/** Actions for BUTTON command */
+enum
+{
+    DG_BUTTON_ACTION_GET = 0x00,
+};
+typedef UINT8 DG_BUTTON_ACTION_T;
+
+/*==================================================================================================
+                                          LOCAL CONSTANTS
 ==================================================================================================*/
 
 /*==================================================================================================
@@ -49,27 +53,6 @@ engine
 /*==================================================================================================
                                          GLOBAL VARIABLES
 ==================================================================================================*/
-/** Table for storing all opcodes/commands we are able to process with this engine
-    Important: Table must be in order of ascending opcodes! The last line must have the opcode of
-    DG_DEFS_HANDLER_TABLE_OPCODE_END */
-const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
-{
-    { 0x0000, DG_DEFS_MODE_ALL,  DG_VERSION_handler_main,     DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0001, DG_DEFS_MODE_ALL,  DG_LED_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x000D, DG_DEFS_MODE_TEST, DG_FPGA_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x000F, DG_DEFS_MODE_TEST, DG_BUTTON_handler_main,      DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0010, DG_DEFS_MODE_TEST, DG_I2C_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0013, DG_DEFS_MODE_ALL,  DG_PCI_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0100, DG_DEFS_MODE_ALL,  DG_SUSPEND_handler_main,     DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0101, DG_DEFS_MODE_TEST, DG_RESET_handler_main,       DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFD, DG_DEFS_MODE_ALL,  DG_DEBUG_LEVEL_handler_main, DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFE, DG_DEFS_MODE_ALL,  DG_TEST_ENGINE_handler_main, DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFF, DG_DEFS_MODE_ALL,  DG_PING_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-
-    /* IMPORTANT: This must be the last line! */
-    { DG_DEFS_HANDLER_TABLE_OPCODE_END, DG_DEFS_MODE_ALL, DG_AUX_CMD_handler_main, 60000 }
-
-};
 
 /*==================================================================================================
                                           LOCAL VARIABLES
@@ -78,6 +61,56 @@ const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
 ==================================================================================================*/
+
+/*=============================================================================================*//**
+@brief Handler function for the BUTTON command
+
+@param[in] req - DIAG request
+*//*==============================================================================================*/
+void DG_BUTTON_handler_main(DG_DEFS_DIAG_REQ_T* req)
+{
+    DG_BUTTON_ACTION_T          action;
+    DG_CMN_DRV_BUTTON_CODE_T    code;
+    DG_DEFS_DIAG_RSP_BUILDER_T* rsp = DG_ENGINE_UTIL_rsp_init();
+
+    /* Verify action parameter was given */
+    DG_DBG_TRACE("In DG_BUTTON_handler_main begin to parse Request");
+    if (DG_ENGINE_UTIL_req_len_check_at_least(req, sizeof(action), rsp))
+    {
+        /* Parse and switch on action */
+        DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
+
+        DG_DBG_TRACE("action=0x%02x", action);
+
+        switch (action)
+        {
+        case DG_BUTTON_ACTION_GET:
+            if (!DG_CMN_DRV_BUTTON_get(&code))
+            {
+                DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
+                                                        "Failed to get last BUTTON");
+            }
+            else
+            {
+                /* Allocate memory for read data */
+                if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, sizeof(code)))
+                {
+                    DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
+                    DG_ENGINE_UTIL_rsp_append_data_hton(rsp, code);
+                }
+            }
+            break;
+
+        default:
+            DG_ENGINE_UTIL_rsp_set_error_string(rsp, DG_RSP_CODE_ASCII_ERR_PARM,
+                                                "Invalid action 0x%02x", action);
+            break;
+        }
+    }
+
+    DG_ENGINE_UTIL_rsp_send(rsp, req);
+    DG_ENGINE_UTIL_rsp_free(rsp);
+}
 
 /*==================================================================================================
                                           LOCAL FUNCTIONS
