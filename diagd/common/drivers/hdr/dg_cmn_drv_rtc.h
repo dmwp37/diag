@@ -1,10 +1,10 @@
-#ifndef _DG_CMN_DRV_BUTTON_H_
-#define _DG_CMN_DRV_BUTTON_H_
+#ifndef _DG_CMN_DRV_RTC_H_
+#define _DG_CMN_DRV_RTC_H_
 /*==================================================================================================
 
-    Module Name:  dg_cmn_drv_button.h
+    Module Name:  dg_cmn_drv_rtc.h
 
-    General Description: This file provides driver interface for BUTTON test
+    General Description: This file provides driver interface for RTC test
 
 ====================================================================================================
 
@@ -16,11 +16,11 @@
 @{
 */
 
-/** @addtogroup BUTTON_driver
+/** @addtogroup RTC_driver
 @{
 
 @par
-Provide APIs for BUTTON
+Provide APIs for RTC
 */
 
 #ifdef __cplusplus
@@ -38,14 +38,16 @@ extern "C" {
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
-/** BUTTON code */
-enum
+/** RTC date structure */
+typedef struct
 {
-    DG_CMN_DRV_BUTTON_POWER = 0x00,
-    DG_CMN_DRV_BUTTON_RESET = 0x01,
-    DG_CMN_DRV_BUTTON_NONE  = 0xFF  /* no button pressed */
-};
-typedef UINT8 DG_CMN_DRV_BUTTON_CODE_T;
+    UINT16 year;
+    UINT8  month;
+    UINT8  day;
+    UINT8  hour;
+    UINT8  minute;
+    UINT8  second;
+} DG_CMN_DRV_RTC_DATE_T;
 
 /*==================================================================================================
                                    GLOBAL VARIABLE DECLARATIONS
@@ -56,12 +58,20 @@ typedef UINT8 DG_CMN_DRV_BUTTON_CODE_T;
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief Get the last pressed button key code
+@brief Reads date from RTC
 
-@param[out] code - The last pressed button key code
+@param[out] date - The date structure filled from RTC
 
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_BUTTON_get(DG_CMN_DRV_BUTTON_CODE_T* code);
+BOOL DG_CMN_DRV_RTC_get(DG_CMN_DRV_RTC_DATE_T* date);
+
+/*=============================================================================================*//**
+@brief Set date to RTC
+
+@param[in] date - The date structure set to RTC
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_RTC_set(DG_CMN_DRV_RTC_DATE_T* date);
 
 #ifdef __cplusplus
 }
@@ -70,5 +80,5 @@ BOOL DG_CMN_DRV_BUTTON_get(DG_CMN_DRV_BUTTON_CODE_T* code);
 /** @} */
 /** @} */
 
-#endif /* _DG_CMN_DRV_BUTTON_H_  */
+#endif /* _DG_CMN_DRV_RTC_H_  */
 

@@ -53,7 +53,7 @@ implementation of the BUTTON driver
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief Reads data from a given address on the given BUTTON bus
+@brief Get the last pressed button key code
 
 @param[out] code - The last pressed button key code
 

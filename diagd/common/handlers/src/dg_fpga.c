@@ -154,7 +154,7 @@ void DG_FPGA_handler_main(DG_DEFS_DIAG_REQ_T* req)
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief Read bus
+@brief Read FPGA register
 
 @param[in]     req     - DIAG request
 @param[in,out] rsp     - DIAG rsp builder
@@ -186,7 +186,7 @@ void dg_fpga_read_reg(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 }
 
 /*=============================================================================================*//**
-@brief Write bus
+@brief Write FPGA register
 
 @param[in]     req     - DIAG request
 @param[in,out] rsp     - DIAG rsp builder
@@ -216,7 +216,7 @@ void dg_fpga_write_reg(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 }
 
 /*=============================================================================================*//**
-@brief Write bus
+@brief Read FPGA memory
 
 @param[in]     req     - DIAG request
 @param[in,out] rsp     - DIAG rsp builder
@@ -257,7 +257,7 @@ void dg_fpga_read_mem(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 }
 
 /*=============================================================================================*//**
-@brief Write bus
+@brief Write FPGA memory
 
 @param[in]     req     - DIAG request
 @param[in,out] rsp     - DIAG rsp builder
@@ -296,7 +296,7 @@ void dg_fpga_write_mem(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 }
 
 /*=============================================================================================*//**
-@brief Write bus
+@brief DMA read FPGA memory
 
 @param[in]     req     - DIAG request
 @param[in,out] rsp     - DIAG rsp builder
@@ -337,7 +337,7 @@ void dg_fpga_dma_recv(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 }
 
 /*=============================================================================================*//**
-@brief Write bus
+@brief DMA write PFGA memory
 
 @param[in]     req     - DIAG request
 @param[in,out] rsp     - DIAG rsp builder
@@ -376,7 +376,7 @@ void dg_fpga_dma_send(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 }
 
 /*=============================================================================================*//**
-@brief Write bus
+@brief FPGA self-test
 
 @param[in]     req     - DIAG request
 @param[in,out] rsp     - DIAG rsp builder
@@ -402,7 +402,7 @@ void dg_fpga_self_test(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 }
 
 /*=============================================================================================*//**
-@brief Write bus
+@brief set FPGA to specific mode
 
 @param[in]     req     - DIAG request
 @param[in,out] rsp     - DIAG rsp builder
@@ -428,7 +428,7 @@ void dg_fpga_set_mode(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp)
 }
 
 /*=============================================================================================*//**
-@brief Write bus
+@brief Download specific FPGA image
 
 @param[in]     req     - DIAG request
 @param[in,out] rsp     - DIAG rsp builder
