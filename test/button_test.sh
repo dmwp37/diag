@@ -13,8 +13,8 @@ echo "#-----------------------$SEC_NAME-----------------------"
 
 #command array
 array_command[0]=01000102
+array_command[1]="$OPCODE""$GET_ACTION"
 array_command[2]="$OPCODE""$GET_ACTION"
-array_command[3]="$OPCODE""$GET_ACTION"
 
 #command description array, need match with command array above.
 array_des[0]="Suspend the DUT"

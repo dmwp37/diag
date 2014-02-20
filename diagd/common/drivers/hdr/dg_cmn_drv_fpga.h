@@ -44,10 +44,10 @@ typedef UINT32 DG_CMN_DRV_FPGA_REG_VALUE_T;
 /** FPGA Register offset */
 typedef UINT16 DG_CMN_DRV_FPGA_REG_ADDR_T;
 
-/** FPGA Memory offset */
+/** FPGA Memory address */
 typedef UINT32 DG_CMN_DRV_FPGA_MEM_ADDR_T;
 
-/** FPGA Memory offset */
+/** FPGA Memory size */
 typedef UINT16 DG_CMN_DRV_FPGA_MEM_SIZE_T;
 
 /** FPGA Self-test */
@@ -92,21 +92,21 @@ typedef UINT8 DG_CMN_DRV_FPGA_IMAGE_T;
 /*=============================================================================================*//**
 @brief Reads specified FPGA register
 
-@param[in]  addr     - The offset of the FPGA register
-@param[out] reg_data - The data read from the register
+@param[in]  addr  - The offset of the FPGA register
+@param[out] value - The data read from the register
 
 @note
 - Read data is only valid when the function returns with a success
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_FPGA_read_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_REG_VALUE_T* reg_data);
+BOOL DG_CMN_DRV_FPGA_read_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_REG_VALUE_T* value);
 
 /*=============================================================================================*//**
 @brief Writes specified FPGA register
 
-@param[in] addr     - The offset of the FPGA register
-@param[in] reg_data - The data write to the register
+@param[in] addr  - The offset of the FPGA register
+@param[in] value - The data write to the register
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_FPGA_write_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_REG_VALUE_T reg_data);
+BOOL DG_CMN_DRV_FPGA_write_reg(DG_CMN_DRV_FPGA_REG_ADDR_T addr, DG_CMN_DRV_FPGA_REG_VALUE_T value);
 
 /*=============================================================================================*//**
 @brief Reads data from the FPGA memory
