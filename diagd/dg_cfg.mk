@@ -7,7 +7,7 @@
 #===================================================================================================
 
 ### Aux Configuration
-DG_CFG_DEFINES += DG_CFG_AUX_NUM=2
+DG_CFG_DEFINES += DG_CFG_AUX_NUM=0
 
 
 ### Diag daemon pid file
