@@ -1,18 +1,27 @@
-#ifndef _DG_COMMON_HANDLER_TABLE_H
-#define _DG_COMMON_HANDLER_TABLE_H
+#ifndef _DG_CMN_DRV_USB_H_
+#define _DG_CMN_DRV_USB_H_
 /*==================================================================================================
 
-    Module Name:  dg_common_handler_table.h
+    Module Name:  dg_cmn_drv_usb.h
 
-    General Description:  Header file for all common handler function prototypes
+    General Description: This file provides driver interface for USB test
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
 
+/** @addtogroup dg_common_drivers
+@{
+*/
+
+/** @addtogroup USB_driver
+@{
+
+@par
+Provide APIs for USB
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,13 +31,32 @@ extern "C" {
                                               MACROS
 ==================================================================================================*/
 
+
 /*==================================================================================================
                                                ENUMS
 ==================================================================================================*/
+enum
+{
+    DG_CMN_DRV_USB_PORT_FEB  = 0x00,
+    DG_CMN_DRV_USB_PORT_WTB0 = 0x01,
+    DG_CMN_DRV_USB_PORT_WTB1 = 0x02,
+};
+typedef UINT8 DG_CMN_DRV_USB_PORT_T;
 
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
+typedef struct
+{
+    UINT8  bus;
+    UINT8  device;
+    UINT16 vendor;
+    UINT16 product;
+    UINT8  major;
+    UINT8  minor;
+    UINT16 maxpower;    /* mA */
+    UINT16 speed;       /* Mbit/s */
+} DG_CMN_DRV_USB_INFO_T;
 
 /*==================================================================================================
                                    GLOBAL VARIABLE DECLARATIONS
@@ -37,27 +65,24 @@ extern "C" {
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-/* Important Note: Please add all handler functions to this list in alphabetical order.  All
-   functions must have the name format/prototype of
-   DG_<DIAG NAME>_handler_main(DG_DEFS_DIAG_REQ_T *req) */
 
-void DG_BUTTON_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_FPGA_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PCI_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_RTC_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_USB_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req);
+/*=============================================================================================*//**
+@brief Reads data from a given port on the given USB device
+
+@param[in]  port     - The USB port to read from
+@param[out] usb_info - The usb info read from the device
+
+@note
+- Read data is only valid when the function returns with a success
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_USB_read_info(DG_CMN_DRV_USB_PORT_T port, DG_CMN_DRV_USB_INFO_T* usb_info);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _DG_COMMON_HANDLER_TABLE_H */
+/** @} */
+/** @} */
+
+#endif /* _DG_CMN_DRV_DBG_LVL_H_  */
 

@@ -1,32 +1,26 @@
 /*==================================================================================================
 
-    Module Name:  dg_handler_table.c
+    Module Name:  dg_cmn_drv_usb.c
 
-    General Description: Table for DIAG handlers
+    General Description: Implements the USB common driver
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
-#include "dg_common_handler_table.h"
-#include "dg_handler_table.h"
+#include "dg_handler_inc.h"
+#include "dg_drv_util.h"
+#include "dg_cmn_drv_usb.h"
 
 
-/** @addtogroup common_command_handlers
+/** @addtogroup dg_common_drivers
 @{
 */
 
-/** @addtogroup Handler_Table
+/** @addtogroup USB_driver
 @{
-
-@par
-<b>Handler_Table</b>
-
-@par
-Static Handler Table for the diag opcode dispatching
-engine
+implementation of the USB driver
 */
 
 /*==================================================================================================
@@ -36,7 +30,7 @@ engine
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_HANDLER_TABLE_DEFAULT_TIMEOUT 10000 /**< Default timeout used for DIAGs */
+#define DG_CMN_DRV_USB_PORT_NUM_MAX 3
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -49,29 +43,6 @@ engine
 /*==================================================================================================
                                          GLOBAL VARIABLES
 ==================================================================================================*/
-/** Table for storing all opcodes/commands we are able to process with this engine
-    Important: Table must be in order of ascending opcodes! The last line must have the opcode of
-    DG_DEFS_HANDLER_TABLE_OPCODE_END */
-const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
-{
-    { 0x0000, DG_DEFS_MODE_ALL,  DG_VERSION_handler_main,     DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0001, DG_DEFS_MODE_ALL,  DG_LED_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x000D, DG_DEFS_MODE_TEST, DG_FPGA_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x000F, DG_DEFS_MODE_TEST, DG_BUTTON_handler_main,      DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0010, DG_DEFS_MODE_TEST, DG_I2C_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0011, DG_DEFS_MODE_ALL,  DG_USB_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0013, DG_DEFS_MODE_ALL,  DG_PCI_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0016, DG_DEFS_MODE_ALL,  DG_RTC_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0100, DG_DEFS_MODE_ALL,  DG_SUSPEND_handler_main,     DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0101, DG_DEFS_MODE_TEST, DG_RESET_handler_main,       DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFD, DG_DEFS_MODE_ALL,  DG_DEBUG_LEVEL_handler_main, DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFE, DG_DEFS_MODE_ALL,  DG_TEST_ENGINE_handler_main, DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFF, DG_DEFS_MODE_ALL,  DG_PING_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-
-    /* IMPORTANT: This must be the last line! */
-    { DG_DEFS_HANDLER_TABLE_OPCODE_END, DG_DEFS_MODE_ALL, DG_AUX_CMD_handler_main, 60000 }
-
-};
 
 /*==================================================================================================
                                           LOCAL VARIABLES
@@ -80,6 +51,45 @@ const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
 ==================================================================================================*/
+
+/*=============================================================================================*//**
+@brief Reads data from a given port on the given USB device
+
+@param[in]  port    - The USB port to read from
+@param[out] usb_info - The usb info read from the device
+
+@note
+- Read data is only valid when the function returns with a success
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_USB_read_info(DG_CMN_DRV_USB_PORT_T port, DG_CMN_DRV_USB_INFO_T* usb_info)
+{
+    BOOL ret = FALSE;
+
+    if (port < DG_CMN_DRV_USB_PORT_NUM_MAX)
+    {
+        /* A sample of lvlian USB LAN. ASIX Electronics Corp. AX88772A Fast Ethernet */
+        usb_info->bus      = 1;
+        usb_info->device   = 4;
+        usb_info->vendor   = 0x0b95;
+        usb_info->product  = 0x772a;
+        usb_info->major    = 2;
+        usb_info->minor    = 0;
+        usb_info->maxpower = 250;
+        usb_info->speed    = 480;
+        DG_DBG_TRACE("Read USB information: port=0x%02x, Bus %03d, Device %03d, ID %04x:%04x, "
+                     "capabilities: usb-%d.%02d, maxpower=%dmA, speed=%dMbit/s.",
+                     port, usb_info->bus, usb_info->device, usb_info->vendor, usb_info->product,
+                     usb_info->major, usb_info->minor, usb_info->maxpower, usb_info->speed);
+        ret = TRUE;
+    }
+    else
+    {
+        DG_DRV_UTIL_set_error_string("Read USB information failed, port=%d should be little than %d",
+                                     port, DG_CMN_DRV_USB_PORT_NUM_MAX);
+    }
+
+    return ret;
+}
 
 /*==================================================================================================
                                           LOCAL FUNCTIONS
