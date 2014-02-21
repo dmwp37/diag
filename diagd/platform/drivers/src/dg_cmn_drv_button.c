@@ -1,32 +1,27 @@
 /*==================================================================================================
 
-    Module Name:  dg_handler_table.c
+    Module Name:  dg_cmn_drv_button.c
 
-    General Description: Table for DIAG handlers
+    General Description: Implements the BUTTON common driver
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
-#include "dg_common_handler_table.h"
-#include "dg_handler_table.h"
+#include <unistd.h>
+#include "dg_handler_inc.h"
+#include "dg_drv_util.h"
+#include "dg_cmn_drv_button.h"
 
 
-/** @addtogroup common_command_handlers
+/** @addtogroup dg_common_drivers
 @{
 */
 
-/** @addtogroup Handler_Table
+/** @addtogroup BUTTON_driver
 @{
-
-@par
-<b>Handler_Table</b>
-
-@par
-Static Handler Table for the diag opcode dispatching
-engine
+implementation of the BUTTON driver
 */
 
 /*==================================================================================================
@@ -36,7 +31,6 @@ engine
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_HANDLER_TABLE_DEFAULT_TIMEOUT 10000 /**< Default timeout used for DIAGs */
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -49,28 +43,6 @@ engine
 /*==================================================================================================
                                          GLOBAL VARIABLES
 ==================================================================================================*/
-/** Table for storing all opcodes/commands we are able to process with this engine
-    Important: Table must be in order of ascending opcodes! The last line must have the opcode of
-    DG_DEFS_HANDLER_TABLE_OPCODE_END */
-const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
-{
-    { 0x0000, DG_DEFS_MODE_ALL,  DG_VERSION_handler_main,     DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0001, DG_DEFS_MODE_ALL,  DG_LED_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x000D, DG_DEFS_MODE_TEST, DG_FPGA_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x000F, DG_DEFS_MODE_TEST, DG_BUTTON_handler_main,      DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0010, DG_DEFS_MODE_TEST, DG_I2C_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0013, DG_DEFS_MODE_ALL,  DG_PCI_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0016, DG_DEFS_MODE_ALL,  DG_RTC_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0100, DG_DEFS_MODE_ALL,  DG_SUSPEND_handler_main,     DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0101, DG_DEFS_MODE_TEST, DG_RESET_handler_main,       DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFD, DG_DEFS_MODE_ALL,  DG_DEBUG_LEVEL_handler_main, DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFE, DG_DEFS_MODE_ALL,  DG_TEST_ENGINE_handler_main, DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFF, DG_DEFS_MODE_ALL,  DG_PING_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-
-    /* IMPORTANT: This must be the last line! */
-    { DG_DEFS_HANDLER_TABLE_OPCODE_END, DG_DEFS_MODE_ALL, DG_AUX_CMD_handler_main, 60000 }
-
-};
 
 /*==================================================================================================
                                           LOCAL VARIABLES
@@ -79,6 +51,33 @@ const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
 ==================================================================================================*/
+
+/*=============================================================================================*//**
+@brief Get the last pressed button key code
+
+@param[out] code - The last pressed button key code
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_BUTTON_get(DG_CMN_DRV_BUTTON_CODE_T* code)
+{
+    static DG_CMN_DRV_BUTTON_CODE_T key_code = DG_CMN_DRV_BUTTON_NONE;
+
+    if (key_code == DG_CMN_DRV_BUTTON_NONE)
+    {
+        sleep(3); /* simulate the process to wait for a button press */
+        key_code = DG_CMN_DRV_BUTTON_POWER;
+    }
+    else
+    {
+        key_code = DG_CMN_DRV_BUTTON_NONE;
+    }
+
+    DG_DBG_TRACE("the last button key_code=0x%02x", key_code);
+
+    *code = key_code;
+
+    return TRUE;
+}
 
 /*==================================================================================================
                                           LOCAL FUNCTIONS

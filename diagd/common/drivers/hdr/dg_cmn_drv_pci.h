@@ -1,10 +1,10 @@
-#ifndef _DG_CMN_DRV_I2C_H_
-#define _DG_CMN_DRV_I2C_H_
+#ifndef _DG_CMN_DRV_PCI_H_
+#define _DG_CMN_DRV_PCI_H_
 /*==================================================================================================
 
-    Module Name:  dg_cmn_drv_i2c.h
+    Module Name:  dg_cmn_drv_pci.h
 
-    General Description: This file provides driver interface for I2C test
+    General Description: This file provides driver interface for PCI test
 
 ====================================================================================================
 
@@ -16,11 +16,11 @@
 @{
 */
 
-/** @addtogroup I2C_driver
+/** @addtogroup PCI_driver
 @{
 
 @par
-Provide APIs for I2C
+Provide APIs for PCI
 */
 
 #ifdef __cplusplus
@@ -38,17 +38,12 @@ extern "C" {
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
-/** I2C Buses */
-typedef UINT8 DG_CMN_DRV_I2C_BUS_T;
-
-/** I2C Device Address */
-typedef UINT8 DG_CMN_DRV_I2C_ADDR_T;
-
-/** I2C Device Offset */
-typedef UINT8 DG_CMN_DRV_I2C_OFFSET_T;
-
-/** I2C operation size */
-typedef UINT8 DG_CMN_DRV_I2C_SIZE_T;
+typedef UINT8 DG_CMN_DRV_PCI_DOMAIN_T;
+typedef UINT8 DG_CMN_DRV_PCI_BUS_T;
+typedef UINT8 DG_CMN_DRV_PCI_DEV_T;
+typedef UINT8 DG_CMN_DRV_PCI_FUNC_T;
+typedef UINT32 DG_CMN_DRV_PCI_OFFSET_T;
+typedef UINT32 DG_CMN_DRV_PCI_LEN_T;
 
 /*==================================================================================================
                                    GLOBAL VARIABLE DECLARATIONS
@@ -59,33 +54,38 @@ typedef UINT8 DG_CMN_DRV_I2C_SIZE_T;
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief Reads data from a given address on the given I2C bus
+@General PCIe bus config space register read
 
-@param[in]  bus       - The I2C bus to read from
-@param[in]  address   - The device address to read from
-@param[in]  offset    - The device data offset to read from
-@param[in]  read_len  - The amount of data to read in bytes
-@param[out] read_data - The data read from the device
+@param[in]  domain    - The PCI domain ID to read from
+@param[in]  bus       - The PCI bus ID to read from
+@param[in]  dev       - The PCI device ID to read from
+@param[in]  func      - The PCI function ID to read from
+@param[in]  offset    - The device register offset to read from
+@param[in]  len       - The amount of data to read in bytes
+@param[out] data      - The data read from the device
 
 @note
 - Read data is only valid when the function returns with a success
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_I2C_read_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address,
-                             DG_CMN_DRV_I2C_OFFSET_T offset, DG_CMN_DRV_I2C_SIZE_T read_len,
-                             UINT8* read_data);
+BOOL DG_CMN_DRV_PCI_cfg_read(UINT8 domain, UINT8 bus, UINT8 dev, UINT8 func,
+                             UINT32 offset, UINT32 len, UINT8* data);
 
 /*=============================================================================================*//**
-@brief Writes data to a given address on the given I2C bus
+@General PCIe bus memory space register read
 
-@param[in]  bus        - The I2C bus to write to
-@param[in]  address    - The device address to write to
-@param[in]  offset     - The device data offset to write to
-@param[in]  write_len  - The amount of data to write in bytes
-@param[in]  write_data - The data to write to the device
+@param[in]  domain    - The PCI domain ID to read from
+@param[in]  bus       - The PCI bus ID to read from
+@param[in]  dev       - The PCI device ID to read from
+@param[in]  func      - The PCI function ID to read from
+@param[in]  offset    - The device register offset to read from
+@param[in]  len       - The amount of data to read in bytes
+@param[out] data      - The data read from the device
+
+@note
+- Read data is only valid when the function returns with a success
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_I2C_write_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address,
-                              DG_CMN_DRV_I2C_OFFSET_T offset, DG_CMN_DRV_I2C_SIZE_T write_len,
-                              UINT8* write_data);
+BOOL DG_CMN_DRV_PCI_mem_read(UINT8 domain, UINT8 bus, UINT8 dev, UINT8 func,
+                             UINT32 offset, UINT32 len, UINT8* data);
 
 #ifdef __cplusplus
 }
@@ -94,5 +94,5 @@ BOOL DG_CMN_DRV_I2C_write_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T ad
 /** @} */
 /** @} */
 
-#endif /* _DG_CMN_DRV_I2C_H_  */
+#endif /* _DG_CMN_DRV_DBG_LVL_H_  */
 

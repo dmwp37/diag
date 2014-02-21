@@ -41,10 +41,15 @@ extern "C" {
    functions must have the name format/prototype of
    DG_<DIAG NAME>_handler_main(DG_DEFS_DIAG_REQ_T *req) */
 
+void DG_BUTTON_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_FPGA_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_PCI_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_RTC_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req);

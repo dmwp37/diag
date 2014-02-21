@@ -93,10 +93,15 @@ DG_ENGINE_PAL_SRC := \
 
 #Common Handlers
 DG_HANDLERS_CMN_SRC := \
+  common/handlers/src/dg_button.c \
   common/handlers/src/dg_debug_level.c \
+  common/handlers/src/dg_fpga.c \
   common/handlers/src/dg_i2c.c \
   common/handlers/src/dg_led.c \
+  common/handlers/src/dg_pci.c \
   common/handlers/src/dg_ping.c \
+  common/handlers/src/dg_reset.c \
+  common/handlers/src/dg_rtc.c \
   common/handlers/src/dg_suspend.c \
   common/handlers/src/dg_version.c \
   common/handlers/src/dg_test_engine.c
@@ -111,9 +116,14 @@ DG_DRIVERS_CMN_SRC := \
 
 #Platform Specific Drivers
 DG_DRIVERS_PLAT_SRC := \
+  platform/drivers/src/dg_cmn_drv_button.c \
   platform/drivers/src/dg_cmn_drv_debug_level.c \
+  platform/drivers/src/dg_cmn_drv_fpga.c \
   platform/drivers/src/dg_cmn_drv_i2c.c \
   platform/drivers/src/dg_cmn_drv_led.c \
+  platform/drivers/src/dg_cmn_drv_pci.c \
+  platform/drivers/src/dg_cmn_drv_reset.c \
+  platform/drivers/src/dg_cmn_drv_rtc.c \
   platform/drivers/src/dg_cmn_drv_suspend.c \
   platform/drivers/src/dg_cmn_drv_version.c
 

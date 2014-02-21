@@ -1,0 +1,61 @@
+NG-SRX JDIAG Project Coding Style Guideline
+
+
+1.	File structure
+Each file must keep the same structure, and contains those sections in order
+	File description
+	Include files
+	Local macros
+	Local typedefs (STRUCTURES, UNIONS, ENUMS)
+	Local constants
+	Local function prototypes
+	Global variables
+	Local variables
+	Global functions
+	Local functions
+
+The max line length is 100 characters for good reading
+
+2.	Comment style
+	We must use c-style comments.
+	Section comments (please follow the same coding style as other files)
+	Function spec comments, each function definition must have its specific comments, including the purpose, the parameters, the return and the notes
+Local function prototype is not need such comment to keep code clean
+	Doxgen comments (please follow the same comment structure as similar files)
+	Structure member comments (please follow the same comments structure as similar files)
+	Successive comments should be aligned
+
+3.	Naming conversion
+	All naming should follow this conversion: <prefix>_example_name_<suffix>
+	Macros, constants, enum, and structure names must be uppercase
+	All <prefix> must be uppercase, each module must use the same prefix
+	Function local variables, structure members should use lower case and shorter, instructive names to keep code clean
+	Local function name must be lowercase
+	All types should use _T as suffix
+	All prefix should start with DG_/dg_
+    For pointer declaration, the * should follow type, e.g. int*  name, (int *name is not correct!)
+
+4.	Spaces and new lines
+	No tabs in source code
+	No un-useful spaces
+	No un-useful successive new lines
+	Add one new line at the end of file
+	Add one space between if/for/while/switch and (
+	Add proper spaces for assignment and compare
+
+5.	Alignment
+	Each level shift 4 spaces to right
+	Keep the same block code alignment as much as possible, the assignment block, the declaration block, the comments block and so on
+
+6.	Braces style
+Please keep the same braces style, for example
+if/for/while/switch
+{
+    …
+}
+
+7.	Tools used for formatting the code
+Please use uncrustify as the coding formatting tool. Before committing your code, please run the tool first and then use diff tool to correct minor changes
+
+When create a new file, you should copy from another similar file and modify the code there, keep the coding style and comments structure.
+

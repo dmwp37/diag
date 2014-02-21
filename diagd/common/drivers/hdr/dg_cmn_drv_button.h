@@ -1,10 +1,10 @@
-#ifndef _DG_PLATFORM_DEFS_H
-#define _DG_PLATFORM_DEFS_H
+#ifndef _DG_CMN_DRV_BUTTON_H_
+#define _DG_CMN_DRV_BUTTON_H_
 /*==================================================================================================
 
-    Module Name:  dg_platform_defs.h
+    Module Name:  dg_cmn_drv_button.h
 
-    General Description: Contains defines for basic types for the platform
+    General Description: This file provides driver interface for BUTTON test
 
 ====================================================================================================
 
@@ -12,19 +12,24 @@
                                            INCLUDE FILES
 ==================================================================================================*/
 
+/** @addtogroup dg_common_drivers
+@{
+*/
+
+/** @addtogroup BUTTON_driver
+@{
+
+@par
+Provide APIs for BUTTON
+*/
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*==================================================================================================
-                                               MACROS
+                                              MACROS
 ==================================================================================================*/
-#ifndef TRUE
-    #define TRUE   1
-    #define FALSE  0
-#endif
-
-#define DG_COMPILE_UNUSED(x) (void)(x)
 
 /*==================================================================================================
                                                ENUMS
@@ -33,30 +38,37 @@ extern "C" {
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
-/* Do not redefine if we are already define those types */
-typedef unsigned char        UINT8;      /**< Unsigned 8 bit integer */
-typedef signed char          INT8;       /**< Signed 8 bit integer */
-typedef unsigned short int   UINT16;     /**< Unsigned 16 bit integer */
-typedef signed short int     INT16;      /**< Signed 16 bit integer */
-typedef unsigned  int        UINT32;     /**< Unsigned 32 bit integer */
-typedef signed int           INT32;      /**< Signed 32 bit integer */
-typedef signed long long     INT64;      /**< Signed 64 bit integer */
-typedef unsigned long long   UINT64;     /**< Unsigned 64 bit integer */
-typedef unsigned char        BOOLEAN;    /**< Boolean type */
-typedef BOOLEAN              BOOL;       /**< Boolean type */
-typedef unsigned short       W_CHAR;     /**< Wide char */
+/** BUTTON code */
+enum
+{
+    DG_CMN_DRV_BUTTON_POWER = 0x00,
+    DG_CMN_DRV_BUTTON_RESET = 0x01,
+    DG_CMN_DRV_BUTTON_NONE  = 0xFF  /* no button pressed */
+};
+typedef UINT8 DG_CMN_DRV_BUTTON_CODE_T;
 
 /*==================================================================================================
-                                      GLOBAL VARIABLE DECLARATIONS
+                                   GLOBAL VARIABLE DECLARATIONS
 ==================================================================================================*/
 
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
 
+/*=============================================================================================*//**
+@brief Get the last pressed button key code
+
+@param[out] code - The last pressed button key code
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_BUTTON_get(DG_CMN_DRV_BUTTON_CODE_T* code);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+/** @} */
+/** @} */
+
+#endif /* _DG_CMN_DRV_BUTTON_H_  */
 

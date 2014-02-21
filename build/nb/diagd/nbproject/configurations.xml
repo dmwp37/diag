@@ -4,9 +4,14 @@
     <logicalFolder name="common" displayName="common" projectFiles="true">
       <logicalFolder name="drivers" displayName="drivers" projectFiles="true">
         <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_button.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h</itemPath>
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_fpga.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_i2c.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_led.h</itemPath>
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_pci.h</itemPath>
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_reset.h</itemPath>
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_rtc.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_suspend.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_version.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_drv_util.h</itemPath>
@@ -51,10 +56,15 @@
           <itemPath>../../../diagd/common/handlers/hdr/dg_handler_inc.h</itemPath>
         </logicalFolder>
         <logicalFolder name="src" displayName="src" projectFiles="true">
+          <itemPath>../../../diagd/common/handlers/src/dg_button.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_debug_level.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_fpga.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_i2c.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_led.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_pci.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_ping.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_reset.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_rtc.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_suspend.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_test_engine.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_version.c</itemPath>
@@ -67,9 +77,14 @@
         <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
         </logicalFolder>
         <logicalFolder name="src" displayName="src" projectFiles="true">
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_button.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_fpga.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_i2c.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_led.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_pci.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_reset.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_rtc.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_suspend.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_version.c</itemPath>
         </logicalFolder>
@@ -171,7 +186,17 @@
       </item>
       <item path="../../../diagd/common/README" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_button.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_fpga.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -182,6 +207,21 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_led.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_pci.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_reset.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_rtc.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -316,7 +356,17 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_button.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_debug_level.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/src/dg_fpga.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -331,7 +381,22 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_pci.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_ping.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/src/dg_reset.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/src/dg_rtc.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -357,7 +422,17 @@
       </item>
       <item path="../../../diagd/platform/README.txt" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_button.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_fpga.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -368,6 +443,21 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_led.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_pci.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_reset.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_rtc.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -447,7 +537,17 @@
       </item>
       <item path="../../../diagd/common/README" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_button.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_fpga.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -458,6 +558,21 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_led.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_pci.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_reset.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_rtc.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -592,7 +707,17 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_button.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_debug_level.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/src/dg_fpga.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -607,7 +732,22 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_pci.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_ping.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/src/dg_reset.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/handlers/src/dg_rtc.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -633,7 +773,17 @@
       </item>
       <item path="../../../diagd/platform/README.txt" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_button.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_fpga.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -644,6 +794,21 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_led.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_pci.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_reset.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_rtc.c"
             ex="false"
             tool="0"
             flavor2="0">

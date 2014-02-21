@@ -8,19 +8,11 @@
 
 ====================================================================================================
 
-Revision History:
-                            Modification     Tracking
-Author                          Date          Number     Description of Changes
--------------------------   ------------    ----------   -------------------------------------------
-Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
-Xudong Huang    - xudongh    2013/12/19     xxxxx-0001   Update diag rsp protocol
-Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protocol
-
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
 /* All platform dependent basic type defines go here */
-#include <dg_pal_client_platform_inc.h>
+#include <dg_platform_defs.h>
 #include <pthread.h>
 #include "dg_rsp_code.h"
 

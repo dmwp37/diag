@@ -1,10 +1,10 @@
-#ifndef _DG_PLATFORM_DEFS_H
-#define _DG_PLATFORM_DEFS_H
+#ifndef _DG_CMN_DRV_RESET_H_
+#define _DG_CMN_DRV_RESET_H_
 /*==================================================================================================
 
-    Module Name:  dg_platform_defs.h
+    Module Name:  dg_cmn_drv_reset.h
 
-    General Description: Contains defines for basic types for the platform
+    General Description: This file provides driver interface for RESET test
 
 ====================================================================================================
 
@@ -12,51 +12,68 @@
                                            INCLUDE FILES
 ==================================================================================================*/
 
+/** @addtogroup dg_common_drivers
+@{
+*/
+
+/** @addtogroup RESET_driver
+@{
+
+@par
+Provide APIs for RESET
+*/
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*==================================================================================================
-                                               MACROS
+                                              MACROS
 ==================================================================================================*/
-#ifndef TRUE
-    #define TRUE   1
-    #define FALSE  0
-#endif
-
-#define DG_COMPILE_UNUSED(x) (void)(x)
 
 /*==================================================================================================
                                                ENUMS
 ==================================================================================================*/
+/** RESET Chip Selection */
+enum
+{
+    DG_CMN_DRV_RESET_PCH    = 0x00,
+    DG_CMN_DRV_RESET_FPGA   = 0x01,
+    DG_CMN_DRV_RESET_SWITCH = 0x02,
+    DG_CMN_DRV_RESET_PHY    = 0x03,
+    DG_CMN_DRV_RESET_SYS    = 0xFF,
+};
+typedef UINT8 DG_CMN_DRV_RESET_COMP_T;
 
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
-/* Do not redefine if we are already define those types */
-typedef unsigned char        UINT8;      /**< Unsigned 8 bit integer */
-typedef signed char          INT8;       /**< Signed 8 bit integer */
-typedef unsigned short int   UINT16;     /**< Unsigned 16 bit integer */
-typedef signed short int     INT16;      /**< Signed 16 bit integer */
-typedef unsigned  int        UINT32;     /**< Unsigned 32 bit integer */
-typedef signed int           INT32;      /**< Signed 32 bit integer */
-typedef signed long long     INT64;      /**< Signed 64 bit integer */
-typedef unsigned long long   UINT64;     /**< Unsigned 64 bit integer */
-typedef unsigned char        BOOLEAN;    /**< Boolean type */
-typedef BOOLEAN              BOOL;       /**< Boolean type */
-typedef unsigned short       W_CHAR;     /**< Wide char */
 
 /*==================================================================================================
-                                      GLOBAL VARIABLE DECLARATIONS
+                                   GLOBAL VARIABLE DECLARATIONS
 ==================================================================================================*/
 
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
 
+/*=============================================================================================*//**
+@brief Reads data from a given address on the given RESET bus
+
+@param[in]  comp       - Which component to reset
+@param[in]  is_reset   - TRUE to reset and FALSE to recover
+
+@note
+- Read data is only valid when the function returns with a success
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_RESET_reset(DG_CMN_DRV_RESET_COMP_T comp, BOOL is_reset);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+/** @} */
+/** @} */
+
+#endif /* _DG_CMN_DRV_RESET_H_  */
 
