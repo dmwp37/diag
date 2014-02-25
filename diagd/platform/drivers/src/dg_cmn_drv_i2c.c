@@ -10,7 +10,6 @@
                                            INCLUDE FILES
 ==================================================================================================*/
 #include <linux/i2c-dev.h>
-#include <i2c/smbus.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -39,7 +38,6 @@ implementation of the I2C driver
                                            LOCAL MACROS
 ==================================================================================================*/
 #define DG_CMN_DRV_I2C_BUS_PATH_SIZE 20
-#define DG_CMN_DRV_I2C_BLOCK_SIZE    32
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -100,6 +98,8 @@ BOOL DG_CMN_DRV_I2C_read_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T add
                          read_len, bus, address, offset);
             ret = TRUE;
         }
+
+        close(bus_fd);
     }
 
     return ret;
@@ -136,6 +136,8 @@ BOOL DG_CMN_DRV_I2C_write_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T ad
                          write_len, bus, address, offset);
             ret = TRUE;
         }
+
+        close(bus_fd);
     }
 
 
@@ -195,38 +197,19 @@ BOOL dg_cmn_drv_i2c_read(int fd, DG_CMN_DRV_I2C_OFFSET_T offset,
 
     while (is_success && (total_bytes_read != read_len))
     {
-        int bytes_to_read      = read_len - total_bytes_read;
-        int current_bytes_read = 0;
+        int current_read_data = i2c_smbus_read_byte_data(fd, offset);
 
-        if (bytes_to_read > DG_CMN_DRV_I2C_BLOCK_SIZE)
+        if (current_read_data < 0)
         {
-            bytes_to_read = DG_CMN_DRV_I2C_BLOCK_SIZE;
-        }
-        current_bytes_read = i2c_smbus_read_i2c_block_data(fd, offset, bytes_to_read, read_data);
-
-        if (current_bytes_read > 0)
-        {
-            total_bytes_read += current_bytes_read;
-            offset           += current_bytes_read;
-            read_data        += current_bytes_read;
-        }
-        else if (current_bytes_read < 0)
-        {
-            DG_DRV_UTIL_set_error_string(
-                "i2c block read failed, current_bytes_read = %d, errno=%d (%s)",
-                current_bytes_read, errno, strerror(errno));
+            DG_DRV_UTIL_set_error_string("i2c byte read failed, offset=%d, errno=%d (%s)",
+                                         offset, errno, strerror(errno));
             is_success = FALSE;
         }
         else
         {
-            if (total_bytes_read != read_len)
-            {
-                DG_DRV_UTIL_set_error_string(
-                    "i2c read exceed, need to read %d bytes, but actual read %d bytes",
-                    read_len, total_bytes_read);
-
-                is_success = FALSE;
-            }
+            total_bytes_read++;
+            offset++;
+            *read_data++ = current_read_data;
         }
     }
 
@@ -254,9 +237,9 @@ BOOL dg_cmn_drv_i2c_write(int fd, DG_CMN_DRV_I2C_OFFSET_T offset,
     {
         int bytes_to_write = write_len - total_bytes_write;
         int write_ret;
-        if (bytes_to_write > DG_CMN_DRV_I2C_BLOCK_SIZE)
+        if (bytes_to_write > I2C_SMBUS_BLOCK_MAX)
         {
-            bytes_to_write = DG_CMN_DRV_I2C_BLOCK_SIZE;
+            bytes_to_write = I2C_SMBUS_BLOCK_MAX;
         }
         write_ret = i2c_smbus_write_i2c_block_data(fd, offset, bytes_to_write, write_data);
 
