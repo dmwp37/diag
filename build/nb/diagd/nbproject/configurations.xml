@@ -4,6 +4,7 @@
     <logicalFolder name="common" displayName="common" projectFiles="true">
       <logicalFolder name="drivers" displayName="drivers" projectFiles="true">
         <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_bios.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_button.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_fpga.h</itemPath>
@@ -57,6 +58,7 @@
           <itemPath>../../../diagd/common/handlers/hdr/dg_handler_inc.h</itemPath>
         </logicalFolder>
         <logicalFolder name="src" displayName="src" projectFiles="true">
+          <itemPath>../../../diagd/common/handlers/src/dg_bios.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_button.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_debug_level.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_fpga.c</itemPath>
@@ -79,6 +81,7 @@
         <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
         </logicalFolder>
         <logicalFolder name="src" displayName="src" projectFiles="true">
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_bios.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_button.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_fpga.c</itemPath>
@@ -188,6 +191,11 @@
       <item path="../../../diagd/README.txt" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../diagd/common/README" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_bios.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_button.h"
             ex="false"
@@ -364,6 +372,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_bios.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_button.c"
             ex="false"
             tool="0"
@@ -434,6 +447,11 @@
       <item path="../../../diagd/local_module.mk" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../diagd/platform/README.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_bios.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_button.c"
             ex="false"
@@ -555,6 +573,11 @@
       </item>
       <item path="../../../diagd/common/README" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_bios.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_button.h"
             ex="false"
             tool="3"
@@ -730,6 +753,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_bios.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_button.c"
             ex="false"
             tool="0"
@@ -800,6 +828,11 @@
       <item path="../../../diagd/local_module.mk" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../diagd/platform/README.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_bios.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_button.c"
             ex="false"

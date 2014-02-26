@@ -41,6 +41,7 @@ extern "C" {
    functions must have the name format/prototype of
    DG_<DIAG NAME>_handler_main(DG_DEFS_DIAG_REQ_T *req) */
 
+void DG_BIOS_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_BUTTON_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_FPGA_handler_main(DG_DEFS_DIAG_REQ_T* req);

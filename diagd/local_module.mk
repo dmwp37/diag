@@ -93,6 +93,7 @@ DG_ENGINE_PAL_SRC := \
 
 #Common Handlers
 DG_HANDLERS_CMN_SRC := \
+  common/handlers/src/dg_bios.c \
   common/handlers/src/dg_button.c \
   common/handlers/src/dg_debug_level.c \
   common/handlers/src/dg_fpga.c \
@@ -117,6 +118,7 @@ DG_DRIVERS_CMN_SRC := \
 
 #Platform Specific Drivers
 DG_DRIVERS_PLAT_SRC := \
+  platform/drivers/src/dg_cmn_drv_bios.c \
   platform/drivers/src/dg_cmn_drv_button.c \
   platform/drivers/src/dg_cmn_drv_debug_level.c \
   platform/drivers/src/dg_cmn_drv_fpga.c \
