@@ -1,32 +1,26 @@
 /*==================================================================================================
 
-    Module Name:  dg_handler_table.c
+    Module Name:  dg_cmn_drv_dimm.c
 
-    General Description: Table for DIAG handlers
+    General Description: Implements the DIMM common driver
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
-#include "dg_common_handler_table.h"
-#include "dg_handler_table.h"
+#include "dg_handler_inc.h"
+#include "dg_drv_util.h"
+#include "dg_cmn_drv_dimm.h"
 
 
-/** @addtogroup common_command_handlers
+/** @addtogroup dg_common_drivers
 @{
 */
 
-/** @addtogroup Handler_Table
+/** @addtogroup DIMM_driver
 @{
-
-@par
-<b>Handler_Table</b>
-
-@par
-Static Handler Table for the diag opcode dispatching
-engine
+implementation of the DIMM driver
 */
 
 /*==================================================================================================
@@ -36,7 +30,6 @@ engine
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_HANDLER_TABLE_DEFAULT_TIMEOUT 10000 /**< Default timeout used for DIAGs */
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -49,32 +42,6 @@ engine
 /*==================================================================================================
                                          GLOBAL VARIABLES
 ==================================================================================================*/
-/** Table for storing all opcodes/commands we are able to process with this engine
-    Important: Table must be in order of ascending opcodes! The last line must have the opcode of
-    DG_DEFS_HANDLER_TABLE_OPCODE_END */
-const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
-{
-    { 0x0000, DG_DEFS_MODE_ALL,  DG_VERSION_handler_main,     DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0001, DG_DEFS_MODE_ALL,  DG_LED_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0008, DG_DEFS_MODE_ALL,  DG_DIMM_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x000D, DG_DEFS_MODE_TEST, DG_FPGA_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x000F, DG_DEFS_MODE_TEST, DG_BUTTON_handler_main,      DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0010, DG_DEFS_MODE_TEST, DG_I2C_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0011, DG_DEFS_MODE_ALL,  DG_USB_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0013, DG_DEFS_MODE_ALL,  DG_PCI_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0015, DG_DEFS_MODE_TEST, DG_BIOS_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0016, DG_DEFS_MODE_ALL,  DG_RTC_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0022, DG_DEFS_MODE_TEST, DG_EXT_LOOP_handler_main,    DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0100, DG_DEFS_MODE_ALL,  DG_SUSPEND_handler_main,     DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0101, DG_DEFS_MODE_TEST, DG_RESET_handler_main,       DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFD, DG_DEFS_MODE_ALL,  DG_DEBUG_LEVEL_handler_main, DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFE, DG_DEFS_MODE_ALL,  DG_TEST_ENGINE_handler_main, DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFF, DG_DEFS_MODE_ALL,  DG_PING_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-
-    /* IMPORTANT: This must be the last line! */
-    { DG_DEFS_HANDLER_TABLE_OPCODE_END, DG_DEFS_MODE_ALL, DG_AUX_CMD_handler_main, 60000 }
-
-};
 
 /*==================================================================================================
                                           LOCAL VARIABLES
@@ -83,6 +50,37 @@ const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
 ==================================================================================================*/
+
+/*=============================================================================================*//**
+@brief Reads SPD data from the DIMM on the given slot
+
+@param[in]  slot - The DIMM slot number
+@param[out] spd  - The SPD data read from the dimm
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_DIMM_get_spd(DG_CMN_DRV_DIMM_SLOT_T slot, DG_CMN_DRV_DIMM_SPD_T* spd)
+{
+    BOOL ret = FALSE;
+
+    switch (slot)
+    {
+    case DG_CMN_DRV_DIMM_SLOT_0:
+    case DG_CMN_DRV_DIMM_SLOT_1:
+    case DG_CMN_DRV_DIMM_SLOT_2:
+    case DG_CMN_DRV_DIMM_SLOT_3:
+        memset(spd->value, slot, sizeof(spd->value));
+        DG_DBG_TRACE("Get DIMM SPD from slot %d", slot);
+        DG_DBG_DUMP(spd->value, sizeof(spd->value));
+        ret = TRUE;
+        break;
+
+    default:
+        DG_DRV_UTIL_set_error_string("Read DIMM SPD failed: slot=0x%02x", slot);
+        break;
+    }
+
+    return ret;
+}
 
 /*==================================================================================================
                                           LOCAL FUNCTIONS
