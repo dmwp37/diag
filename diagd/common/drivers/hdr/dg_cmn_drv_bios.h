@@ -149,5 +149,5 @@ BOOL DG_CMN_DRV_BIOS_get_src(DG_CMN_DRV_BIOS_ID_T* bios_id);
 /** @} */
 /** @} */
 
-#endif /* _DG_CMN_DRV_DBG_LVL_H_  */
+#endif /* _DG_CMN_DRV_BIOS_H_  */
 

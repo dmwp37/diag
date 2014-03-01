@@ -96,6 +96,7 @@ DG_HANDLERS_CMN_SRC := \
   common/handlers/src/dg_bios.c \
   common/handlers/src/dg_button.c \
   common/handlers/src/dg_debug_level.c \
+  common/handlers/src/dg_ext_loop.c \
   common/handlers/src/dg_fpga.c \
   common/handlers/src/dg_i2c.c \
   common/handlers/src/dg_led.c \
@@ -121,6 +122,7 @@ DG_DRIVERS_PLAT_SRC := \
   platform/drivers/src/dg_cmn_drv_bios.c \
   platform/drivers/src/dg_cmn_drv_button.c \
   platform/drivers/src/dg_cmn_drv_debug_level.c \
+  platform/drivers/src/dg_cmn_drv_ext_loop.c \
   platform/drivers/src/dg_cmn_drv_fpga.c \
   platform/drivers/src/dg_cmn_drv_i2c.c \
   platform/drivers/src/dg_cmn_drv_led.c \

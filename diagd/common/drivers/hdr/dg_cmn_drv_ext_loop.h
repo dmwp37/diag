@@ -1,10 +1,10 @@
-#ifndef _DG_CMN_DRV_PCI_H_
-#define _DG_CMN_DRV_PCI_H_
+#ifndef _DG_CMN_DRV_EXT_LOOP_H_
+#define _DG_CMN_DRV_EXT_LOOP_H_
 /*==================================================================================================
 
-    Module Name:  dg_cmn_drv_pci.h
+    Module Name:  dg_cmn_drv_ext_loop.h
 
-    General Description: This file provides driver interface for PCI test
+    General Description: This file provides driver interface for external loopback test
 
 ====================================================================================================
 
@@ -16,11 +16,11 @@
 @{
 */
 
-/** @addtogroup PCI_driver
+/** @addtogroup EXT_LOOP_driver
 @{
 
 @par
-Provide APIs for PCI
+Provide APIs for EXT_LOOP
 */
 
 #ifdef __cplusplus
@@ -34,16 +34,38 @@ extern "C" {
 /*==================================================================================================
                                                ENUMS
 ==================================================================================================*/
+enum
+{
+    DG_CMN_DRV_EXT_LOOP_ACTION_CLEAR = 0x00,
+    DG_CMN_DRV_EXT_LOOP_ACTION_SET   = 0x01,
+};
+typedef UINT8 DG_CMN_DRV_EXT_LOOP_ACTION_T;
+
+enum
+{
+    DG_CMN_DRV_EXT_LOOP_NODE_PCH     = 0x00,
+    DG_CMN_DRV_EXT_LOOP_NODE_FPGA    = 0x01,
+    DG_CMN_DRV_EXT_LOOP_NODE_SWITCH  = 0x02,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY_MGT = 0x10,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P1 = 0x11,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P2 = 0x12,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P3 = 0x13,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P4 = 0x14,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P5 = 0x15,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P6 = 0x16,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P7 = 0x17,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P8 = 0x18,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY1_P1 = 0x19,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY1_P2 = 0x1A,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY1_P3 = 0x1B,
+    DG_CMN_DRV_EXT_LOOP_NODE_PHY1_P4 = 0x1C,
+};
+typedef UINT8 DG_CMN_DRV_EXT_LOOP_NODE_T;
 
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
-typedef UINT8 DG_CMN_DRV_PCI_DOMAIN_T;
-typedef UINT8 DG_CMN_DRV_PCI_BUS_T;
-typedef UINT8 DG_CMN_DRV_PCI_DEV_T;
-typedef UINT8 DG_CMN_DRV_PCI_FUNC_T;
-typedef UINT32 DG_CMN_DRV_PCI_OFFSET_T;
-typedef UINT32 DG_CMN_DRV_PCI_LEN_T;
+
 
 /*==================================================================================================
                                    GLOBAL VARIABLE DECLARATIONS
@@ -54,38 +76,16 @@ typedef UINT32 DG_CMN_DRV_PCI_LEN_T;
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@General PCIe bus config space register read
+@brief external loopback operate
 
-@param[in]  domain    - The PCI domain ID to read from
-@param[in]  bus       - The PCI bus ID to read from
-@param[in]  dev       - The PCI device ID to read from
-@param[in]  func      - The PCI function ID to read from
-@param[in]  offset    - The device register offset to read from
-@param[in]  len       - The amount of data to read in bytes
-@param[out] data      - The data read from the device
+@param[in]  action   - set/clear
+@param[out] node     - node need to be operate
 
 @note
-- Read data is only valid when the function returns with a success
+- result is only valid when the function returns with a success
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_PCI_cfg_read(UINT8 domain, UINT8 bus, UINT8 dev, UINT8 func,
-                             UINT32 offset, UINT32 len, UINT8* data);
-
-/*=============================================================================================*//**
-@General PCIe bus memory space register read
-
-@param[in]  domain    - The PCI domain ID to read from
-@param[in]  bus       - The PCI bus ID to read from
-@param[in]  dev       - The PCI device ID to read from
-@param[in]  func      - The PCI function ID to read from
-@param[in]  offset    - The device register offset to read from
-@param[in]  len       - The amount of data to read in bytes
-@param[out] data      - The data read from the device
-
-@note
-- Read data is only valid when the function returns with a success
-*//*==============================================================================================*/
-BOOL DG_CMN_DRV_PCI_mem_read(UINT8 domain, UINT8 bus, UINT8 dev, UINT8 func,
-                             UINT32 offset, UINT32 len, UINT8* data);
+BOOL DG_CMN_DRV_EXT_LOOP_operate(DG_CMN_DRV_EXT_LOOP_ACTION_T action,
+                                 DG_CMN_DRV_EXT_LOOP_NODE_T   node);
 
 #ifdef __cplusplus
 }
@@ -94,5 +94,5 @@ BOOL DG_CMN_DRV_PCI_mem_read(UINT8 domain, UINT8 bus, UINT8 dev, UINT8 func,
 /** @} */
 /** @} */
 
-#endif /* _DG_CMN_DRV_PCI_H_  */
+#endif /* _DG_CMN_DRV_EXT_LOOP_H_  */
 

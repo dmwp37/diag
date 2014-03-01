@@ -84,5 +84,5 @@ BOOL DG_CMN_DRV_USB_read_info(DG_CMN_DRV_USB_PORT_T port, DG_CMN_DRV_USB_INFO_T*
 /** @} */
 /** @} */
 
-#endif /* _DG_CMN_DRV_DBG_LVL_H_  */
+#endif /* _DG_CMN_DRV_USB_H_  */
 

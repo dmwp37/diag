@@ -1,32 +1,26 @@
 /*==================================================================================================
 
-    Module Name:  dg_handler_table.c
+    Module Name:  dg_cmn_drv_ext_loop.c
 
-    General Description: Table for DIAG handlers
+    General Description: Implements the EXT_LOOP common driver
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
-#include "dg_common_handler_table.h"
-#include "dg_handler_table.h"
+#include "dg_handler_inc.h"
+#include "dg_drv_util.h"
+#include "dg_cmn_drv_ext_loop.h"
 
 
-/** @addtogroup common_command_handlers
+/** @addtogroup dg_common_drivers
 @{
 */
 
-/** @addtogroup Handler_Table
+/** @addtogroup EXT_LOOP_driver
 @{
-
-@par
-<b>Handler_Table</b>
-
-@par
-Static Handler Table for the diag opcode dispatching
-engine
+implementation of the EXT_LOOP driver
 */
 
 /*==================================================================================================
@@ -36,7 +30,6 @@ engine
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_HANDLER_TABLE_DEFAULT_TIMEOUT 10000 /**< Default timeout used for DIAGs */
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -49,31 +42,6 @@ engine
 /*==================================================================================================
                                          GLOBAL VARIABLES
 ==================================================================================================*/
-/** Table for storing all opcodes/commands we are able to process with this engine
-    Important: Table must be in order of ascending opcodes! The last line must have the opcode of
-    DG_DEFS_HANDLER_TABLE_OPCODE_END */
-const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
-{
-    { 0x0000, DG_DEFS_MODE_ALL,  DG_VERSION_handler_main,     DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0001, DG_DEFS_MODE_ALL,  DG_LED_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x000D, DG_DEFS_MODE_TEST, DG_FPGA_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x000F, DG_DEFS_MODE_TEST, DG_BUTTON_handler_main,      DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0010, DG_DEFS_MODE_TEST, DG_I2C_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0011, DG_DEFS_MODE_ALL,  DG_USB_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0013, DG_DEFS_MODE_ALL,  DG_PCI_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0015, DG_DEFS_MODE_TEST, DG_BIOS_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0016, DG_DEFS_MODE_ALL,  DG_RTC_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0022, DG_DEFS_MODE_TEST, DG_EXT_LOOP_handler_main,    DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0100, DG_DEFS_MODE_ALL,  DG_SUSPEND_handler_main,     DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0101, DG_DEFS_MODE_TEST, DG_RESET_handler_main,       DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFD, DG_DEFS_MODE_ALL,  DG_DEBUG_LEVEL_handler_main, DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFE, DG_DEFS_MODE_ALL,  DG_TEST_ENGINE_handler_main, DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFF, DG_DEFS_MODE_ALL,  DG_PING_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-
-    /* IMPORTANT: This must be the last line! */
-    { DG_DEFS_HANDLER_TABLE_OPCODE_END, DG_DEFS_MODE_ALL, DG_AUX_CMD_handler_main, 60000 }
-
-};
 
 /*==================================================================================================
                                           LOCAL VARIABLES
@@ -82,6 +50,70 @@ const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
 ==================================================================================================*/
+
+/*=============================================================================================*//**
+@brief external loopback operate
+
+@param[in]  action   - set/clear
+@param[out] node     - node need to be operate
+
+@note
+- result is only valid when the function returns with a success
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_EXT_LOOP_operate(DG_CMN_DRV_EXT_LOOP_ACTION_T action,
+                                 DG_CMN_DRV_EXT_LOOP_NODE_T   node)
+{
+    BOOL ret = FALSE;
+
+    switch (node)
+    {
+    case DG_CMN_DRV_EXT_LOOP_NODE_PCH:
+    case DG_CMN_DRV_EXT_LOOP_NODE_FPGA:
+    case DG_CMN_DRV_EXT_LOOP_NODE_SWITCH:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY_MGT:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P1:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P2:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P3:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P4:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P5:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P6:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P7:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY0_P8:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY1_P1:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY1_P2:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY1_P3:
+    case DG_CMN_DRV_EXT_LOOP_NODE_PHY1_P4:
+        switch (action)
+        {
+        case DG_CMN_DRV_EXT_LOOP_ACTION_CLEAR:
+        case DG_CMN_DRV_EXT_LOOP_ACTION_SET:
+            /* The judge need change to call driver to set/clear external loopback */
+            if (node != DG_CMN_DRV_EXT_LOOP_NODE_FPGA)
+            {
+                DG_DBG_TRACE("External loopback operate action:0x%02x, node:0x%02x", action, node);
+                ret = TRUE;
+            }
+            else
+            {
+                DG_DRV_UTIL_set_error_string("External loopback operate failed, "
+                                             "action:0x%02x, node:0x%02x", action, node);
+            }
+            break;
+
+        default:
+            DG_DRV_UTIL_set_error_string("Invalid action 0x%02x", action);
+            break;
+        }
+        break;
+
+    default:
+        DG_DRV_UTIL_set_error_string("Invalid node 0x%02x", node);
+        break;
+    }
+
+    return ret;
+}
+
 
 /*==================================================================================================
                                           LOCAL FUNCTIONS

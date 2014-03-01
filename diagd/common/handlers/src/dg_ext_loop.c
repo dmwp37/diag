@@ -1,46 +1,47 @@
 /*==================================================================================================
 
-    Module Name:  dg_handler_table.c
+    Module Name:  dg_ext_loop.c
 
-    General Description: Table for DIAG handlers
+    General Description: Implements the EXT_LOOP test handler
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
-#include "dg_common_handler_table.h"
-#include "dg_handler_table.h"
+#include <stdlib.h>
+#include "dg_handler_inc.h"
+#include "dg_cmn_drv_ext_loop.h"
 
 
 /** @addtogroup common_command_handlers
 @{
 */
 
-/** @addtogroup Handler_Table
+/** @addtogroup EXT_LOOP
 @{
 
 @par
-<b>Handler_Table</b>
+<b>EXT_LOOP - 0x0022</b>
 
 @par
-Static Handler Table for the diag opcode dispatching
-engine
+Allows Clear and set external loopback mode on specified traffic node.
 */
-
-/*==================================================================================================
-                                          LOCAL CONSTANTS
-==================================================================================================*/
 
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_HANDLER_TABLE_DEFAULT_TIMEOUT 10000 /**< Default timeout used for DIAGs */
+
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
 ==================================================================================================*/
+
+/*==================================================================================================
+                                          LOCAL CONSTANTS
+==================================================================================================*/
+static const UINT32 DG_EXT_LOOP_LEN = sizeof(DG_CMN_DRV_EXT_LOOP_ACTION_T) +
+                                      sizeof(DG_CMN_DRV_EXT_LOOP_NODE_T);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -49,31 +50,6 @@ engine
 /*==================================================================================================
                                          GLOBAL VARIABLES
 ==================================================================================================*/
-/** Table for storing all opcodes/commands we are able to process with this engine
-    Important: Table must be in order of ascending opcodes! The last line must have the opcode of
-    DG_DEFS_HANDLER_TABLE_OPCODE_END */
-const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
-{
-    { 0x0000, DG_DEFS_MODE_ALL,  DG_VERSION_handler_main,     DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0001, DG_DEFS_MODE_ALL,  DG_LED_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x000D, DG_DEFS_MODE_TEST, DG_FPGA_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x000F, DG_DEFS_MODE_TEST, DG_BUTTON_handler_main,      DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0010, DG_DEFS_MODE_TEST, DG_I2C_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0011, DG_DEFS_MODE_ALL,  DG_USB_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0013, DG_DEFS_MODE_ALL,  DG_PCI_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0015, DG_DEFS_MODE_TEST, DG_BIOS_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0016, DG_DEFS_MODE_ALL,  DG_RTC_handler_main,         DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0022, DG_DEFS_MODE_TEST, DG_EXT_LOOP_handler_main,    DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0100, DG_DEFS_MODE_ALL,  DG_SUSPEND_handler_main,     DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0101, DG_DEFS_MODE_TEST, DG_RESET_handler_main,       DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFD, DG_DEFS_MODE_ALL,  DG_DEBUG_LEVEL_handler_main, DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFE, DG_DEFS_MODE_ALL,  DG_TEST_ENGINE_handler_main, DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-    { 0x0FFF, DG_DEFS_MODE_ALL,  DG_PING_handler_main,        DG_HANDLER_TABLE_DEFAULT_TIMEOUT },
-
-    /* IMPORTANT: This must be the last line! */
-    { DG_DEFS_HANDLER_TABLE_OPCODE_END, DG_DEFS_MODE_ALL, DG_AUX_CMD_handler_main, 60000 }
-
-};
 
 /*==================================================================================================
                                           LOCAL VARIABLES
@@ -82,6 +58,41 @@ const DG_DEFS_OPCODE_ENTRY_T DG_HANDLER_TABLE_data[] =
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
 ==================================================================================================*/
+
+/*=============================================================================================*//**
+@brief Handler function for the EXT_LOOP command
+
+@param[in] req - DIAG request
+*//*==============================================================================================*/
+void DG_EXT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req)
+{
+    DG_CMN_DRV_EXT_LOOP_ACTION_T action;
+    DG_CMN_DRV_EXT_LOOP_NODE_T   node;
+    DG_DEFS_DIAG_RSP_BUILDER_T*  rsp = DG_ENGINE_UTIL_rsp_init();
+
+    /* Verify action parameter was given */
+    DG_DBG_TRACE("In DG_EXT_LOOP_handler_main begin to parse Request");
+    if (DG_ENGINE_UTIL_req_len_check_equal(req, DG_EXT_LOOP_LEN, rsp))
+    {
+        /* Parse and switch on action */
+        DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
+        DG_ENGINE_UTIL_req_parse_data_ntoh(req, node);
+        DG_DBG_TRACE("action=0x%02x, node=0x%02x", action, node);
+
+        if (!DG_CMN_DRV_EXT_LOOP_operate(action, node))
+        {
+            DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
+                                                    "Failed to set/clear external loopback");
+        }
+        else
+        {
+            DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
+        }
+
+        DG_ENGINE_UTIL_rsp_send(rsp, req);
+        DG_ENGINE_UTIL_rsp_free(rsp);
+    }
+}
 
 /*==================================================================================================
                                           LOCAL FUNCTIONS
