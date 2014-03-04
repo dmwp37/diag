@@ -40,8 +40,6 @@ Allows Clear and set external loopback mode on specified traffic node.
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-static const UINT32 DG_EXT_LOOP_LEN = sizeof(DG_CMN_DRV_EXT_LOOP_ACTION_T) +
-                                      sizeof(DG_CMN_DRV_EXT_LOOP_NODE_T);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -70,9 +68,11 @@ void DG_EXT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req)
     DG_CMN_DRV_EXT_LOOP_NODE_T   node;
     DG_DEFS_DIAG_RSP_BUILDER_T*  rsp = DG_ENGINE_UTIL_rsp_init();
 
+    const UINT32 req_len = sizeof(action) + sizeof(node);
+
     /* Verify action parameter was given */
     DG_DBG_TRACE("In DG_EXT_LOOP_handler_main begin to parse Request");
-    if (DG_ENGINE_UTIL_req_len_check_equal(req, DG_EXT_LOOP_LEN, rsp))
+    if (DG_ENGINE_UTIL_req_len_check_equal(req, req_len, rsp))
     {
         /* Parse and switch on action */
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);

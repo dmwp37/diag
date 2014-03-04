@@ -46,10 +46,6 @@ typedef UINT8 DG_I2C_ACTION_T;
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-static const UINT32 DG_I2C_REQ_LEN_MIN = sizeof(DG_I2C_ACTION_T) +
-                                         sizeof(DG_CMN_DRV_I2C_BUS_T) +
-                                         sizeof(DG_CMN_DRV_I2C_ADDR_T) +
-                                         sizeof(DG_CMN_DRV_I2C_OFFSET_T);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -87,9 +83,11 @@ void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req)
     DG_CMN_DRV_I2C_OFFSET_T     offset;
     DG_DEFS_DIAG_RSP_BUILDER_T* rsp = DG_ENGINE_UTIL_rsp_init();
 
+    const UINT32 req_len = sizeof(action) + sizeof(bus) + sizeof(address) + sizeof(offset);
+
     /* Verify action parameter was given */
     DG_DBG_TRACE("In DG_I2C_handler_main begin to parse Request");
-    if (DG_ENGINE_UTIL_req_len_check_at_least(req, DG_I2C_REQ_LEN_MIN, rsp))
+    if (DG_ENGINE_UTIL_req_len_check_at_least(req, req_len, rsp))
     {
         /* Parse and switch on action */
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
@@ -140,7 +138,7 @@ void dg_i2c_read_bus(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
     DG_CMN_DRV_I2C_SIZE_T read_length = 0;
     UINT8*                read_data   = NULL;
 
-    if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(DG_CMN_DRV_I2C_SIZE_T), rsp))
+    if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(read_length), rsp))
     {
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, read_length);
 
@@ -183,7 +181,7 @@ void dg_i2c_write_bus(DG_DEFS_DIAG_REQ_T* req, DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
     DG_CMN_DRV_I2C_SIZE_T write_length = 0;
     UINT8*                write_data   = NULL;
 
-    if (DG_ENGINE_UTIL_req_remain_len_check_at_least(req, sizeof(DG_CMN_DRV_I2C_SIZE_T), rsp))
+    if (DG_ENGINE_UTIL_req_remain_len_check_at_least(req, sizeof(write_length), rsp))
     {
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, write_length);
 

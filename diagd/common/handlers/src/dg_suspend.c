@@ -49,8 +49,6 @@ typedef UINT8 DG_SUSPEND_MODE_T;
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-const UINT32 DG_SUSPEND_REQ_LEN_MIN = sizeof(DG_SUSPEND_ACTION_T);
-const UINT32 DG_SUSPEND_MODE_SIZE   = sizeof(DG_SUSPEND_MODE_T);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -81,7 +79,7 @@ void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req)
 
     DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
 
-    if (DG_ENGINE_UTIL_req_len_check_at_least(req, DG_SUSPEND_REQ_LEN_MIN, rsp))
+    if (DG_ENGINE_UTIL_req_len_check_at_least(req, sizeof(action), rsp))
     {
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
 
@@ -89,7 +87,7 @@ void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req)
         {
         case DG_SUSPEND_ACTION_GET:
         {
-            if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, DG_SUSPEND_MODE_SIZE))
+            if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, sizeof(mode)))
             {
                 DG_ENGINE_UTIL_rsp_append_data_hton(rsp, mode);
             }
@@ -98,10 +96,9 @@ void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req)
 
         case DG_SUSPEND_ACTION_SET:
         {
-            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, DG_SUSPEND_MODE_SIZE, rsp))
+            DG_SUSPEND_MODE_T new_mode;
+            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(new_mode), rsp))
             {
-                DG_SUSPEND_MODE_T new_mode;
-
                 DG_ENGINE_UTIL_req_parse_data_ntoh(req, new_mode);
 
                 if ((mode == DG_DEFS_MODE_NORMAL) &&

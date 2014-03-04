@@ -46,14 +46,6 @@ typedef UINT8 DG_USB_ACTION_T;
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-static const UINT32 DG_USB_INFO_LEN = sizeof(((DG_CMN_DRV_USB_INFO_T*)NULL)->bus) +
-                                      sizeof(((DG_CMN_DRV_USB_INFO_T*)NULL)->device) +
-                                      sizeof(((DG_CMN_DRV_USB_INFO_T*)NULL)->vendor) +
-                                      sizeof(((DG_CMN_DRV_USB_INFO_T*)NULL)->product) +
-                                      sizeof(((DG_CMN_DRV_USB_INFO_T*)NULL)->major) +
-                                      sizeof(((DG_CMN_DRV_USB_INFO_T*)NULL)->minor) +
-                                      sizeof(((DG_CMN_DRV_USB_INFO_T*)NULL)->maxpower) +
-                                      sizeof(((DG_CMN_DRV_USB_INFO_T*)NULL)->speed);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -80,12 +72,14 @@ void DG_USB_handler_main(DG_DEFS_DIAG_REQ_T* req)
 {
     DG_USB_ACTION_T             action;
     DG_CMN_DRV_USB_PORT_T       port;
-    DG_DEFS_DIAG_RSP_BUILDER_T* rsp       = DG_ENGINE_UTIL_rsp_init();
+    DG_DEFS_DIAG_RSP_BUILDER_T* rsp = DG_ENGINE_UTIL_rsp_init();
     DG_CMN_DRV_USB_INFO_T       usb_info;
+
+    UINT32 req_len = sizeof(action) + sizeof(port);
 
     /* Verify action parameter was given */
     DG_DBG_TRACE("In DG_USB_handler_main begin to parse Request");
-    if (DG_ENGINE_UTIL_req_len_check_at_least(req, sizeof(action)+sizeof(port), rsp))
+    if (DG_ENGINE_UTIL_req_len_check_equal(req, req_len, rsp))
     {
         /* Parse and switch on action */
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
@@ -104,8 +98,8 @@ void DG_USB_handler_main(DG_DEFS_DIAG_REQ_T* req)
             }
             else
             {
-                /* Allocate memory for read data */
-                if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, DG_USB_INFO_LEN))
+                /* Allocate enough memory for read data */
+                if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, sizeof(usb_info)))
                 {
                     DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
                     DG_ENGINE_UTIL_rsp_append_data_hton(rsp, usb_info.bus);

@@ -52,10 +52,6 @@ typedef UINT8 DG_BIOS_ACTION_T;
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-static const UINT32 DG_BIOS_INFO_LEN = sizeof(((DG_CMN_DRV_BIOS_INFO_T*)NULL)->mfg) +
-                                       sizeof(((DG_CMN_DRV_BIOS_INFO_T*)NULL)->dev) +
-                                       sizeof(((DG_CMN_DRV_BIOS_INFO_T*)NULL)->edi_len) +
-                                       sizeof(((DG_CMN_DRV_BIOS_INFO_T*)NULL)->edi_b1);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -108,7 +104,8 @@ void DG_BIOS_handler_main(DG_DEFS_DIAG_REQ_T* req)
                 }
                 else
                 {
-                    if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, DG_BIOS_INFO_LEN))
+                    /* alloc enough memory for bios info */
+                    if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, sizeof(bios_info)))
                     {
                         DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
                         DG_ENGINE_UTIL_rsp_append_data_hton(rsp, bios_info.mfg);

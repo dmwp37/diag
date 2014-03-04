@@ -46,12 +46,6 @@ typedef UINT8 DG_PCI_ACTION_T;
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-static const UINT32 DG_PCI_REQ_LEN_MIN = sizeof(DG_CMN_DRV_PCI_DOMAIN_T) +
-                                         sizeof(DG_CMN_DRV_PCI_BUS_T) +
-                                         sizeof(DG_CMN_DRV_PCI_DEV_T) +
-                                         sizeof(DG_CMN_DRV_PCI_FUNC_T) +
-                                         sizeof(DG_CMN_DRV_PCI_OFFSET_T) +
-                                         sizeof(DG_CMN_DRV_PCI_LEN_T);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -86,9 +80,12 @@ void DG_PCI_handler_main(DG_DEFS_DIAG_REQ_T* req)
     DG_DEFS_DIAG_RSP_BUILDER_T* rsp       = DG_ENGINE_UTIL_rsp_init();
     UINT8*                      read_data = NULL;
 
+    const UINT32 req_len = sizeof(action) + sizeof(domain) + sizeof(bus) +
+                           sizeof(dev) + sizeof(func) + sizeof(offset) + sizeof(len);
+
     /* Verify action parameter was given */
     DG_DBG_TRACE("In DG_PCI_handler_main begin to parse Request");
-    if (DG_ENGINE_UTIL_req_len_check_at_least(req, DG_PCI_REQ_LEN_MIN, rsp))
+    if (DG_ENGINE_UTIL_req_len_check_equal(req, req_len, rsp))
     {
         /* Parse and switch on action */
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
