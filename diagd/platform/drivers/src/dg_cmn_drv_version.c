@@ -148,49 +148,25 @@ BOOL dg_cmn_drv_version_diag(char** pp_str)
 *//*==============================================================================================*/
 BOOL dg_cmn_drv_version_sw(char** pp_str)
 {
-    /* just print out the content of "uname -srm"*/
-    const char* shell_cmd = "uname -srm";
+    BOOL        ret       = FALSE;
+    const char* shell_cmd = "uname -srm"; /* just print out the content of "uname -srm"*/
+    char*       p_out     = NULL;
 
-    BOOL  ret = FALSE;
-    FILE* f   = NULL;
-    int   sys_ret;
-    int   exit_val;
-    char  buf[512]; /* Arbitrary size, must be large enough for known use cases */
-
-    if ((f = popen(shell_cmd, "r")) == NULL)
+    if (DG_DRV_UTIL_system(shell_cmd, &p_out))
     {
-        DG_DRV_UTIL_set_error_string("failed to run: %s, error=%s", shell_cmd, strerror(errno));
-    }
-    else
-    {
-        /* dump the output */
-        fgets(buf, sizeof(buf), f);
-        DG_DBG_TRACE("%s", buf);
-
-        sys_ret  = pclose(f);
-        exit_val = WEXITSTATUS(sys_ret);
-        f        = NULL;
-
-        if (exit_val != 0)
+        if (p_out != NULL)
         {
-            DG_DRV_UTIL_set_error_string("%s, sys_ret = %d, exit_val = %d",
-                                         shell_cmd, sys_ret, exit_val);
-        }
-        else
-        {
-            int last = sizeof(buf) - 1;
-            /* null terminate the string */
-            buf[last] = '\0';
-
             /* remove the tail '\n' */
-            last = strlen(buf) - 1;
-            if (buf[last] == '\n')
+            int last = strlen(p_out) - 1;
+            if (p_out[last] == '\n')
             {
-                buf[last] = '\0';
+                p_out[last] = '\0';
             }
 
-            ret = dg_cmn_drv_version_copy(pp_str, buf);
+            ret = TRUE;
         }
+
+        *pp_str = p_out;
     }
 
     return ret;
