@@ -48,6 +48,7 @@ void DG_DIMM_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_EEPROM_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_EXT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_FPGA_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_GPIO_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_INT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
