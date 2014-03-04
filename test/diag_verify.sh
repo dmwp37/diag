@@ -27,6 +27,7 @@ declare -a __array_command=("${!2}")
 declare -a __array_des=("${!3}")
 
 for var in ${__array_command[@]}; do
+    echo -e "$index)"
 
     echo ${__array_des[$index]} : $var
 
@@ -38,26 +39,25 @@ for var in ${__array_command[@]}; do
         if [ $test_pass != 0 ]; then
             __exit_status=1;
 
-            echo -e diag_send $var failed!!!!!!!!!!!!!!!!!! '\n'
-            echo -e '\n'$SEC_NAME ${array_des[$index]} : $var failed!!! '\n' >> $FILE_FAILURE_LOG
+            echo -e $CLIENT_CMD $var failed!!!!!!!!!!!!!!!!!! '\n'
+            echo -e '\n'$SEC_NAME ${__array_des[$index]} : $var failed!!! '\n' >> $FILE_FAILURE_LOG
             cat $FILE_TEMP
             cat $FILE_TEMP>>$FILE_FAILURE_LOG
         else
-            echo -e diag_send $var succeeded! '\n'
+            echo -e $CLIENT_CMD $var succeeded! '\n'
         fi
     else
         if [ $test_pass != 0 ]; then
-            echo -e diag_send $var failure test passed! '\n'
+            echo -e $CLIENT_CMD $var failure test passed! '\n'
             cat $FILE_TEMP
         else
             __exit_status=2
 
-            echo -e diag_send $var verify failure failed!!!!!!!!!!!!!!!!!! '\n'
-            echo -e '\n'$SEC_NAME ${array_des[$index]} : $var verify failure failed!!! '\n' >> $FILE_FAILURE_LOG
+            echo -e $CLIENT_CMD $var verify failure failed!!!!!!!!!!!!!!!!!! '\n'
+            echo -e '\n'$SEC_NAME ${__array_des[$index]} : $var verify failure failed!!! '\n' >> $FILE_FAILURE_LOG
             cat $FILE_TEMP>>$FILE_FAILURE_LOG
         fi
     fi
-
     let index+=1;
 done
 
