@@ -19,6 +19,7 @@
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_led.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_pci.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_phy.h</itemPath>
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_prbs.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_pttm.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_reset.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_rtc.h</itemPath>
@@ -85,6 +86,7 @@
           <itemPath>../../../diagd/common/handlers/src/dg_pci.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_phy.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_ping.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_prbs.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_pttm.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_reset.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_rtc.c</itemPath>
@@ -118,6 +120,7 @@
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_led.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_pci.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_phy.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_prbs.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_pttm.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_reset.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_rtc.c</itemPath>
@@ -296,6 +299,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_phy.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_prbs.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -540,6 +548,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_prbs.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_pttm.c"
             ex="false"
             tool="0"
@@ -662,6 +675,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_phy.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_prbs.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -846,6 +864,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_prbs.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_pttm.h"
             ex="false"
             tool="3"
@@ -1086,6 +1109,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_prbs.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_pttm.c"
             ex="false"
             tool="0"
@@ -1208,6 +1236,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_phy.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_prbs.c"
             ex="false"
             tool="0"
             flavor2="0">

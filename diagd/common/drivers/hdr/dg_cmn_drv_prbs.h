@@ -1,18 +1,27 @@
-#ifndef _DG_COMMON_HANDLER_TABLE_H
-#define _DG_COMMON_HANDLER_TABLE_H
+#ifndef _DG_CMN_DRV_PRBS_H_
+#define _DG_CMN_DRV_PRBS_H_
 /*==================================================================================================
 
-    Module Name:  dg_common_handler_table.h
+    Module Name:  dg_cmn_drv_prbs.h
 
-    General Description:  Header file for all common handler function prototypes
+    General Description: This file provides driver interface for PRBS test
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
 
+/** @addtogroup dg_common_drivers
+@{
+*/
+
+/** @addtogroup PRBS_driver
+@{
+
+@par
+Provide APIs for PRBS
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,10 +34,35 @@ extern "C" {
 /*==================================================================================================
                                                ENUMS
 ==================================================================================================*/
+enum
+{
+    DG_CMN_DRV_PRBS_BUS_HiGig0  = 0x00,
+    DG_CMN_DRV_PRBS_BUS_HiGig1  = 0x01,
+    DG_CMN_DRV_PRBS_BUS_QSGMII0 = 0x10,
+    DG_CMN_DRV_PRBS_BUS_QSGMII1 = 0x11,
+    DG_CMN_DRV_PRBS_BUS_QSGMII2 = 0x12,
+    DG_CMN_DRV_PRBS_BUS_QSGMII3 = 0x13,
+    DG_CMN_DRV_PRBS_BUS_SFI0    = 0x20,
+    DG_CMN_DRV_PRBS_BUS_SFI1    = 0x21,
+    DG_CMN_DRV_PRBS_BUS_SFI2    = 0x22,
+    DG_CMN_DRV_PRBS_BUS_SFI3    = 0x23,
+};
+typedef UINT8 DG_CMN_DRV_PRBS_BUS_T;
+
+enum
+{
+    DG_CMN_DRV_PRBS_ORDER_7TH  = 0x00,
+    DG_CMN_DRV_PRBS_ORDER_15TH = 0x01,
+    DG_CMN_DRV_PRBS_ORDER_23TH = 0x02,
+    DG_CMN_DRV_PRBS_ORDER_31TH = 0x03,
+};
+typedef UINT8 DG_CMN_DRV_PRBS_ORDER_T;
 
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
+typedef UINT32 DG_CMN_DRV_PRBS_COUNT_T;
+
 
 /*==================================================================================================
                                    GLOBAL VARIABLE DECLARATIONS
@@ -37,40 +71,24 @@ extern "C" {
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-/* Important Note: Please add all handler functions to this list in alphabetical order.  All
-   functions must have the name format/prototype of
-   DG_<DIAG NAME>_handler_main(DG_DEFS_DIAG_REQ_T *req) */
 
-void DG_BIOS_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_BUTTON_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_CLOCK_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_DIMM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_EEPROM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_EXT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_FAN_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_FPGA_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_GPIO_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_INT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PCI_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PHY_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PRBS_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PTTM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_RTC_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_TEMP_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_TPM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_USB_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req);
+/*=============================================================================================*//**
+@brief PRBS test operate
+
+@param[in]  bus   - bus need to be test
+@param[in]  order - order need to be use
+@param[out] count - PRBS error count value
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_PRBS_operate(DG_CMN_DRV_PRBS_BUS_T    bus,
+                             DG_CMN_DRV_PRBS_ORDER_T  order,
+                             DG_CMN_DRV_PRBS_COUNT_T* count);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _DG_COMMON_HANDLER_TABLE_H */
+/** @} */
+/** @} */
+
+#endif /* _DG_CMN_DRV_PRBS_H_  */
 
