@@ -23,6 +23,7 @@
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_reset.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_rtc.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_suspend.h</itemPath>
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_tpm.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_usb.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_version.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_drv_util.h</itemPath>
@@ -88,6 +89,7 @@
           <itemPath>../../../diagd/common/handlers/src/dg_rtc.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_suspend.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_test_engine.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_tpm.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_usb.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_version.c</itemPath>
         </logicalFolder>
@@ -118,6 +120,7 @@
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_reset.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_rtc.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_suspend.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_tpm.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_usb.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_version.c</itemPath>
         </logicalFolder>
@@ -314,6 +317,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_tpm.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_usb.h"
             ex="false"
             tool="3"
@@ -549,6 +557,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_tpm.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_usb.c"
             ex="false"
             tool="0"
@@ -656,6 +669,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_suspend.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_tpm.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -830,6 +848,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_tpm.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_usb.h"
             ex="false"
             tool="3"
@@ -1065,6 +1088,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_tpm.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_usb.c"
             ex="false"
             tool="0"
@@ -1172,6 +1200,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_suspend.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_tpm.c"
             ex="false"
             tool="0"
             flavor2="0">

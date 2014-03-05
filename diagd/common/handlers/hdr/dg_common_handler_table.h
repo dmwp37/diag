@@ -62,6 +62,7 @@ void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_RTC_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_TPM_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_USB_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req);
 
