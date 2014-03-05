@@ -106,6 +106,7 @@ DG_HANDLERS_CMN_SRC := \
   common/handlers/src/dg_led.c \
   common/handlers/src/dg_pci.c \
   common/handlers/src/dg_ping.c \
+  common/handlers/src/dg_pttm.c \
   common/handlers/src/dg_reset.c \
   common/handlers/src/dg_rtc.c \
   common/handlers/src/dg_suspend.c \
@@ -135,6 +136,7 @@ DG_DRIVERS_PLAT_SRC := \
   platform/drivers/src/dg_cmn_drv_int_loop.c \
   platform/drivers/src/dg_cmn_drv_led.c \
   platform/drivers/src/dg_cmn_drv_pci.c \
+  platform/drivers/src/dg_cmn_drv_pttm.c \
   platform/drivers/src/dg_cmn_drv_reset.c \
   platform/drivers/src/dg_cmn_drv_rtc.c \
   platform/drivers/src/dg_cmn_drv_suspend.c \

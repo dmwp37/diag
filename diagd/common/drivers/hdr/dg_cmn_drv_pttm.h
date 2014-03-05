@@ -1,18 +1,27 @@
-#ifndef _DG_COMMON_HANDLER_TABLE_H
-#define _DG_COMMON_HANDLER_TABLE_H
+#ifndef _DG_CMN_DRV_PTTM_H_
+#define _DG_CMN_DRV_PTTM_H_
 /*==================================================================================================
 
-    Module Name:  dg_common_handler_table.h
+    Module Name:  dg_cmn_drv_pttm.h
 
-    General Description:  Header file for all common handler function prototypes
+    General Description: This file provides driver interface for Potentiometer test
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
 
+/** @addtogroup dg_common_drivers
+@{
+*/
+
+/** @addtogroup PTTM_driver
+@{
+
+@par
+Provide APIs for Potentiometer
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,14 +30,24 @@ extern "C" {
 /*==================================================================================================
                                               MACROS
 ==================================================================================================*/
+#define DG_CMN_DRV_PTTM_DATE_MAX 127
 
 /*==================================================================================================
                                                ENUMS
 ==================================================================================================*/
+enum
+{
+    DG_CMN_DRV_PTTM_AD5247   = 0x00,
+    DG_CMN_DRV_PTTM_ISL90727 = 0x01,
+    DG_CMN_DRV_PTTM_ISL90728 = 0x02,
+};
+typedef UINT8 DG_CMN_DRV_PTTM_CHIP_T;
 
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
+/** PTTM Data in RDAC register, from 0 to 127 */
+typedef UINT8 DG_CMN_DRV_PTTM_DATA_T;
 
 /*==================================================================================================
                                    GLOBAL VARIABLE DECLARATIONS
@@ -37,34 +56,31 @@ extern "C" {
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-/* Important Note: Please add all handler functions to this list in alphabetical order.  All
-   functions must have the name format/prototype of
-   DG_<DIAG NAME>_handler_main(DG_DEFS_DIAG_REQ_T *req) */
 
-void DG_BIOS_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_BUTTON_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_DIMM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_EEPROM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_EXT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_FPGA_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_GPIO_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_INT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PCI_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PTTM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_RTC_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_USB_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req);
+/*=============================================================================================*//**
+@brief Reads RDAC register from PTTM
+
+@param[in]  chip - PTTM chip selection
+@param[out] data - The RDAC register data from PTTM
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_PTTM_get(DG_CMN_DRV_PTTM_CHIP_T chip, DG_CMN_DRV_PTTM_DATA_T* data);
+
+/*=============================================================================================*//**
+@brief Set RDAC register to PTTM
+
+@param[in] chip - PTTM chip selection
+@param[in] data - The RDAC register data set to PTTM
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_PTTM_set(DG_CMN_DRV_PTTM_CHIP_T chip, DG_CMN_DRV_PTTM_DATA_T data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _DG_COMMON_HANDLER_TABLE_H */
+/** @} */
+/** @} */
+
+#endif /* _DG_CMN_DRV_PTTM_H_  */
 
