@@ -85,11 +85,9 @@ void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req)
 
     const UINT32 req_len = sizeof(action) + sizeof(bus) + sizeof(address) + sizeof(offset);
 
-    /* Verify action parameter was given */
     DG_DBG_TRACE("In DG_I2C_handler_main begin to parse Request");
     if (DG_ENGINE_UTIL_req_len_check_at_least(req, req_len, rsp))
     {
-        /* Parse and switch on action */
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, bus);
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, address);

@@ -9,7 +9,6 @@
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include <stdlib.h>
 #include "dg_handler_inc.h"
 #include "dg_cmn_drv_usb.h"
 
@@ -77,11 +76,9 @@ void DG_USB_handler_main(DG_DEFS_DIAG_REQ_T* req)
 
     UINT32 req_len = sizeof(action) + sizeof(port);
 
-    /* Verify action parameter was given */
     DG_DBG_TRACE("In DG_USB_handler_main begin to parse Request");
     if (DG_ENGINE_UTIL_req_len_check_equal(req, req_len, rsp))
     {
-        /* Parse and switch on action */
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, port);
 

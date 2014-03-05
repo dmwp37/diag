@@ -74,11 +74,9 @@ void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req)
     DG_CMN_DRV_RESET_COMP_T     comp;
     DG_DEFS_DIAG_RSP_BUILDER_T* rsp = DG_ENGINE_UTIL_rsp_init();
 
-    const UINT32 req_len = sizeof(action);
-
     /* Verify action parameter was given */
     DG_DBG_TRACE("In DG_RESET_handler_main begin to parse Request");
-    if (DG_ENGINE_UTIL_req_len_check_at_least(req, req_len, rsp))
+    if (DG_ENGINE_UTIL_req_len_check_at_least(req, sizeof(action), rsp))
     {
         /* Parse and switch on action */
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);

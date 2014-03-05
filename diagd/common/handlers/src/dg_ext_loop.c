@@ -9,7 +9,6 @@
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include <stdlib.h>
 #include "dg_handler_inc.h"
 #include "dg_cmn_drv_ext_loop.h"
 
@@ -70,11 +69,9 @@ void DG_EXT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req)
 
     const UINT32 req_len = sizeof(action) + sizeof(node);
 
-    /* Verify action parameter was given */
     DG_DBG_TRACE("In DG_EXT_LOOP_handler_main begin to parse Request");
     if (DG_ENGINE_UTIL_req_len_check_equal(req, req_len, rsp))
     {
-        /* Parse and switch on action */
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, node);
         DG_DBG_TRACE("action=0x%02x, node=0x%02x", action, node);
