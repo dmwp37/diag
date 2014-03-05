@@ -1,18 +1,27 @@
-#ifndef _DG_COMMON_HANDLER_TABLE_H
-#define _DG_COMMON_HANDLER_TABLE_H
+#ifndef _DG_CMN_DRV_CLOCK_H_
+#define _DG_CMN_DRV_CLOCK_H_
 /*==================================================================================================
 
-    Module Name:  dg_common_handler_table.h
+    Module Name:  dg_cmn_drv_clock.h
 
-    General Description:  Header file for all common handler function prototypes
+    General Description: This file provides driver interface for clock test
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
 
+/** @addtogroup dg_common_drivers
+@{
+*/
+
+/** @addtogroup CLOCK_driver
+@{
+
+@par
+Provide APIs for clock
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,9 +35,15 @@ extern "C" {
                                                ENUMS
 ==================================================================================================*/
 
+
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
+/** clock register type, max 0x09 */
+typedef UINT8 DG_CMN_DRV_CLOCK_REG_T;
+
+/** clock register data */
+typedef UINT8 DG_CMN_DRV_CLOCK_DATA_T;
 
 /*==================================================================================================
                                    GLOBAL VARIABLE DECLARATIONS
@@ -37,36 +52,31 @@ extern "C" {
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-/* Important Note: Please add all handler functions to this list in alphabetical order.  All
-   functions must have the name format/prototype of
-   DG_<DIAG NAME>_handler_main(DG_DEFS_DIAG_REQ_T *req) */
 
-void DG_BIOS_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_BUTTON_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_CLOCK_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_DIMM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_EEPROM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_EXT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_FPGA_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_GPIO_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_INT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PCI_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PHY_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PTTM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_RTC_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_USB_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req);
+/*=============================================================================================*//**
+@brief Read clock register
+
+@param[in]  reg  - clock chip selection
+@param[out] data - The clock register data
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_CLOCK_get(DG_CMN_DRV_CLOCK_REG_T reg, DG_CMN_DRV_CLOCK_DATA_T* data);
+
+/*=============================================================================================*//**
+@brief Set clock register
+
+@param[in] reg  - clock chip selection
+@param[in] data - The clock register data
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_CLOCK_set(DG_CMN_DRV_CLOCK_REG_T reg, DG_CMN_DRV_CLOCK_DATA_T data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _DG_COMMON_HANDLER_TABLE_H */
+/** @} */
+/** @} */
+
+#endif /* _DG_CMN_DRV_CLOCK_H_  */
 

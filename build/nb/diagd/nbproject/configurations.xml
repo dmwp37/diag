@@ -6,6 +6,7 @@
         <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_bios.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_button.h</itemPath>
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_clock.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_dimm.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_eeprom.h</itemPath>
@@ -67,6 +68,7 @@
         <logicalFolder name="src" displayName="src" projectFiles="true">
           <itemPath>../../../diagd/common/handlers/src/dg_bios.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_button.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_clock.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_debug_level.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_dimm.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_eeprom.c</itemPath>
@@ -97,6 +99,7 @@
         <logicalFolder name="src" displayName="src" projectFiles="true">
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_bios.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_button.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_clock.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_debug_level.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_dimm.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_eeprom.c</itemPath>
@@ -219,6 +222,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_button.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_clock.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -438,6 +446,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_clock.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_debug_level.c"
             ex="false"
             tool="0"
@@ -545,6 +558,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_button.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_clock.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -709,6 +727,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_clock.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_debug_level.h"
             ex="false"
             tool="3"
@@ -924,6 +947,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_clock.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_debug_level.c"
             ex="false"
             tool="0"
@@ -1031,6 +1059,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_button.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_clock.c"
             ex="false"
             tool="0"
             flavor2="0">
