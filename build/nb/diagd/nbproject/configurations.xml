@@ -23,6 +23,7 @@
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_pttm.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_reset.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_rtc.h</itemPath>
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_ssd.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_suspend.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_temp.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_tpm.h</itemPath>
@@ -90,6 +91,7 @@
           <itemPath>../../../diagd/common/handlers/src/dg_pttm.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_reset.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_rtc.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_ssd.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_suspend.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_temp.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_test_engine.c</itemPath>
@@ -124,6 +126,7 @@
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_pttm.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_reset.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_rtc.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_ssd.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_suspend.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_temp.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_tpm.c</itemPath>
@@ -323,6 +326,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_ssd.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_suspend.h"
             ex="false"
             tool="3"
@@ -568,6 +576,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_ssd.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_suspend.c"
             ex="false"
             tool="0"
@@ -695,6 +708,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_rtc.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_ssd.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -884,6 +902,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_ssd.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_suspend.h"
             ex="false"
             tool="3"
@@ -1129,6 +1152,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_ssd.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_suspend.c"
             ex="false"
             tool="0"
@@ -1256,6 +1284,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_rtc.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_ssd.c"
             ex="false"
             tool="0"
             flavor2="0">
