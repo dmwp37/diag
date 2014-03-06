@@ -64,7 +64,7 @@ BOOL DG_CMN_DRV_CLOCK_get(DG_CMN_DRV_CLOCK_REG_T reg, DG_CMN_DRV_CLOCK_DATA_T* d
 {
     BOOL ret = FALSE;
 
-    if (reg >= DG_CMN_DRV_CLOCK_REG_MAX)
+    if (reg > DG_CMN_DRV_CLOCK_REG_MAX)
     {
         DG_DRV_UTIL_set_error_string("Invalid clock register=%d", reg);
     }
@@ -91,7 +91,7 @@ BOOL DG_CMN_DRV_CLOCK_set(DG_CMN_DRV_CLOCK_REG_T reg, DG_CMN_DRV_CLOCK_DATA_T da
 {
     BOOL ret = FALSE;
 
-    if (reg >= DG_CMN_DRV_CLOCK_REG_MAX)
+    if (reg > DG_CMN_DRV_CLOCK_REG_MAX)
     {
         DG_DRV_UTIL_set_error_string("Invalid clock register=%d", reg);
     }

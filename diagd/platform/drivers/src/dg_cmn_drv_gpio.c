@@ -30,6 +30,7 @@ implementation of the GPIO driver
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
+#define DG_CMN_DRV_GPIO_PORT_MAX 0x49
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -46,8 +47,8 @@ implementation of the GPIO driver
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
-static DG_CMN_DRV_GPIO_VALUE_T dg_cmn_drv_gpio_data[DG_CMN_DRV_GPIO_PORT_MAX] = { 0 };
-static DG_CMN_DRV_GPIO_CFG_T   dg_cmn_drv_gpio_cfg[DG_CMN_DRV_GPIO_PORT_MAX] = { 0 };
+static DG_CMN_DRV_GPIO_VALUE_T dg_cmn_drv_gpio_data[DG_CMN_DRV_GPIO_PORT_MAX + 1] = { 0 };
+static DG_CMN_DRV_GPIO_CFG_T   dg_cmn_drv_gpio_cfg[DG_CMN_DRV_GPIO_PORT_MAX + 1] = { 0 };
 
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
@@ -123,7 +124,7 @@ BOOL DG_CMN_DRV_GPIO_set(DG_CMN_DRV_GPIO_PORT_T port, DG_CMN_DRV_GPIO_VALUE_T va
 @param[in] cfg  - The GPIO port configuration
 
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_GPIO_cfg(DG_CMN_DRV_GPIO_PORT_T port, DG_CMN_DRV_GPIO_CFG_T cfg)
+BOOL DG_CMN_DRV_GPIO_set_cfg(DG_CMN_DRV_GPIO_PORT_T port, DG_CMN_DRV_GPIO_CFG_T cfg)
 {
     BOOL ret = FALSE;
 
@@ -147,6 +148,35 @@ BOOL DG_CMN_DRV_GPIO_cfg(DG_CMN_DRV_GPIO_PORT_T port, DG_CMN_DRV_GPIO_CFG_T cfg)
 
     return ret;
 }
+
+/*=============================================================================================*//**
+@brief Get the GPIO port configuration
+
+@param[in]  port - The GPIO port
+@param[out] cfg  - The GPIO port configuration
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_GPIO_get_cfg(DG_CMN_DRV_GPIO_PORT_T port, DG_CMN_DRV_GPIO_CFG_T* cfg)
+{
+    BOOL ret = FALSE;
+
+    if (port > DG_CMN_DRV_GPIO_PORT_MAX)
+    {
+        DG_DRV_UTIL_set_error_string("Invalid port=%d", port);
+    }
+    else
+    {
+        *cfg = dg_cmn_drv_gpio_cfg[port];
+
+        DG_DBG_TRACE("GPIO Port %d got configured as %s", port,
+                     (*cfg == DG_CMN_DRV_GPIO_CFG_INPUT) ? "input" : "output");
+
+        ret = TRUE;
+    }
+
+    return ret;
+}
+
 /*==================================================================================================
                                           LOCAL FUNCTIONS
 ==================================================================================================*/

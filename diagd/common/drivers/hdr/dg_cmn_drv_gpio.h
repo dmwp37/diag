@@ -30,7 +30,6 @@ extern "C" {
 /*==================================================================================================
                                               MACROS
 ==================================================================================================*/
-#define DG_CMN_DRV_GPIO_PORT_MAX 0x49
 
 /*==================================================================================================
                                                ENUMS
@@ -92,7 +91,16 @@ BOOL DG_CMN_DRV_GPIO_set(DG_CMN_DRV_GPIO_PORT_T port, DG_CMN_DRV_GPIO_VALUE_T va
 @param[in] cfg  - The GPIO port configuration
 
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_GPIO_cfg(DG_CMN_DRV_GPIO_PORT_T port, DG_CMN_DRV_GPIO_CFG_T cfg);
+BOOL DG_CMN_DRV_GPIO_set_cfg(DG_CMN_DRV_GPIO_PORT_T port, DG_CMN_DRV_GPIO_CFG_T cfg);
+
+/*=============================================================================================*//**
+@brief Get the GPIO port configuration
+
+@param[in]  port - The GPIO port
+@param[out] cfg  - The GPIO port configuration
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_GPIO_get_cfg(DG_CMN_DRV_GPIO_PORT_T port, DG_CMN_DRV_GPIO_CFG_T* cfg);
 
 #ifdef __cplusplus
 }

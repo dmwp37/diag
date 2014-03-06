@@ -37,9 +37,10 @@ GPIO test handler.
 /** Actions for GPIO command */
 enum
 {
-    DG_GPIO_ACTION_GET = 0x00,
-    DG_GPIO_ACTION_SET = 0x01,
-    DG_GPIO_ACTION_CFG = 0x02,
+    DG_GPIO_ACTION_GET     = 0x00,
+    DG_GPIO_ACTION_SET     = 0x01,
+    DG_GPIO_ACTION_SET_CFG = 0x02,
+    DG_GPIO_ACTION_GET_CFG = 0x03,
 };
 typedef UINT8 DG_GPIO_ACTION_T;
 
@@ -123,11 +124,11 @@ void DG_GPIO_handler_main(DG_DEFS_DIAG_REQ_T* req)
             }
             break;
 
-        case DG_GPIO_ACTION_CFG:
+        case DG_GPIO_ACTION_SET_CFG:
             if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(cfg), rsp))
             {
                 DG_ENGINE_UTIL_req_parse_data_ntoh(req, cfg);
-                if (!DG_CMN_DRV_GPIO_cfg(port, cfg))
+                if (!DG_CMN_DRV_GPIO_set_cfg(port, cfg))
                 {
                     DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
                                                             "Failed to config GPIO port");
@@ -135,6 +136,25 @@ void DG_GPIO_handler_main(DG_DEFS_DIAG_REQ_T* req)
                 else
                 {
                     DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
+                }
+            }
+            break;
+
+        case DG_GPIO_ACTION_GET_CFG:
+            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, 0, rsp))
+            {
+                if (!DG_CMN_DRV_GPIO_get_cfg(port, &cfg))
+                {
+                    DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
+                                                            "Failed to get GPIO config");
+                }
+                else
+                {
+                    if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, sizeof(cfg)))
+                    {
+                        DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
+                        DG_ENGINE_UTIL_rsp_append_data_hton(rsp, cfg);
+                    }
                 }
             }
             break;
