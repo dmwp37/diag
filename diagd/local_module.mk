@@ -100,6 +100,7 @@ DG_HANDLERS_CMN_SRC := \
   common/handlers/src/dg_dimm.c \
   common/handlers/src/dg_eeprom.c \
   common/handlers/src/dg_ext_loop.c \
+  common/handlers/src/dg_fan.c \
   common/handlers/src/dg_fpga.c \
   common/handlers/src/dg_gpio.c \
   common/handlers/src/dg_i2c.c \
@@ -133,6 +134,7 @@ DG_DRIVERS_PLAT_SRC := \
   platform/drivers/src/dg_cmn_drv_dimm.c \
   platform/drivers/src/dg_cmn_drv_eeprom.c \
   platform/drivers/src/dg_cmn_drv_ext_loop.c \
+  platform/drivers/src/dg_cmn_drv_fan.c \
   platform/drivers/src/dg_cmn_drv_fpga.c \
   platform/drivers/src/dg_cmn_drv_gpio.c \
   platform/drivers/src/dg_cmn_drv_i2c.c \

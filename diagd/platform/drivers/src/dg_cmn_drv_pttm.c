@@ -106,7 +106,7 @@ BOOL DG_CMN_DRV_PTTM_set(DG_CMN_DRV_PTTM_CHIP_T chip, DG_CMN_DRV_PTTM_DATA_T dat
     {
         dg_cmn_drv_pttm_data[chip] = data;
 
-        DG_DBG_TRACE("GPIO Port %d set value: %d", chip, data);
+        DG_DBG_TRACE("PTTM chip %d set value: %d", chip, data);
 
         ret = TRUE;
     }
