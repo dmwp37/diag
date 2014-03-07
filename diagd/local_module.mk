@@ -96,6 +96,7 @@ DG_HANDLERS_CMN_SRC := \
   common/handlers/src/dg_bios.c \
   common/handlers/src/dg_button.c \
   common/handlers/src/dg_clock.c \
+  common/handlers/src/dg_cpld.c \
   common/handlers/src/dg_debug_level.c \
   common/handlers/src/dg_dimm.c \
   common/handlers/src/dg_eeprom.c \
@@ -135,6 +136,7 @@ DG_DRIVERS_PLAT_SRC := \
   platform/drivers/src/dg_cmn_drv_bios.c \
   platform/drivers/src/dg_cmn_drv_button.c \
   platform/drivers/src/dg_cmn_drv_clock.c \
+  platform/drivers/src/dg_cmn_drv_cpld.c \
   platform/drivers/src/dg_cmn_drv_debug_level.c \
   platform/drivers/src/dg_cmn_drv_dimm.c \
   platform/drivers/src/dg_cmn_drv_eeprom.c \

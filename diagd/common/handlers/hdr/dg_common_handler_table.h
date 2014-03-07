@@ -44,6 +44,7 @@ extern "C" {
 void DG_BIOS_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_BUTTON_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_CLOCK_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_CPLD_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_DIMM_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_EEPROM_handler_main(DG_DEFS_DIAG_REQ_T* req);
