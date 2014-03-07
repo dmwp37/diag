@@ -114,6 +114,7 @@ DG_HANDLERS_CMN_SRC := \
   common/handlers/src/dg_pttm.c \
   common/handlers/src/dg_reset.c \
   common/handlers/src/dg_rtc.c \
+  common/handlers/src/dg_sfp.c \
   common/handlers/src/dg_ssd.c \
   common/handlers/src/dg_suspend.c \
   common/handlers/src/dg_temp.c \
@@ -153,6 +154,7 @@ DG_DRIVERS_PLAT_SRC := \
   platform/drivers/src/dg_cmn_drv_pttm.c \
   platform/drivers/src/dg_cmn_drv_reset.c \
   platform/drivers/src/dg_cmn_drv_rtc.c \
+  platform/drivers/src/dg_cmn_drv_sfp.c \
   platform/drivers/src/dg_cmn_drv_ssd.c \
   platform/drivers/src/dg_cmn_drv_suspend.c \
   platform/drivers/src/dg_cmn_drv_temp.c \

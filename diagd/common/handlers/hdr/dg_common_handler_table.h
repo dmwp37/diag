@@ -62,6 +62,7 @@ void DG_PRBS_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PTTM_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_RTC_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_SFP_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_SSD_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_TEMP_handler_main(DG_DEFS_DIAG_REQ_T* req);
