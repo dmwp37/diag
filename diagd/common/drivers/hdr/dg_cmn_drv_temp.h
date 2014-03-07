@@ -1,18 +1,27 @@
-#ifndef _DG_COMMON_HANDLER_TABLE_H
-#define _DG_COMMON_HANDLER_TABLE_H
+#ifndef _DG_CMN_DRV_TEMP_H_
+#define _DG_CMN_DRV_TEMP_H_
 /*==================================================================================================
 
-    Module Name:  dg_common_handler_table.h
+    Module Name:  dg_cmn_drv_temp.h
 
-    General Description:  Header file for all common handler function prototypes
+    General Description: This file provides driver interface for Temperature test
 
 ====================================================================================================
 
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include "dg_defs.h"
 
+/** @addtogroup dg_common_drivers
+@{
+*/
+
+/** @addtogroup TEMP_driver
+@{
+
+@par
+Provide APIs for Temperature test
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,10 +34,29 @@ extern "C" {
 /*==================================================================================================
                                                ENUMS
 ==================================================================================================*/
+enum
+{
+    DG_CMN_DRV_TEMP_CB_0  = 0x00,
+    DG_CMN_DRV_TEMP_CB_1  = 0x01,
+    DG_CMN_DRV_TEMP_FEB_0 = 0x02,
+    DG_CMN_DRV_TEMP_FEB_1 = 0x03,
+    DG_CMN_DRV_TEMP_CPU   = 0x04,
+    DG_CMN_DRV_TEMP_PCH   = 0x05,
+    DG_CMN_DRV_TEMP_PSU_0 = 0x06,
+    DG_CMN_DRV_TEMP_PSU_1 = 0x07,
+    DG_CMN_DRV_TEMP_WTB_0 = 0x08,
+    DG_CMN_DRV_TEMP_WTB_1 = 0x09,
+    DG_CMN_DRV_TEMP_PHY_0 = 0x0a,
+    DG_CMN_DRV_TEMP_PHY_1 = 0x0b,
+    DG_CMN_DRV_TEMP_FPGA  = 0x0c,
+};
+typedef UINT8 DG_CMN_DRV_TEMP_SENSOR_T;
 
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
+/** Temperature data */
+typedef UINT32 DG_CMN_DRV_TEMP_DATA_T;
 
 /*==================================================================================================
                                    GLOBAL VARIABLE DECLARATIONS
@@ -37,39 +65,25 @@ extern "C" {
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-/* Important Note: Please add all handler functions to this list in alphabetical order.  All
-   functions must have the name format/prototype of
-   DG_<DIAG NAME>_handler_main(DG_DEFS_DIAG_REQ_T *req) */
 
-void DG_BIOS_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_BUTTON_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_CLOCK_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_DEBUG_LEVEL_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_DIMM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_EEPROM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_EXT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_FAN_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_FPGA_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_GPIO_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_I2C_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_INT_LOOP_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PCI_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PHY_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_PTTM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_RTC_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_SUSPEND_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_TEMP_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_TPM_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_USB_handler_main(DG_DEFS_DIAG_REQ_T* req);
-void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req);
+/*=============================================================================================*//**
+@brief Get temperature from specified temp sensor
+
+@param[in]  sensor      - temperature sensor selection
+@param[out] temperature - The temperature from the sensor (convert from float)
+
+@note
+- the temp is a UINT32 pointer, but it must contains the exact data as a float
+- *temp = *(UINT32*)&(float_temperature)
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_TEMP_get(DG_CMN_DRV_TEMP_SENSOR_T sensor, DG_CMN_DRV_TEMP_DATA_T* temperature);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _DG_COMMON_HANDLER_TABLE_H */
+/** @} */
+/** @} */
+
+#endif /* _DG_CMN_DRV_TEMP_H_  */
 

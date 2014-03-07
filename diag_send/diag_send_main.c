@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include "dg_platform_defs.h"
 #include "dg_client_api.h"
 
@@ -400,6 +401,14 @@ void dg_send_print_output(UINT16 opcode, UINT8* buf, UINT32 len)
     case 0x0000: /* version */
         DG_SEND_PRINT("%s", (const char*)buf);
         break;
+
+    case 0x0003: /* temperature */
+    {
+        UINT32 data = ntohl(*(UINT32*)buf);
+        float  temp = *(float*)(&data);
+        DG_SEND_PRINT("%+.02f°C", temp);
+    }
+    break;
 
     default:
         dg_send_dump(buf, len);
