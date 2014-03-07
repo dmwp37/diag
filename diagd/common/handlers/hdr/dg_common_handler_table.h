@@ -59,6 +59,7 @@ void DG_PCI_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PHY_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PRBS_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_PSU_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PTTM_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_RTC_handler_main(DG_DEFS_DIAG_REQ_T* req);
