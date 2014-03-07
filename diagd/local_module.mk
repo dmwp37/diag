@@ -119,6 +119,7 @@ DG_HANDLERS_CMN_SRC := \
   common/handlers/src/dg_tpm.c \
   common/handlers/src/dg_usb.c \
   common/handlers/src/dg_version.c \
+  common/handlers/src/dg_voltage.c \
   common/handlers/src/dg_test_engine.c
 
 #Platform Specific Handlers
@@ -155,7 +156,8 @@ DG_DRIVERS_PLAT_SRC := \
   platform/drivers/src/dg_cmn_drv_temp.c \
   platform/drivers/src/dg_cmn_drv_tpm.c \
   platform/drivers/src/dg_cmn_drv_usb.c \
-  platform/drivers/src/dg_cmn_drv_version.c
+  platform/drivers/src/dg_cmn_drv_version.c \
+  platform/drivers/src/dg_cmn_drv_voltage.c
 
 LOCAL_SRC_FILES := \
   $(DG_ENGINE_SRC) \

@@ -68,6 +68,7 @@ void DG_TEST_ENGINE_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_TPM_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_USB_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_VOLTAGE_handler_main(DG_DEFS_DIAG_REQ_T* req);
 
 #ifdef __cplusplus
 }

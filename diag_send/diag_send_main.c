@@ -395,24 +395,44 @@ void dg_send_dump(UINT8* buf, UINT32 len)
 *//*==============================================================================================*/
 void dg_send_print_output(UINT16 opcode, UINT8* buf, UINT32 len)
 {
+    BOOL b_out = FALSE;
+
     DG_SEND_PRINT("-> Data success received");
+
     switch (opcode)
     {
     case 0x0000: /* version */
-        DG_SEND_PRINT("%s", (const char*)buf);
+        DG_SEND_PRINT("%s", (char*)buf);
+        b_out = TRUE;
         break;
 
     case 0x0003: /* temperature */
-    {
-        UINT32 data = ntohl(*(UINT32*)buf);
-        float  temp = *(float*)(&data);
-        DG_SEND_PRINT("%+.02f°C", temp);
-    }
-    break;
+        if (len == sizeof(UINT32))
+        {
+            UINT32 data = ntohl(*(UINT32*)buf);
+            float  temp = *(float*)(&data);
+            DG_SEND_PRINT("%+.02f°C", temp);
+            b_out = TRUE;
+        }
+        break;
+
+    case 0x0005: /* voltage */
+        if (len == sizeof(UINT32))
+        {
+            UINT32 data    = ntohl(*(UINT32*)buf);
+            float  voltage = *(float*)(&data);
+            DG_SEND_PRINT("%+.02fV", voltage);
+            b_out = TRUE;
+        }
+        break;
 
     default:
-        dg_send_dump(buf, len);
         break;
+    }
+
+    if (!b_out)
+    {
+        dg_send_dump(buf, len);
     }
 }
 

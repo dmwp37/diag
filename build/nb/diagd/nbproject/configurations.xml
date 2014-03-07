@@ -29,6 +29,7 @@
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_tpm.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_usb.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_version.h</itemPath>
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_voltage.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_drv_util.h</itemPath>
         </logicalFolder>
         <logicalFolder name="f1" displayName="src" projectFiles="true">
@@ -98,6 +99,7 @@
           <itemPath>../../../diagd/common/handlers/src/dg_tpm.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_usb.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_version.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_voltage.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <itemPath>../../../diagd/common/README</itemPath>
@@ -132,6 +134,7 @@
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_tpm.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_usb.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_version.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_voltage.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="handlers" displayName="handlers" projectFiles="true">
@@ -356,6 +359,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_voltage.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_drv_util.h"
             ex="false"
             tool="3"
@@ -611,6 +619,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_voltage.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/dg_cfg.mk" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../diagd/local_module.mk" ex="false" tool="3" flavor2="0">
@@ -738,6 +751,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_version.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_voltage.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -932,6 +950,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_voltage.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_drv_util.h"
             ex="false"
             tool="3"
@@ -1187,6 +1210,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_voltage.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/dg_cfg.mk" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../diagd/local_module.mk" ex="false" tool="3" flavor2="0">
@@ -1314,6 +1342,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_version.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_voltage.c"
             ex="false"
             tool="0"
             flavor2="0">
