@@ -37,11 +37,24 @@ extern "C" {
 /** RESET Chip Selection */
 enum
 {
-    DG_CMN_DRV_RESET_PCH    = 0x00,
-    DG_CMN_DRV_RESET_FPGA   = 0x01,
-    DG_CMN_DRV_RESET_SWITCH = 0x02,
-    DG_CMN_DRV_RESET_PHY    = 0x03,
-    DG_CMN_DRV_RESET_SYS    = 0xFF,
+    DG_CMN_DRV_RESET_CPU           = 0x00,
+    DG_CMN_DRV_RESET_FEB           = 0x01,
+    DG_CMN_DRV_RESET_CB_RENESAS    = 0x02,
+    DG_CMN_DRV_RESET_I2C           = 0x03,
+    DG_CMN_DRV_RESET_PHY0          = 0x10,
+    DG_CMN_DRV_RESET_PHY1          = 0x11,
+    DG_CMN_DRV_RESET_SWITCH        = 0x12,
+    DG_CMN_DRV_RESET_MGT_PHY       = 0x13,
+    DG_CMN_DRV_RESET_FPGA          = 0x14,
+    DG_CMN_DRV_RESET_FPGA_PCIE     = 0x15,
+    DG_CMN_DRV_RESET_FEB_RENESAS   = 0x16,
+    DG_CMN_DRV_RESET_FPGA_FLASH    = 0x17,
+    DG_CMN_DRV_RESET_SWITCH_PERST0 = 0x20,
+    DG_CMN_DRV_RESET_SWITCH_PERST1 = 0x21,
+    DG_CMN_DRV_RESET_I2C_MUX       = 0x22,
+    DG_CMN_DRV_RESET_WANPIM1       = 0x23,
+    DG_CMN_DRV_RESET_WANPIM2       = 0x24,
+    DG_CMN_DRV_RESET_SYS           = 0xFF,
 };
 typedef UINT8 DG_CMN_DRV_RESET_COMP_T;
 

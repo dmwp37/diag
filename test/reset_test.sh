@@ -9,7 +9,7 @@ RESET_SYSTEM=00
 RESET_ACTION=01
 RECOVER_ACTION=02
 
-CHIP_ID=01 #FPGA
+CHIP_ID=01 # FEB
 
 echo "#-----------------------$SEC_NAME-----------------------"
 
@@ -19,18 +19,21 @@ echo "#-----------------------$SEC_NAME-----------------------"
 array_command[0]=01000102
 array_command[1]="$OPCODE""$RESET_ACTION""$CHIP_ID"
 array_command[2]="$OPCODE""$RECOVER_ACTION""$CHIP_ID"
+array_command[3]="$OPCODE""$RESET_SYSTEM"
 
 #command description array, need match with command array above.
 array_des[0]="Suspend the DUT"
 array_des[1]="Reset Chip=$CHIP_ID"
 array_des[2]="Recover Chip=$CHIP_ID"
+array_des[3]="Reboot System"
+
+array_command_fail[0]="$OPCODE"07
 
 CHIP_ID=0f
-array_command_fail[0]="$OPCODE""$RESET_ACTION""$CHIP_ID"
-array_command_fail[1]="$OPCODE""$RESET_SYSTEM"
+array_command_fail[1]="$OPCODE""$RESET_ACTION""$CHIP_ID"
 
-array_des_fail[0]="Reset invalid chip. Chip=$CHIP_ID"
-array_des_fail[1]="Reset system not support"
+array_des_fail[0]="Invalid Action"
+array_des_fail[1]="Reset invalid chip. Chip=$CHIP_ID"
 
 . $CUR_PATH/diag_verify.sh
 
