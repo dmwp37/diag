@@ -59,6 +59,7 @@ void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PCI_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PHY_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PING_handler_main(DG_DEFS_DIAG_REQ_T* req);
+void DG_PORT_LED_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PRBS_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PSU_handler_main(DG_DEFS_DIAG_REQ_T* req);
 void DG_PTTM_handler_main(DG_DEFS_DIAG_REQ_T* req);

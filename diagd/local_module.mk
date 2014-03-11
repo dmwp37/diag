@@ -111,6 +111,7 @@ DG_HANDLERS_CMN_SRC := \
   common/handlers/src/dg_pci.c \
   common/handlers/src/dg_phy.c \
   common/handlers/src/dg_ping.c \
+  common/handlers/src/dg_port_led.c \
   common/handlers/src/dg_prbs.c \
   common/handlers/src/dg_psu.c \
   common/handlers/src/dg_pttm.c \
@@ -153,6 +154,7 @@ DG_DRIVERS_PLAT_SRC := \
   platform/drivers/src/dg_cmn_drv_led.c \
   platform/drivers/src/dg_cmn_drv_pci.c \
   platform/drivers/src/dg_cmn_drv_phy.c \
+  platform/drivers/src/dg_cmn_drv_port_led.c \
   platform/drivers/src/dg_cmn_drv_prbs.c \
   platform/drivers/src/dg_cmn_drv_psu.c \
   platform/drivers/src/dg_cmn_drv_pttm.c \
