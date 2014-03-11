@@ -142,8 +142,7 @@ int main(int argc, char* argv[])
         fp = fopen(argv[argnum], "r");
         if (fp == NULL)
         {
-            DG_SEND_PRINT("-- Unable to open file '%s': errno=%d (%s)",
-                          argv[argnum], errno, strerror(errno));
+            DG_SEND_PRINT("-- Unable to open file '%s': errno=%d(%m)", argv[argnum], errno);
             exit(1);
         }
     }

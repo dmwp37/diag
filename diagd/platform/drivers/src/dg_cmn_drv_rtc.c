@@ -11,7 +11,6 @@
 ==================================================================================================*/
 #include <time.h>
 #include <sys/time.h>
-#include <string.h>
 #include <errno.h>
 #include "dg_handler_inc.h"
 #include "dg_drv_util.h"
@@ -70,13 +69,11 @@ BOOL DG_CMN_DRV_RTC_get(DG_CMN_DRV_RTC_DATE_T* date)
 
     if (gettimeofday(&time_of_day, NULL) != 0)
     {
-        DG_DRV_UTIL_set_error_string("Failed to get time of day, errno=%d (%s)",
-                                     errno, strerror(errno));
+        DG_DRV_UTIL_set_error_string("Failed to get time of day, errno=%d(%m)", errno);
     }
     else if ((local_time = localtime(&time_of_day.tv_sec)) == NULL)
     {
-        DG_DRV_UTIL_set_error_string("Failed to get local time, errno=%d (%s)",
-                                     errno, strerror(errno));
+        DG_DRV_UTIL_set_error_string("Failed to get local time, errno=%d(%m)", errno);
     }
     else
     {
@@ -129,7 +126,7 @@ BOOL DG_CMN_DRV_RTC_set(DG_CMN_DRV_RTC_DATE_T* date)
 
     if ((clock = mktime(&local_time)) == -1)
     {
-        DG_DRV_UTIL_set_error_string("Failed to mktime, errno=%d (%s)", errno, strerror(errno));
+        DG_DRV_UTIL_set_error_string("Failed to mktime, errno=%d(%m)", errno);
     }
     else
     {
@@ -138,8 +135,7 @@ BOOL DG_CMN_DRV_RTC_set(DG_CMN_DRV_RTC_DATE_T* date)
 
         if (settimeofday(&time_of_day, NULL) != 0)
         {
-            DG_DRV_UTIL_set_error_string("Failed to set time of day, errno=%d (%s)",
-                                         errno, strerror(errno));
+            DG_DRV_UTIL_set_error_string("Failed to set time of day, errno=%d(%m)", errno);
         }
         else
         {

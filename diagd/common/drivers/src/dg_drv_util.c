@@ -11,7 +11,6 @@
 ==================================================================================================*/
 #include <stdlib.h>
 #include <stdarg.h>
-#include <string.h>
 #include <errno.h>
 #include <pthread.h>
 #include "dg_dbg.h"
@@ -70,8 +69,7 @@ void DG_DRV_UTIL_init_error_string()
 
     if (ret != 0)
     {
-        DG_DBG_ERROR("pthread_once() for error string key failed. errno=%d (%s)",
-                     errno, strerror(errno));
+        DG_DBG_ERROR("pthread_once() for error string key failed. errno=%d(%m)", errno);
     }
 }
 
@@ -99,8 +97,7 @@ void DG_DRV_UTIL_set_error_string(const char* format, ...)
 
     if (str_len < 0)
     {
-        DG_DBG_ERROR("vsnprintf() get string length failed. errno=%d (%s)",
-                     errno, strerror(errno));
+        DG_DBG_ERROR("vsnprintf() get string length failed. errno=%d(%m)", errno);
     }
     else if ((p_err_str = (char*)malloc(str_len + 1)) == NULL)
     {
@@ -126,8 +123,7 @@ void DG_DRV_UTIL_set_error_string(const char* format, ...)
         /* Set new error string */
         if (pthread_setspecific(dg_drv_util_error_string_key, p_err_str) != 0)
         {
-            DG_DBG_ERROR("pthread_setspecific() set error string failed. errno=%d (%s)",
-                         errno, strerror(errno));
+            DG_DBG_ERROR("pthread_setspecific() set error string failed. errno=%d(%m)", errno);
         }
     }
 }
@@ -172,7 +168,7 @@ BOOL DG_DRV_UTIL_system(const char* cmd, char** p_out)
     DG_DBG_TRACE("Execute command: %s", cmd);
     if ((fp = popen(cmd, "r")) == NULL)
     {
-        DG_DRV_UTIL_set_error_string("failed to run: %s, error=%s", cmd, strerror(errno));
+        DG_DRV_UTIL_set_error_string("failed to run: %s, errno=%d(%m)", cmd, errno);
     }
     else
     {
@@ -251,8 +247,7 @@ void dg_drv_util_create_error_string_key()
 
     if (ret != 0)
     {
-        DG_DBG_ERROR("pthread_key_create() for driver error string failed. errno=%d (%s)",
-                     errno, strerror(errno));
+        DG_DBG_ERROR("pthread_key_create() for driver error string failed. errno=%d(%m)", errno);
     }
 }
 

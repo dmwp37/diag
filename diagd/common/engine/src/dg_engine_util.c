@@ -23,8 +23,6 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protoco
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <math.h>
-#include <string.h>
 #include <pthread.h>
 #include "dg_defs.h"
 #include "dg_dbg.h"
@@ -1458,8 +1456,7 @@ void DG_ENGINE_UTIL_rsp_set_error_string(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
     }
     else if ((str_len = vsnprintf(NULL, 0, format, args)) < 0)
     {
-        DG_DBG_ERROR("vsnprintf() get string length failed. errno=%d (%s)",
-                     errno, strerror(errno));
+        DG_DBG_ERROR("vsnprintf() get string length failed. errno=%d(%m)", errno);
     }
     else if ((ascii_error_string = (char*)malloc(str_len + 1)) == NULL)
     {
@@ -1516,8 +1513,7 @@ void DG_ENGINE_UTIL_rsp_set_error_string_drv(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
 
     if (str_len < 0)
     {
-        DG_DBG_ERROR("vsnprintf() get string length failed. errno=%d (%s)",
-                     errno, strerror(errno));
+        DG_DBG_ERROR("vsnprintf() get string length failed. errno=%d(%m)", errno);
     }
     else if ((ascii_error_string = (char*)malloc(str_len + 1)) == NULL)
     {

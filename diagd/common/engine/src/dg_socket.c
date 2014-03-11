@@ -117,7 +117,7 @@ void DG_SOCKET_connection_listener(void)
             DG_DBG_TRACE("Listening for incoming client connection request");
             if (select(max_fd + 1, &working_set, NULL, NULL, NULL) < 0)
             {
-                DG_DBG_ERROR("Select failed, errno = %d (%s)", errno, strerror(errno));
+                DG_DBG_ERROR("Select failed, errno=%d(%m)", errno);
             }
             else
             {
@@ -237,8 +237,7 @@ void dg_socket_listen_sock(int sock, int* max_fd, fd_set* socket_set)
     }
     else if (listen(sock,  DG_SOCKET_MAX_PENDING_CONNECTION_QUEUE) == -1)
     {
-        DG_DBG_ERROR("Error listening on DIAG socket %d, errno = %d(%s)", sock, errno,
-                     strerror(errno));
+        DG_DBG_ERROR("Error listening on DIAG socket %d, errno=%d(%m)", sock, errno);
     }
     else
     {
@@ -265,8 +264,7 @@ void dg_socket_accept_client_connect(int listen_sock, DG_CLIENT_COMM_CLIENT_TYPE
     DG_DBG_TRACE("Attempting to accept new client sock on listen sock %d", listen_sock);
     if ((client_sock = accept(listen_sock, &serv_addr, &sock_len)) == -1)
     {
-        DG_DBG_ERROR("Error accepting incoming DIAG connection request: %s",
-                     strerror(errno));
+        DG_DBG_ERROR("Error accepting incoming DIAG connection request. errno=%d(%m)",errno);
     }
     else
     {
@@ -332,8 +330,7 @@ BOOL dg_socket_set_non_blocking_mode(int fd, BOOL is_enable)
     /* Get the socket's flags */
     if ((fd_flags = fcntl(fd, F_GETFL)) == -1)
     {
-        DG_DBG_ERROR("Failed to read socket %d flags, errno = %d (%s)",
-                     fd, errno, strerror(errno));
+        DG_DBG_ERROR("Failed to read socket %d flags, errno=%d(%m)", fd, errno);
     }
     else
     {
@@ -349,8 +346,7 @@ BOOL dg_socket_set_non_blocking_mode(int fd, BOOL is_enable)
 
         if (fcntl(fd, F_SETFL, fd_flags) != 0)
         {
-            DG_DBG_ERROR("Failed to set socket %d flags to %d, errno = %d (%s)",
-                         fd, fd_flags, errno, strerror(errno));
+            DG_DBG_ERROR("Failed to set socket %d flags to %d, errno=%d(%m)", fd, fd_flags, errno);
         }
         else
         {

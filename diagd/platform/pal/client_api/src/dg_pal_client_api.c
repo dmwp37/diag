@@ -12,7 +12,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <arpa/inet.h>
@@ -88,7 +87,7 @@ int DG_PAL_CLIENT_API_create_int_diag_socket()
 
     if ((socket_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
     {
-        DG_CLIENT_API_ERROR("Can't create unix socket, errno=%d (%s)", errno, strerror(errno));
+        DG_CLIENT_API_ERROR("Can't create unix socket, errno=%d(%m)", errno);
         return -1;
     }
 
@@ -129,7 +128,7 @@ int DG_PAL_CLIENT_API_create_ext_diag_socket(const char* serv_addr)
     socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_fd < 0)
     {
-        DG_CLIENT_API_ERROR("Can't create INET socket, errno=%d (%s)", errno, strerror(errno));
+        DG_CLIENT_API_ERROR("Can't create INET socket, errno=%d(%m)", errno);
         return -1;
     }
 
@@ -207,8 +206,7 @@ BOOL DG_PAL_CLIENT_API_wait(int socket, BOOL is_read, UINT32 timeout_in_ms)
     }
     else if (select_status != 1)
     {
-        DG_CLIENT_API_ERROR("Select failed, select_status = %d. errno=%d (%s)",
-                            select_status, errno, strerror(errno));
+        DG_CLIENT_API_ERROR("Select failed, select_status=%d. errno=%d(%m)", select_status, errno);
     }
     else
     {
@@ -248,8 +246,8 @@ BOOL DG_PAL_CLIENT_API_read(int socket, UINT32 len_to_read, UINT8* buff_ptr)
         else if ((current_bytes_read == -1) && ((errno == EAGAIN)
                                                 || (errno == EWOULDBLOCK) || (errno == ETIMEDOUT)))
         {
-            DG_CLIENT_API_ERROR("Timeout occurred while waiting for DIAG response. errno=%d (%s)",
-                                errno, strerror(errno));
+            DG_CLIENT_API_ERROR("Timeout occurred while waiting for DIAG response. errno=%d(%m)",
+                                errno);
             status = FALSE;
         }
         else if (++try_count == DG_PAL_CLIENT_API_READ_TCP_RETRY_NUM)
@@ -277,8 +275,8 @@ BOOL DG_PAL_CLIENT_API_write(int socket, UINT8* buf, UINT32 len)
 
     if (send(socket, buf, len, 0) != (int)len)
     {
-        DG_CLIENT_API_ERROR("Failed to send %d bytes to socket %d. errno=%d (%s)",
-                            len, socket, errno, strerror(errno));
+        DG_CLIENT_API_ERROR("Failed to send %d bytes to socket %d. errno=%d(%m)",
+                            len, socket, errno);
 
         status = FALSE;
     }
@@ -338,7 +336,7 @@ BOOL dg_pal_client_api_connect_socket(int socket, struct sockaddr* addr, socklen
     orig_flags = fcntl(socket, F_GETFL);
     if ((orig_flags == -1) || (fcntl(socket, F_SETFL, O_NONBLOCK) == -1))
     {
-        DG_CLIENT_API_ERROR("Failed disabling blocking. errno=%d (%s)", errno, strerror(errno));
+        DG_CLIENT_API_ERROR("Failed disabling blocking. errno=%d(%m)", errno);
     }
     else
     {
@@ -357,20 +355,19 @@ BOOL dg_pal_client_api_connect_socket(int socket, struct sockaddr* addr, socklen
 
         default:
         {
-            DG_CLIENT_API_TRACE("waiting for connection. errno = %d (%s)", errno, strerror(errno));
+            DG_CLIENT_API_TRACE("waiting for connection. errno=%d(%m)", errno);
 
             if (DG_PAL_CLIENT_API_wait(socket, FALSE, DG_PAL_CLIENT_API_CONNECT_WAIT))
             {
                 /* determine if connect() was eventually successful */
                 if (getsockopt(socket, SOL_SOCKET, SO_ERROR, &error_value, &errval_size) != 0)
                 {
-                    DG_CLIENT_API_ERROR("cannot connect to server. errno=%d (%s)",
-                                        errno, strerror(errno));
+                    DG_CLIENT_API_ERROR("cannot connect to server. errno=%d(%m)", errno);
                 }
                 else if (error_value != 0)
                 {
-                    DG_CLIENT_API_ERROR("cannot connect to server, error_value = %d. errno=%d (%s)",
-                                        error_value, errno, strerror(errno));
+                    DG_CLIENT_API_ERROR("cannot connect to server, error_value=%d. errno=%d(%m)",
+                                        error_value, errno);
                 }
                 else
                 {
