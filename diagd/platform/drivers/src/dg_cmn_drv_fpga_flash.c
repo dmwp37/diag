@@ -1,8 +1,8 @@
 /*==================================================================================================
 
-    Module Name:  dg_cmn_drv_reset.c
+    Module Name:  dg_cmn_drv_fpga_flash.c
 
-    General Description: Implements the RESET common driver
+    General Description: Implements the FPGA_FLASH common driver
 
 ====================================================================================================
 
@@ -11,16 +11,16 @@
 ==================================================================================================*/
 #include "dg_handler_inc.h"
 #include "dg_drv_util.h"
-#include "dg_cmn_drv_reset.h"
+#include "dg_cmn_drv_fpga_flash.h"
 
 
 /** @addtogroup dg_common_drivers
 @{
 */
 
-/** @addtogroup RESET_driver
+/** @addtogroup FPGA_FLASH_driver
 @{
-implementation of the RESET driver
+implementation of the FPGA_FLASH driver
 */
 
 /*==================================================================================================
@@ -52,52 +52,85 @@ implementation of the RESET driver
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief Reads data from a given address on the given RESET bus
+@brief Get FPGA flash information
 
-@param[in]  comp       - Which component to reset
-@param[in]  is_reset   - TRUE to reset and FALSE to recover
-
-@note
-- Read data is only valid when the function returns with a success
+@param[out] info - The flash info read from the device
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_RESET_reset(DG_CMN_DRV_RESET_COMP_T comp, BOOL is_reset)
+BOOL DG_CMN_DRV_FPGA_FLASH_get_info(DG_CMN_DRV_FLASH_INFO_T* info)
 {
-    BOOL ret = FALSE;
+    info->mfg_id         = 1;
+    info->dev_id1        = 2;
+    info->dev_id2        = 3;
+    info->dev_id3        = 4;
+    info->dev_verify     = 5;
+    info->protect_verify = 6;
+    DG_DBG_TRACE("Get FPGA flash information");
 
-    switch (comp)
+    return TRUE;
+}
+
+/*=============================================================================================*//**
+@brief Get FPGA flash CFI
+
+@param[out] cfi - The flash CFI read from the device
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_FPGA_FLASH_get_cfi(DG_CMN_DRV_FLASH_CFI_T* cfi)
+{
+    UINT32 i;
+
+    for (i = 0; i < sizeof(cfi->val); i++)
     {
-    case DG_CMN_DRV_RESET_CPU:
-    case DG_CMN_DRV_RESET_FEB:
-    case DG_CMN_DRV_RESET_CB_RENESAS:
-    case DG_CMN_DRV_RESET_I2C:
-    case DG_CMN_DRV_RESET_PHY0:
-    case DG_CMN_DRV_RESET_PHY1:
-    case DG_CMN_DRV_RESET_SWITCH:
-    case DG_CMN_DRV_RESET_MGT_PHY:
-    case DG_CMN_DRV_RESET_FPGA:
-    case DG_CMN_DRV_RESET_FPGA_PCIE:
-    case DG_CMN_DRV_RESET_FEB_RENESAS:
-    case DG_CMN_DRV_RESET_FPGA_FLASH:
-    case DG_CMN_DRV_RESET_SWITCH_PERST0:
-    case DG_CMN_DRV_RESET_SWITCH_PERST1:
-    case DG_CMN_DRV_RESET_I2C_MUX:
-    case DG_CMN_DRV_RESET_WANPIM1:
-    case DG_CMN_DRV_RESET_WANPIM2:
-        DG_DBG_TRACE("Reset Component=%d, Reset=%d", comp, is_reset);
-        ret = TRUE;
-        break;
-
-    case DG_CMN_DRV_RESET_SYS:
-        DG_DBG_TRACE("System Reboot!");
-        ret = TRUE;
-        break;
-
-    default:
-        DG_DRV_UTIL_set_error_string("Unsupported reset chip component! Component=%d", comp);
-        break;
+        cfi->val[i] = i;
     }
+    /* support CFI */
+    cfi->val[0] = 'Q';
+    cfi->val[1] = 'R';
+    cfi->val[2] = 'Y';
 
-    return ret;
+    DG_DBG_TRACE("Get FPGA flash CFI");
+    DG_DBG_DUMP(cfi->val, sizeof(cfi->val));
+
+    return TRUE;
+}
+
+/*=============================================================================================*//**
+@brief Get FPGA flash memory
+
+@param[in]  addr- The flash memory address read from the device
+@param[in]  len - The amount of data to read in bytes
+@param[out] buf - The data to read from the device
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_FPGA_FLASH_get_mem(DG_CMN_DRV_FLASH_ADDR_T addr,
+                                   DG_CMN_DRV_FLASH_LEN_T  len,
+                                   UINT8*                  buf)
+{
+    UINT32 i;
+
+    for (i = 0; i < len; i++)
+    {
+        *buf++ = (UINT8)(addr + i);
+    }
+    DG_DBG_TRACE("Get FPGA flash memory address %x, length %d, buffer %p", addr, len, buf);
+    DG_DBG_DUMP(buf, len);
+
+    return TRUE;
+}
+
+/*=============================================================================================*//**
+@brief Set FPGA flash memory
+
+@param[in] addr- The flash memory address read from the device
+@param[in] len - The amount of data to write in bytes
+@param[in] buf - The data to write to the device
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_FPGA_FLASH_set_mem(DG_CMN_DRV_FLASH_ADDR_T addr,
+                                   DG_CMN_DRV_FLASH_LEN_T  len,
+                                   UINT8*                  buf)
+{
+    DG_DBG_TRACE("Set FPGA flash memory address %x, length %d, buffer %p", addr, len, buf);
+    DG_DBG_DUMP(buf, len);
+
+    return TRUE;
 }
 
 /*==================================================================================================

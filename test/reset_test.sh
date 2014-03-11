@@ -33,7 +33,7 @@ CHIP_ID=0f
 array_command_fail[1]="$OPCODE""$RESET_ACTION""$CHIP_ID"
 
 array_des_fail[0]="Invalid Action"
-array_des_fail[1]="Reset invalid chip. Chip=$CHIP_ID"
+array_des_fail[1]="Reset invalid chip. CHIP_ID=$CHIP_ID"
 
 . $CUR_PATH/diag_verify.sh
 
