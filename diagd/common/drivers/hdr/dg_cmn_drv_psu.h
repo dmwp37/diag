@@ -43,14 +43,6 @@ enum
 };
 typedef UINT8 DG_CMN_DRV_PSU_SLOT_T;
 
-/** PSU channel type */
-enum
-{
-    DG_CMN_DRV_PSU_CHANNEL_EEPROM = 0x00,
-    DG_CMN_DRV_PSU_CHANNEL_PSMI   = 0x01,
-};
-typedef UINT8 DG_CMN_DRV_PSU_CHANNEL_T;
-
 /** PSU config type */
 enum
 {
@@ -62,17 +54,17 @@ typedef UINT8 DG_CMN_DRV_PSU_CFG_T;
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
+/** PSMI address type */
+typedef UINT8 DG_CMN_DRV_PSU_PSMI_ADDR_T;
+
+/** PSMI data type */
+typedef UINT16 DG_CMN_DRV_PSU_PSMI_DATA_T;
+
 /** PSU information type */
 typedef struct
 {
-    UINT8 data[512];
-} DG_CMN_DRV_PSU_INFO_T;
-
-/** PSU address type */
-typedef UINT8 DG_CMN_DRV_PSU_ADDR_T;
-
-/** PSU data type */
-typedef UINT16 DG_CMN_DRV_PSU_DATA_T;
+    DG_CMN_DRV_PSU_PSMI_DATA_T data[256];
+} DG_CMN_DRV_PSU_PSMI_INFO_T;
 
 /** PSU status type */
 typedef UINT8 DG_CMN_DRV_PSU_STATUS_T;
@@ -86,31 +78,27 @@ typedef UINT8 DG_CMN_DRV_PSU_STATUS_T;
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief Dump the PSU information value
+@brief Dump the PSU PSMI
 
 @param[in]  slot    - The PSU slot
-@param[in]  channel - The PSU channel
-@param[out] info    - The PSU dumped information
+@param[out] psmi    - The dumped PSMI information
 
 @note
 - Fill unavailable data with 0xFF
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_PSU_dump_info(DG_CMN_DRV_PSU_SLOT_T    slot,
-                              DG_CMN_DRV_PSU_CHANNEL_T channel,
-                              DG_CMN_DRV_PSU_INFO_T*   info);
+BOOL DG_CMN_DRV_PSU_dump_psmi(DG_CMN_DRV_PSU_SLOT_T       slot,
+                              DG_CMN_DRV_PSU_PSMI_INFO_T* psmi);
 
 /*=============================================================================================*//**
-@brief write PSU information
+@brief write PSU PSMI data
 
 @param[in] slot    - The PSU slot
-@param[in] channel - The PSU channel
-@param[in] addr    - The PSU address to write
-@param[in] data    - The PSU data to write
+@param[in] addr    - The PSMI address to write
+@param[in] data    - The PSMI data to write
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_PSU_write(DG_CMN_DRV_PSU_SLOT_T    slot,
-                          DG_CMN_DRV_PSU_CHANNEL_T channel,
-                          DG_CMN_DRV_PSU_ADDR_T    addr,
-                          DG_CMN_DRV_PSU_DATA_T    data);
+BOOL DG_CMN_DRV_PSU_write_psmi(DG_CMN_DRV_PSU_SLOT_T      slot,
+                               DG_CMN_DRV_PSU_PSMI_ADDR_T addr,
+                               DG_CMN_DRV_PSU_PSMI_DATA_T data);
 
 /*=============================================================================================*//**
 @brief Get the PSU status

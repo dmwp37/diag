@@ -44,6 +44,8 @@ enum
     DG_CMN_DRV_EEPROM_WTB0   = 0x03, /** WANPIM0 Test Board ID EEPROM */
     DG_CMN_DRV_EEPROM_WTB1   = 0x04, /** WANPIM1 Test Board ID EEPROM */
     DG_CMN_DRV_EEPROM_BPB    = 0x05, /** Back Plane Board ID EEPROM   */
+    DG_CMN_DRV_EEPROM_PSU0   = 0x06, /** PSU slot0 EEPROM             */
+    DG_CMN_DRV_EEPROM_PSU1   = 0x07, /** PSU slot1 EEPROM             */
 };
 typedef UINT8 DG_CMN_DRV_EEPROM_ID_T;
 

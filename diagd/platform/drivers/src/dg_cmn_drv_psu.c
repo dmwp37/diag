@@ -53,18 +53,16 @@ implementation of the PSU driver
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief Dump the PSU information value
+@brief Dump the PSU PSMI
 
 @param[in]  slot    - The PSU slot
-@param[in]  channel - The PSU channel
-@param[out] info    - The PSU dumped information
+@param[out] psmi    - The dumped PSMI information
 
 @note
 - Fill unavailable data with 0xFF
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_PSU_dump_info(DG_CMN_DRV_PSU_SLOT_T    slot,
-                              DG_CMN_DRV_PSU_CHANNEL_T channel,
-                              DG_CMN_DRV_PSU_INFO_T*   info)
+BOOL DG_CMN_DRV_PSU_dump_psmi(DG_CMN_DRV_PSU_SLOT_T       slot,
+                              DG_CMN_DRV_PSU_PSMI_INFO_T* psmi)
 {
     BOOL ret = FALSE;
 
@@ -74,48 +72,30 @@ BOOL DG_CMN_DRV_PSU_dump_info(DG_CMN_DRV_PSU_SLOT_T    slot,
     }
     else
     {
-        /* fill all the info data with 0xff */
-        memset(info->data, 0xFF, sizeof(info->data));
+        /* fill all the psmi data with 0xff */
+        memset(psmi->data, 0xFF, sizeof(psmi->data));
 
-        if (channel == DG_CMN_DRV_PSU_CHANNEL_EEPROM)
-        {
-            info->data[0] = 0x00;
+        psmi->data[0] = 0x00;
 
-            DG_DBG_TRACE("PSU slot %d channel EEPROM dump", slot);
-            DG_DBG_DUMP(info->data, sizeof(info->data));
+        DG_DBG_TRACE("PSU slot %d PSMI dump", slot);
+        DG_DBG_DUMP(psmi->data, sizeof(psmi->data));
 
-            ret = TRUE;
-        }
-        else if (channel == DG_CMN_DRV_PSU_CHANNEL_PSMI)
-        {
-            info->data[0] = 0x11;
-
-            DG_DBG_TRACE("PSU slot %d channel PSMI dump", slot);
-            DG_DBG_DUMP(info->data, sizeof(info->data));
-
-            ret = TRUE;
-        }
-        else
-        {
-            DG_DRV_UTIL_set_error_string("Invalid PSU channel=%d", channel);
-        }
+        ret = TRUE;
     }
 
     return ret;
 }
 
 /*=============================================================================================*//**
-@brief write PSU information
+@brief write PSU PSMI data
 
 @param[in] slot    - The PSU slot
-@param[in] channel - The PSU channel
-@param[in] addr    - The PSU address to write
-@param[in] data    - The PSU data to write
+@param[in] addr    - The PSMI address to write
+@param[in] data    - The PSMI data to write
 *//*==============================================================================================*/
-BOOL DG_CMN_DRV_PSU_write(DG_CMN_DRV_PSU_SLOT_T    slot,
-                          DG_CMN_DRV_PSU_CHANNEL_T channel,
-                          DG_CMN_DRV_PSU_ADDR_T    addr,
-                          DG_CMN_DRV_PSU_DATA_T    data)
+BOOL DG_CMN_DRV_PSU_write_psmi(DG_CMN_DRV_PSU_SLOT_T      slot,
+                               DG_CMN_DRV_PSU_PSMI_ADDR_T addr,
+                               DG_CMN_DRV_PSU_PSMI_DATA_T data)
 {
     BOOL ret = FALSE;
 
@@ -125,24 +105,11 @@ BOOL DG_CMN_DRV_PSU_write(DG_CMN_DRV_PSU_SLOT_T    slot,
     }
     else
     {
-        if (channel == DG_CMN_DRV_PSU_CHANNEL_EEPROM)
-        {
-            DG_DBG_TRACE("PSU slot %d channel EEPROM write addr=0x%02x, data=0x%02x",
-                         slot, addr, (UINT8)data);
 
-            ret = TRUE;
-        }
-        else if (channel == DG_CMN_DRV_PSU_CHANNEL_PSMI)
-        {
-            DG_DBG_TRACE("PSU slot %d channel PSMI write addr=0x%02x, data=0x%04x",
-                         slot, addr, data);
+        DG_DBG_TRACE("PSU slot %d PSMI write addr=0x%02x, data=0x%04x",
+                     slot, addr, data);
 
-            ret = TRUE;
-        }
-        else
-        {
-            DG_DRV_UTIL_set_error_string("Invalid PSU channel=%d", channel);
-        }
+        ret = TRUE;
     }
 
     return ret;

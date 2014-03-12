@@ -37,8 +37,8 @@ PSU test handler.
 /** Actions for PSU command */
 enum
 {
-    DG_PSU_ACTION_DUMP_INFO  = 0x00,
-    DG_PSU_ACTION_SET_INFO   = 0x01,
+    DG_PSU_ACTION_DUMP_PSMI  = 0x00,
+    DG_PSU_ACTION_WRITE_PSMI = 0x01,
     DG_PSU_ACTION_GET_STATUS = 0x02,
     DG_PSU_ACTION_SET_CFG    = 0x03,
 };
@@ -73,9 +73,8 @@ void DG_PSU_handler_main(DG_DEFS_DIAG_REQ_T* req)
 {
     DG_PSU_ACTION_T             action;
     DG_CMN_DRV_PSU_SLOT_T       slot;
-    DG_CMN_DRV_PSU_CHANNEL_T    channel;
-    DG_CMN_DRV_PSU_ADDR_T       addr;
-    DG_CMN_DRV_PSU_DATA_T       data;
+    DG_CMN_DRV_PSU_PSMI_ADDR_T  addr;
+    DG_CMN_DRV_PSU_PSMI_DATA_T  data;
     DG_CMN_DRV_PSU_CFG_T        cfg;
     DG_DEFS_DIAG_RSP_BUILDER_T* rsp = DG_ENGINE_UTIL_rsp_init();
 
@@ -91,41 +90,45 @@ void DG_PSU_handler_main(DG_DEFS_DIAG_REQ_T* req)
 
         switch (action)
         {
-        case DG_PSU_ACTION_DUMP_INFO:
-            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(channel), rsp))
+        case DG_PSU_ACTION_DUMP_PSMI:
+            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, 0, rsp))
             {
-                DG_CMN_DRV_PSU_INFO_T info;
+                DG_CMN_DRV_PSU_PSMI_INFO_T psmi;
 
-                DG_ENGINE_UTIL_req_parse_data_ntoh(req, channel);
-
-                if (!DG_CMN_DRV_PSU_dump_info(slot, channel, &info))
+                if (!DG_CMN_DRV_PSU_dump_psmi(slot, &psmi))
                 {
                     DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                                                            "Failed to dump PSU information");
+                                                            "Failed to dump PSMI information");
                 }
                 else
                 {
-                    if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, sizeof(info)))
+                    if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, sizeof(psmi)))
                     {
+                        int i;
+                        int num = sizeof(psmi.data) / sizeof(psmi.data[0]);
+
                         DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
-                        DG_ENGINE_UTIL_rsp_append_buf(rsp, info.data, sizeof(info.data));
+
+                        for (i = 0; i < num; i++)
+                        {
+                            DG_ENGINE_UTIL_rsp_append_data_hton(rsp, psmi.data[i]);
+                        }
                     }
                 }
             }
             break;
 
-        case DG_PSU_ACTION_SET_INFO:
-            req_len = sizeof(channel) + sizeof(addr) + sizeof(data);
+        case DG_PSU_ACTION_WRITE_PSMI:
+            req_len = sizeof(addr) + sizeof(data);
             if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, req_len, rsp))
             {
-                DG_ENGINE_UTIL_req_parse_data_ntoh(req, channel);
                 DG_ENGINE_UTIL_req_parse_data_ntoh(req, addr);
                 DG_ENGINE_UTIL_req_parse_data_ntoh(req, data);
 
-                if (!DG_CMN_DRV_PSU_write(slot, channel, addr, data))
+                if (!DG_CMN_DRV_PSU_write_psmi(slot, addr, data))
                 {
                     DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                                                            "Failed to write PSU data");
+                                                            "Failed to write PSMI data");
                 }
                 else
                 {

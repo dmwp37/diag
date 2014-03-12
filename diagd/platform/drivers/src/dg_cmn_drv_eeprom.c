@@ -73,6 +73,8 @@ BOOL DG_CMN_DRV_EEPROM_read(DG_CMN_DRV_EEPROM_ID_T   eeprom,
     case DG_CMN_DRV_EEPROM_WTB0:
     case DG_CMN_DRV_EEPROM_WTB1:
     case DG_CMN_DRV_EEPROM_BPB:
+    case DG_CMN_DRV_EEPROM_PSU0:
+    case DG_CMN_DRV_EEPROM_PSU1:
 
         *data = eeprom;
         DG_DBG_TRACE("Read EEPROM: EEPROM_ID=%d, Offset=0x%04x, Data=0x%02x", eeprom, addr, *data);
@@ -110,6 +112,8 @@ BOOL DG_CMN_DRV_EEPROM_write(DG_CMN_DRV_EEPROM_ID_T   eeprom,
     case DG_CMN_DRV_EEPROM_WTB0:
     case DG_CMN_DRV_EEPROM_WTB1:
     case DG_CMN_DRV_EEPROM_BPB:
+    case DG_CMN_DRV_EEPROM_PSU0:
+    case DG_CMN_DRV_EEPROM_PSU1:
 
         DG_DBG_TRACE("Write EEPROM: EEPROM_ID=%d, Offset=0x%04x, Data=0x%02x", eeprom, addr, data);
         ret = TRUE;
