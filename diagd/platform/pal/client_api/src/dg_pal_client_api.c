@@ -9,10 +9,7 @@
 ====================================================================================================
                                             INCLUDE FILES
 ==================================================================================================*/
-#include <string.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
 #include <WinSock2.h>
 #include "dg_pal_client_platform_inc.h"
 #include "dg_defs.h"
@@ -127,7 +124,7 @@ int DG_PAL_CLIENT_API_create_ext_diag_socket(const char* serv_addr)
     socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_fd < 0)
     {
-        DG_CLIENT_API_ERROR("Can't create INET socket, errno=%d (%s)", errno, strerror(errno));
+        DG_CLIENT_API_ERROR("Can't create INET socket, errno=%d", WSAGetLastError());
         return -1;
     }
 
@@ -177,7 +174,7 @@ BOOL DG_PAL_CLIENT_API_wait(int socket, BOOL is_read, UINT32 timeout_in_ms)
     /* Convert the timeout (in milliseconds) to seconds & microseconds if timeout used */
     if (timeout_in_ms != 0)
     {
-        DG_CLIENT_API_TRACE("Response timeout = %d milliseconds", timeout_in_ms);
+        DG_CLIENT_API_TRACE("Response timeout=%d milliseconds", timeout_in_ms);
         timeout.tv_sec  = timeout_in_ms / 1000;
         timeout.tv_usec = (timeout_in_ms % 1000) * 1000;
         timeout_ptr     = &timeout;
@@ -206,8 +203,8 @@ BOOL DG_PAL_CLIENT_API_wait(int socket, BOOL is_read, UINT32 timeout_in_ms)
     }
     else if (select_status != 1)
     {
-        DG_CLIENT_API_ERROR("Select failed, select_status = %d. errno=%d (%s)",
-                            select_status, errno, strerror(errno));
+        DG_CLIENT_API_ERROR("Select failed, select_status=%d. errno=%d",
+                            select_status, WSAGetLastError());
     }
     else
     {
@@ -231,7 +228,6 @@ BOOL DG_PAL_CLIENT_API_read(int socket, UINT32 len_to_read, UINT8* buff_ptr)
     BOOL  status             = TRUE;
     INT32 total_bytes_read   = 0;
     INT32 current_bytes_read = 0;
-    INT32 try_count          = 0;
 
     DG_CLIENT_API_TRACE("Attempting to read %d bytes from %d.", len_to_read, socket);
 
@@ -244,16 +240,14 @@ BOOL DG_PAL_CLIENT_API_read(int socket, UINT32 len_to_read, UINT8* buff_ptr)
         {
             total_bytes_read += current_bytes_read;
         }
-        else if ((current_bytes_read == -1) && ((errno == EAGAIN)
-                                                || (errno == EWOULDBLOCK) || (errno == ETIMEDOUT)))
+        else if (current_bytes_read == 0)
         {
-            DG_CLIENT_API_ERROR("Timeout occurred while waiting for DIAG response. errno=%d (%s)",
-                                errno, strerror(errno));
+            DG_CLIENT_API_ERROR("Connection closed");
             status = FALSE;
         }
-        else if (++try_count == DG_PAL_CLIENT_API_READ_TCP_RETRY_NUM)
+        else
         {
-            DG_CLIENT_API_ERROR("Read Failed, over number of retries.");
+            DG_CLIENT_API_ERROR("recv failed. errno=%d", WSAGetLastError());
             status = FALSE;
         }
     }
@@ -274,10 +268,10 @@ BOOL DG_PAL_CLIENT_API_write(int socket, UINT8* buf, UINT32 len)
 {
     BOOL status = TRUE;
 
-    if (send(socket, buf, len, 0) != (int)len)
+    if (send(socket, (const char*)buf, len, 0) != (int)len)
     {
-        DG_CLIENT_API_ERROR("Failed to send %d bytes to socket %d. errno=%d (%s)",
-                            len, socket, errno, strerror(errno));
+        DG_CLIENT_API_ERROR("Failed to send %d bytes to socket %d. errno=%d",
+                            len, socket, WSAGetLastError());
 
         status = FALSE;
     }
@@ -329,46 +323,39 @@ void DG_PAL_CLIENT_API_rsp_hdr_ntoh(DG_DEFS_DIAG_RSP_HDR_T* hdr_in, DG_DEFS_DIAG
 *//*==============================================================================================*/
 BOOL dg_pal_client_api_connect_socket(int socket, struct sockaddr* addr, socklen_t len)
 {
-    BOOL      status      = FALSE;
-    u_long    orig_flags  = 1;
-    char      error_value = 0;
-    socklen_t errval_size = sizeof(error_value);
+    BOOL   status      = FALSE;
+    u_long orig_flags  = 1;
+    int    error_value = 0;
+    int    errval_size = sizeof(error_value);
 
     if (ioctlsocket(socket, FIONBIO, &orig_flags) != NO_ERROR)
     {
-        DG_CLIENT_API_ERROR("Failed to disable blocking. errno=%d (%s)", errno, strerror(errno));
+        DG_CLIENT_API_ERROR("Failed to disable blocking. errno=%d", WSAGetLastError());
     }
     else
     {
         DG_CLIENT_API_TRACE("Attempting to connect to socket %d", socket);
-        connect(socket, addr, len);
 
-        switch (errno)
-        {
-        case 0:
+        if (connect(socket, addr, len) == 0)
         {
             /* success */
             DG_CLIENT_API_TRACE("Successfully connected!");
             status = TRUE;
         }
-        break;
-
-        default:
+        else
         {
-            DG_CLIENT_API_TRACE("waiting for connection. errno = %d (%s)", errno, strerror(errno));
+            DG_CLIENT_API_TRACE("waiting for connection. errno=%d", WSAGetLastError());
 
             if (DG_PAL_CLIENT_API_wait(socket, FALSE, DG_PAL_CLIENT_API_CONNECT_WAIT))
             {
                 /* determine if connect() was eventually successful */
-                if (getsockopt(socket, SOL_SOCKET, SO_ERROR, &error_value, &errval_size) != 0)
+                if (getsockopt(socket, SOL_SOCKET, SO_ERROR, (char*)&error_value, &errval_size) != 0)
                 {
-                    DG_CLIENT_API_ERROR("cannot connect to server. errno=%d (%s)",
-                                        errno, strerror(errno));
+                    DG_CLIENT_API_ERROR("cannot connect to server. errno=%d", WSAGetLastError());
                 }
                 else if (error_value != 0)
                 {
-                    DG_CLIENT_API_ERROR("cannot connect to server, error_value = %d. errno=%d (%s)",
-                                        error_value, errno, strerror(errno));
+                    DG_CLIENT_API_ERROR("cannot connect to server, error_value=%d", error_value);
                 }
                 else
                 {
@@ -378,8 +365,6 @@ BOOL dg_pal_client_api_connect_socket(int socket, struct sockaddr* addr, socklen
                     status = TRUE;
                 }
             }
-        }
-        break;
         }
     }
 
