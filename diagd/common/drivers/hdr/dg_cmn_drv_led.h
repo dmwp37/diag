@@ -43,14 +43,6 @@ enum
     DG_CMN_DRV_LED_HA      = 0x03,
     DG_CMN_DRV_LED_STORAGE = 0x04,
     DG_CMN_DRV_LED_RPS     = 0x05,
-    DG_CMN_DRV_LED_SFP0    = 0x10,
-    DG_CMN_DRV_LED_SFP1    = 0x11,
-    DG_CMN_DRV_LED_SFP2    = 0x12,
-    DG_CMN_DRV_LED_SFP3    = 0x13,
-    DG_CMN_DRV_LED_SFP4    = 0x14,
-    DG_CMN_DRV_LED_SFP5    = 0x15,
-    DG_CMN_DRV_LED_SFP6    = 0x16,
-    DG_CMN_DRV_LED_SFP7    = 0x17,
 };
 typedef UINT8 DG_CMN_DRV_LED_ID_T;
 

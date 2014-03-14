@@ -93,13 +93,38 @@ DG_ENGINE_PAL_SRC := \
 
 #Common Handlers
 DG_HANDLERS_CMN_SRC := \
+  common/handlers/src/dg_bios.c \
+  common/handlers/src/dg_button.c \
+  common/handlers/src/dg_clock.c \
+  common/handlers/src/dg_cpld.c \
   common/handlers/src/dg_debug_level.c \
+  common/handlers/src/dg_dimm.c \
+  common/handlers/src/dg_eeprom.c \
+  common/handlers/src/dg_ext_loop.c \
+  common/handlers/src/dg_fan.c \
+  common/handlers/src/dg_fpga.c \
+  common/handlers/src/dg_fpga_flash.c \
+  common/handlers/src/dg_gpio.c \
   common/handlers/src/dg_i2c.c \
+  common/handlers/src/dg_int_loop.c \
   common/handlers/src/dg_led.c \
   common/handlers/src/dg_pci.c \
+  common/handlers/src/dg_phy.c \
   common/handlers/src/dg_ping.c \
+  common/handlers/src/dg_port_led.c \
+  common/handlers/src/dg_prbs.c \
+  common/handlers/src/dg_psu.c \
+  common/handlers/src/dg_pttm.c \
+  common/handlers/src/dg_reset.c \
+  common/handlers/src/dg_rtc.c \
+  common/handlers/src/dg_sfp.c \
+  common/handlers/src/dg_ssd.c \
   common/handlers/src/dg_suspend.c \
+  common/handlers/src/dg_temp.c \
+  common/handlers/src/dg_tpm.c \
+  common/handlers/src/dg_usb.c \
   common/handlers/src/dg_version.c \
+  common/handlers/src/dg_voltage.c \
   common/handlers/src/dg_test_engine.c
 
 #Platform Specific Handlers
@@ -112,12 +137,37 @@ DG_DRIVERS_CMN_SRC := \
 
 #Platform Specific Drivers
 DG_DRIVERS_PLAT_SRC := \
+  platform/drivers/src/dg_cmn_drv_bios.c \
+  platform/drivers/src/dg_cmn_drv_button.c \
+  platform/drivers/src/dg_cmn_drv_clock.c \
+  platform/drivers/src/dg_cmn_drv_cpld.c \
   platform/drivers/src/dg_cmn_drv_debug_level.c \
+  platform/drivers/src/dg_cmn_drv_dimm.c \
+  platform/drivers/src/dg_cmn_drv_eeprom.c \
+  platform/drivers/src/dg_cmn_drv_ext_loop.c \
+  platform/drivers/src/dg_cmn_drv_fan.c \
+  platform/drivers/src/dg_cmn_drv_fpga.c \
+  platform/drivers/src/dg_cmn_drv_fpga_flash.c \
+  platform/drivers/src/dg_cmn_drv_gpio.c \
   platform/drivers/src/dg_cmn_drv_i2c.c \
+  platform/drivers/src/dg_cmn_drv_int_loop.c \
   platform/drivers/src/dg_cmn_drv_led.c \
   platform/drivers/src/dg_cmn_drv_pci.c \
+  platform/drivers/src/dg_cmn_drv_phy.c \
+  platform/drivers/src/dg_cmn_drv_port_led.c \
+  platform/drivers/src/dg_cmn_drv_prbs.c \
+  platform/drivers/src/dg_cmn_drv_psu.c \
+  platform/drivers/src/dg_cmn_drv_pttm.c \
+  platform/drivers/src/dg_cmn_drv_reset.c \
+  platform/drivers/src/dg_cmn_drv_rtc.c \
+  platform/drivers/src/dg_cmn_drv_sfp.c \
+  platform/drivers/src/dg_cmn_drv_ssd.c \
   platform/drivers/src/dg_cmn_drv_suspend.c \
-  platform/drivers/src/dg_cmn_drv_version.c
+  platform/drivers/src/dg_cmn_drv_temp.c \
+  platform/drivers/src/dg_cmn_drv_tpm.c \
+  platform/drivers/src/dg_cmn_drv_usb.c \
+  platform/drivers/src/dg_cmn_drv_version.c \
+  platform/drivers/src/dg_cmn_drv_voltage.c
 
 LOCAL_SRC_FILES := \
   $(DG_ENGINE_SRC) \

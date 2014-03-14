@@ -34,7 +34,6 @@ This command is responsible for LED test
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_LED_REQ_LEN_MIN 2
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -77,17 +76,24 @@ void DG_LED_handler_main(DG_DEFS_DIAG_REQ_T* req)
 
     DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
 
-    if (DG_ENGINE_UTIL_req_len_check_at_least(req, DG_LED_REQ_LEN_MIN, rsp))
+    const UINT32 req_len = sizeof(action) + sizeof(led_id);
+
+    DG_DBG_TRACE("In DG_LED_handler_main begin to parse Request");
+    if (DG_ENGINE_UTIL_req_len_check_at_least(req, req_len, rsp))
     {
-        action = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
-        led_id = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+        DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
+        DG_ENGINE_UTIL_req_parse_data_ntoh(req, led_id);
+
+        DG_DBG_TRACE("action=0x%02x, led_id=0x%02x", action, led_id);
 
         switch (action)
         {
         case DG_LED_ENABLE:
             if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(led_color), rsp))
             {
-                led_color = DG_ENGINE_UTIL_req_parse_1_byte_ntoh(req);
+                DG_ENGINE_UTIL_req_parse_data_ntoh(req, led_color);
+
+                DG_DBG_TRACE("led_color=0x%02x", led_color);
 
                 if (!DG_CMN_DRV_LED_enable(led_id, led_color))
                 {

@@ -69,19 +69,26 @@ BOOL DG_CMN_DRV_I2C_read_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T add
 {
     BOOL ret = FALSE;
 
-    if (bus == 0)
+    switch (bus)
     {
+    case DG_CMN_DRV_I2C_PCH_SMB:
+    case DG_CMN_DRV_I2C_MUX_CPU:
+    case DG_CMN_DRV_I2C_MUX_PSU0:
+    case DG_CMN_DRV_I2C_MUX_PSU1:
+    case DG_CMN_DRV_I2C_MUX_WBP:
+    case DG_CMN_DRV_I2C_MUX_WTB1:
+    case DG_CMN_DRV_I2C_MUX_WTB2:
+    case DG_CMN_DRV_I2C_MUX_FEB:
         memset(read_data, address, read_len);
         DG_DBG_TRACE("Read I2C bus=0x%02x, address=0x%02x, offset=0x%02x, read_len=0x%02x",
                      bus, address, offset, read_len);
         ret = TRUE;
-    }
+        break;
 
-    if (!ret)
-    {
-        DG_DRV_UTIL_set_error_string("Read I2C failed: bus=0x%02x, address=0x%02x, "
-                                     "offset=0x%02x, read_len=0x%02x",
-                                     bus, address, offset, read_len);
+    default:
+        DG_DRV_UTIL_set_error_string("Invalid I2C bus: bus=0x%02x", bus);
+        break;
+
     }
 
     return ret;
@@ -102,19 +109,26 @@ BOOL DG_CMN_DRV_I2C_write_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T ad
 {
     BOOL ret = FALSE;
 
-    if (bus == 0)
+    switch (bus)
     {
+    case DG_CMN_DRV_I2C_PCH_SMB:
+    case DG_CMN_DRV_I2C_MUX_CPU:
+    case DG_CMN_DRV_I2C_MUX_PSU0:
+    case DG_CMN_DRV_I2C_MUX_PSU1:
+    case DG_CMN_DRV_I2C_MUX_WBP:
+    case DG_CMN_DRV_I2C_MUX_WTB1:
+    case DG_CMN_DRV_I2C_MUX_WTB2:
+    case DG_CMN_DRV_I2C_MUX_FEB:
         DG_DBG_TRACE("Write I2C bus=0x%02x, address=0x%02x, offset=0x%02x, write_len=0x%02x",
                      bus, address, offset, write_len);
         DG_DBG_DUMP(write_data, write_len);
         ret = TRUE;
-    }
+        break;
 
-    if (!ret)
-    {
-        DG_DRV_UTIL_set_error_string("Write I2C failed: bus=0x%02x, address=0x%02x, ",
-                                     "offset=0x%02x, write_len=0x%02x",
-                                     bus, address, offset, write_len);
+    default:
+        DG_DRV_UTIL_set_error_string("Invalid I2C bus: bus=0x%02x", bus);
+        break;
+
     }
 
     return ret;

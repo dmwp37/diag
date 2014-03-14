@@ -295,7 +295,7 @@ BOOL DG_PAL_UTIL_is_socket_allowed(int socket)
                     /* Get IP address of peer, ensure peer & host addresses are not the same */
                     else if (getpeername(socket, (struct sockaddr*)&peer_addr, &peer_addr_len) != 0)
                     {
-                        DG_DBG_ERROR("getpeername failed, errno = %d (%s)", errno, strerror(errno));
+                        DG_DBG_ERROR("getpeername failed, errno=%d(%m)", errno);
                     }
                     else if (in_peer_addr->sin_addr.s_addr == serv_addr_iface->sin_addr.s_addr)
                     {
@@ -332,7 +332,7 @@ BOOL DG_PAL_UTIL_create_int_diag_listen_sock(int* sock)
 
     if ((*sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
     {
-        DG_DBG_ERROR("Failed to create socket, errno = %d (%s)", errno, strerror(errno));
+        DG_DBG_ERROR("Failed to create socket, errno=%d(%m)", errno);
     }
     else
     {
@@ -343,7 +343,7 @@ BOOL DG_PAL_UTIL_create_int_diag_listen_sock(int* sock)
         if (bind(*sock, (const struct sockaddr*)&server,
                  (sizeof(server.sun_family) + strlen(server.sun_path) + 1)) < 0)
         {
-            DG_DBG_ERROR("Error binding to DIAG socket, errno = %d (%s)", errno, strerror(errno));
+            DG_DBG_ERROR("Error binding to DIAG socket, errno=%d(%m)", errno);
             close(*sock);
             *sock = -1;
         }
@@ -402,15 +402,13 @@ BOOL DG_PAL_UTIL_create_ext_diag_listen_sock(int* sock)
             (setsockopt(*sock, IPPROTO_TCP, TCP_NODELAY,
                         &sock_options, sizeof(sock_options)) == -1))
         {
-            DG_DBG_ERROR("Failed on setsockopt() on sock: %d, errno = %d (%s)",
-                         *sock, errno, strerror(errno));
+            DG_DBG_ERROR("Failed on setsockopt() on sock: %d, errno=%d(%m)", *sock, errno);
             close(*sock);
             *sock = -1;
         }
         else if (bind(*sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
         {
-            DG_DBG_ERROR("Failed to bind to socket, errno = %d (%s)",
-                         errno, strerror(errno));
+            DG_DBG_ERROR("Failed to bind to socket, errno=%d(%m)", errno);
             close(*sock);
             *sock = -1;
         }
@@ -448,14 +446,13 @@ BOOL DG_PAL_UTIL_create_update_sock(int* sock)
         /* Enable passing credentials to prevent message spoofing */
         if (setsockopt(*sock, SOL_SOCKET, SO_PASSCRED, &on, sizeof(on)) == -1)
         {
-            DG_DBG_ERROR("Failed to enable SO_PASSCRED, errno = %d (%s)", errno, strerror(errno));
+            DG_DBG_ERROR("Failed to enable SO_PASSCRED, errno=%d(%m)", errno);
             close(*sock);
             *sock = -1;
         }
         else if (bind(*sock, (struct sockaddr*)&sa_nl, sizeof(sa_nl)) == -1)
         {
-            DG_DBG_ERROR("Failed to bind to netlink socket, errno = %d (%s)",
-                         errno, strerror(errno));
+            DG_DBG_ERROR("Failed to bind to netlink socket, errno=%d(%m)", errno);
             close(*sock);
             *sock = -1;
         }
@@ -795,7 +792,7 @@ BOOL dg_pal_util_get_ext_ip_address(int* sock, struct sockaddr_in* addr)
         /* Get list of interfaces from the OS */
         if ((ioctl(*sock, SIOCGIFCONF, &ifc) != 0))
         {
-            DG_DBG_ERROR("Failed to SIOCGIFCONF,  errno = %d (%s)", errno, strerror(errno));
+            DG_DBG_ERROR("Failed to SIOCGIFCONF, errno=%d(%m)", errno);
         }
         else if ((iface_name = dg_pal_util_get_ext_itfc_name()) == NULL)
         {

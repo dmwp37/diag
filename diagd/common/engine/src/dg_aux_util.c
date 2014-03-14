@@ -230,8 +230,7 @@ DG_AUX_UTIL_BP_REQ_T* dg_aux_util_bp_req_malloc()
     }
     else if (sem_init(&req->sem, 0, 0) != 0)
     {
-        DG_DBG_ERROR("Failed to init semphore for BP req, errno = %d (%s)",
-                     errno, strerror(errno));
+        DG_DBG_ERROR("Failed to init semphore for BP req, errno=%d(%m)", errno);
         free(req);
         req = NULL;
     }
@@ -283,7 +282,7 @@ void dg_aux_util_wait_bp_rsp(DG_AUX_UTIL_BP_REQ_T* req, UINT32 time_out)
     {
         if (gettimeofday(&time_of_day, NULL) != 0)
         {
-            DG_DBG_ERROR("Failed to get time of day, errno = %d (%s)", errno, strerror(errno));
+            DG_DBG_ERROR("Failed to get time of day, errno=%d(%m)", errno);
             DG_DBG_TRACE("Waiting BP rsp: Change to INFINIT wait");
             time_out = 0;
         }
@@ -316,8 +315,8 @@ void dg_aux_util_wait_bp_rsp(DG_AUX_UTIL_BP_REQ_T* req, UINT32 time_out)
         else
         {
             /* If an error other than time out occurred, send an error response */
-            DG_DBG_ERROR("Waiting for aux response failed on aux %d, errno = %d (%s)",
-                         req->aux_id, errno, strerror(errno));
+            DG_DBG_ERROR("Waiting for aux response failed on aux %d, errno=%d(%m)",
+                         req->aux_id, errno);
         }
     }
     else

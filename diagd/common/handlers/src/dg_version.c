@@ -39,7 +39,6 @@ This command is responsible for VERSION test
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-const UINT32 DG_VERSION_REQ_LEN = sizeof(DG_CMN_DRV_VERSION_TYPE_T);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -69,7 +68,7 @@ void DG_VERSION_handler_main(DG_DEFS_DIAG_REQ_T* req)
 
     DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
 
-    if (DG_ENGINE_UTIL_req_len_check_equal(req, DG_VERSION_REQ_LEN, rsp))
+    if (DG_ENGINE_UTIL_req_len_check_equal(req, sizeof(type), rsp))
     {
         char* p_version_str = NULL;
 

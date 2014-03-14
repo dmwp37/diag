@@ -34,12 +34,23 @@ extern "C" {
 /*==================================================================================================
                                                ENUMS
 ==================================================================================================*/
+/** I2C Buses */
+enum
+{
+    DG_CMN_DRV_I2C_PCH_SMB  = 0x00, /** PCH SMBUS controller  */
+    DG_CMN_DRV_I2C_MUX_CPU  = 0x10, /** PAX SMBUS MUX to CPU  */
+    DG_CMN_DRV_I2C_MUX_PSU0 = 0x11, /** PAX SMBUS MUX to PSU0 */
+    DG_CMN_DRV_I2C_MUX_PSU1 = 0x12, /** PAX SMBUS MUX to PSU1 */
+    DG_CMN_DRV_I2C_MUX_WBP  = 0x13, /** PAX SMBUS MUX to WBP  */
+    DG_CMN_DRV_I2C_MUX_WTB1 = 0x14, /** PAX SMBUS MUX to WTB1 */
+    DG_CMN_DRV_I2C_MUX_WTB2 = 0x15, /** PAX SMBUS MUX to WTB2 */
+    DG_CMN_DRV_I2C_MUX_FEB  = 0x16, /** PAX SMBUS MUX to FEB  */
+};
+typedef UINT8 DG_CMN_DRV_I2C_BUS_T;
 
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
-/** I2C Buses */
-typedef UINT8 DG_CMN_DRV_I2C_BUS_T;
 
 /** I2C Device Address */
 typedef UINT8 DG_CMN_DRV_I2C_ADDR_T;
@@ -94,5 +105,5 @@ BOOL DG_CMN_DRV_I2C_write_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T ad
 /** @} */
 /** @} */
 
-#endif /* _DG_CMN_DRV_DBG_LVL_H_  */
+#endif /* _DG_CMN_DRV_I2C_H_  */
 

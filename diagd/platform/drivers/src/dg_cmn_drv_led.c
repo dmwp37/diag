@@ -69,14 +69,6 @@ BOOL DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LED_COLOR_T le
     case DG_CMN_DRV_LED_HA:
     case DG_CMN_DRV_LED_STORAGE:
     case DG_CMN_DRV_LED_RPS:
-    case DG_CMN_DRV_LED_SFP0:
-    case DG_CMN_DRV_LED_SFP1:
-    case DG_CMN_DRV_LED_SFP2:
-    case DG_CMN_DRV_LED_SFP3:
-    case DG_CMN_DRV_LED_SFP4:
-    case DG_CMN_DRV_LED_SFP5:
-    case DG_CMN_DRV_LED_SFP6:
-    case DG_CMN_DRV_LED_SFP7:
         switch (led_color)
         {
         case DG_CMN_DRV_LED_COLOR_DEFAULT:
@@ -123,14 +115,6 @@ BOOL DG_CMN_DRV_LED_disable(DG_CMN_DRV_LED_ID_T led_id)
     case DG_CMN_DRV_LED_HA:
     case DG_CMN_DRV_LED_STORAGE:
     case DG_CMN_DRV_LED_RPS:
-    case DG_CMN_DRV_LED_SFP0:
-    case DG_CMN_DRV_LED_SFP1:
-    case DG_CMN_DRV_LED_SFP2:
-    case DG_CMN_DRV_LED_SFP3:
-    case DG_CMN_DRV_LED_SFP4:
-    case DG_CMN_DRV_LED_SFP5:
-    case DG_CMN_DRV_LED_SFP6:
-    case DG_CMN_DRV_LED_SFP7:
         ret = TRUE;
         DG_DBG_TRACE("Disable LED driver: led_id=0x%02x", led_id);
         break;
