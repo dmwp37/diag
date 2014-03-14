@@ -78,7 +78,9 @@ enum
 };
 typedef UINT8 DG_CMN_DRV_INT_LOOP_NODE_T;
 
-/** internal loopback interface speed configuration */
+/** internal loopback interface speed configuration
+ * this is not used yet, the driver would use the
+ * default (1000M) config first */
 enum
 {
     DG_CMN_DRV_INT_LOOP_CFG_10M   = 0x00,

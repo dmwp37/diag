@@ -29,7 +29,7 @@
 #endif
 
 #define DG_SEND_ERROR(x ...) do { printf("DIAG_SEND ERROR: "x); printf("\n"); } while (0)
-#define DG_SEND_PRINT(x ...) do { printf(x); printf("\n"); } while (0)
+#define DG_SEND_PRINT(x ...) do { printf(x); printf("\n"); fflush(stdout); } while (0)
 
 /*==================================================================================================
                              LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)

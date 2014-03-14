@@ -64,6 +64,7 @@ void DG_PAL_DBG_print(int debug_level, const char* format, ...)
         printf("DIAG: ");
         vprintf(format, args);
         printf("\n");
+        fflush(stdout);
     }
     va_end(args);
 }
@@ -139,3 +140,4 @@ void DG_PAL_DBG_dump_fs_log(UINT16 id)
 
 /** @} */
 /** @} */
+
