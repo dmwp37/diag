@@ -169,6 +169,7 @@ BOOL DG_CMN_DRV_PCI_mem_read(DG_CMN_DRV_PCI_DOMAIN_T domain,
 {
     BOOL ret = FALSE;
 
+    DG_COMPILE_UNUSED(read_data);
 
     DG_DRV_UTIL_set_error_string("Read PCI memory space failed: domain=0x%02x, bus=0x%02x, "
                                  "dev=0x%02x, func=0x%02x, offset=0x%08x, len=0x%08x"
