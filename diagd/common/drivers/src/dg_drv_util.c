@@ -178,7 +178,7 @@ BOOL DG_DRV_UTIL_system(const char* cmd, char** p_out)
 
         int read       = 0;
         int cur_pos    = 0;
-        int total_read = 0;
+        int total_read = 1; /* alloc extra 1 byte for the \0 */
 
         while ((read = getline(&line, &len, fp)) != -1)
         {
@@ -202,8 +202,8 @@ BOOL DG_DRV_UTIL_system(const char* cmd, char** p_out)
 
             /* append the data to buf */
             memcpy(buf + cur_pos, line, read);
-
-            cur_pos = total_read;
+            /* leave the last one byte */
+            cur_pos = total_read - 1;
         }
 
         free(line);
@@ -221,6 +221,9 @@ BOOL DG_DRV_UTIL_system(const char* cmd, char** p_out)
             DG_DBG_TRACE("Successfully Execute command: %s", cmd);
             if (buf != NULL)
             {
+                /* NULL terminator */
+                buf[total_read - 1] = '\0';
+
                 *p_out = buf;
             }
             ret = TRUE;

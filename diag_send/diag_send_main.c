@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include "dg_platform_defs.h"
@@ -97,6 +98,8 @@ int main(int argc, char* argv[])
 #endif
 
     DG_SEND_TRACE("Enter diag send main application");
+
+    signal(SIGPIPE, SIG_IGN);
 
     if (argc < 2)
     {
@@ -182,7 +185,6 @@ int main(int argc, char* argv[])
             if (!dg_send_process_raw_command(diag_session, buffer))
             {
                 ret = -1;
-                break;
             }
         }
         if (fp != NULL)
