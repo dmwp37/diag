@@ -27,9 +27,11 @@ array_des[2]="Set CPLD $CPLD_ID $CPLD_OFFSET value"
 
 array_command_fail[0]="$OPCODE""02""$CPLD_ID""$CPLD_OFFSET"
 array_command_fail[1]="$OPCODE""$GET_ACTION""02""$CPLD_OFFSET"
+array_command_fail[2]="$OPCODE""$GET_ACTION""$CPLD_ID""7000"
 
 array_des_fail[0]="Invalid action"
 array_des_fail[1]="Invalid CPLD ID"
+array_des_fail[2]="Invalid CPLD offset"
 
 
 . $CUR_PATH/diag_verify.sh
