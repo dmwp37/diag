@@ -88,8 +88,8 @@ BOOL DG_CMN_DRV_I2C_read_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T add
         if (!dg_cmn_drv_i2c_read(bus_fd, offset, read_len, read_data))
         {
             DG_DBG_ERROR("I2C driver failed to read %d bytes from device, "
-                         "bus=%d, address=0x%02x, offset=0x%02x, errno=%d (%s)",
-                         read_len, bus, address, offset, errno, strerror(errno));
+                         "bus=%d, address=0x%02x, offset=0x%02x, errno=%d(%m)",
+                         read_len, bus, address, offset, errno);
         }
         else
         {
@@ -126,8 +126,8 @@ BOOL DG_CMN_DRV_I2C_write_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T ad
         if (!dg_cmn_drv_i2c_write(bus_fd, offset, write_len, write_data))
         {
             DG_DBG_ERROR("I2C driver failed to write %d bytes to device, "
-                         "bus=%d, address=0x%02x, offset=0x%02x, errno=%d (%s)",
-                         write_len, bus, address, offset, errno, strerror(errno));
+                         "bus=%d, address=0x%02x, offset=0x%02x, errno=%d(%m)",
+                         write_len, bus, address, offset, errno);
         }
         else
         {
@@ -164,13 +164,13 @@ int dg_cmn_drv_i2c_connect_device(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_
     snprintf(bus_name, DG_CMN_DRV_I2C_BUS_PATH_SIZE, "/dev/i2c/%d", bus);
     if ((bus_fd = open(bus_name, O_RDWR)) < 0)
     {
-        DG_DRV_UTIL_set_error_string("I2C driver failed to open bus %s, errno=%d (%s)",
-                                     bus_name, errno, strerror(errno));
+        DG_DRV_UTIL_set_error_string("I2C driver failed to open bus %s, errno=%d(%m)",
+                                     bus_name, errno);
     }
     else if (ioctl(bus_fd, I2C_SLAVE_FORCE, (int)address) < 0)
     {
-        DG_DRV_UTIL_set_error_string("I2C driver failed to ioctl, address=%d, errno=%d (%s)",
-                                     address, errno, strerror(errno));
+        DG_DRV_UTIL_set_error_string("I2C driver failed to ioctl, address=%d, errno=%d(%m)",
+                                     address, errno);
         close(bus_fd);
         bus_fd = -1;
     }
@@ -201,8 +201,8 @@ BOOL dg_cmn_drv_i2c_read(int fd, DG_CMN_DRV_I2C_OFFSET_T offset,
 
         if (current_read_data < 0)
         {
-            DG_DRV_UTIL_set_error_string("i2c byte read failed, offset=%d, errno=%d (%s)",
-                                         offset, errno, strerror(errno));
+            DG_DRV_UTIL_set_error_string("i2c byte read failed, offset=%d, errno=%d(%m)",
+                                         offset, errno);
             is_success = FALSE;
         }
         else
@@ -233,27 +233,23 @@ BOOL dg_cmn_drv_i2c_write(int fd, DG_CMN_DRV_I2C_OFFSET_T offset,
 
     DG_CMN_DRV_I2C_SIZE_T total_bytes_write = 0;
 
+
     while (is_success && (total_bytes_write != write_len))
     {
-        int bytes_to_write = write_len - total_bytes_write;
-        int write_ret;
-        if (bytes_to_write > I2C_SMBUS_BLOCK_MAX)
-        {
-            bytes_to_write = I2C_SMBUS_BLOCK_MAX;
-        }
-        write_ret = i2c_smbus_write_i2c_block_data(fd, offset, bytes_to_write, write_data);
+        int write_ret = i2c_smbus_write_byte_data(fd, offset, *write_data);
 
         if (write_ret < 0)
         {
-            DG_DRV_UTIL_set_error_string("i2c block write failed, errno=%d (%s)",
-                                         errno, strerror(errno));
+            DG_DRV_UTIL_set_error_string("i2c byte write failed, "
+                                         "offset=%d, wite_data=0x%02x, errno=%d(%m)",
+                                         offset, *write_data, errno);
             is_success = FALSE;
         }
         else
         {
-            total_bytes_write += bytes_to_write;
-            offset            += bytes_to_write;
-            write_data        += bytes_to_write;
+            total_bytes_write++;
+            offset++;
+            write_data++;
         }
     }
 

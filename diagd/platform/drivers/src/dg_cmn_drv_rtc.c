@@ -75,13 +75,12 @@ BOOL DG_CMN_DRV_RTC_get(DG_CMN_DRV_RTC_DATE_T* date)
 
     if ((fd = open(DG_CMN_DRV_RTC_DEV, O_RDONLY)) < 0)
     {
-        DG_DRV_UTIL_set_error_string("can not open %s to get RTC time, errno=%d (%s)",
-                                     DG_CMN_DRV_RTC_DEV, errno, strerror(errno));
+        DG_DRV_UTIL_set_error_string("can not open %s to get RTC time, errno=%d(%m)",
+                                     DG_CMN_DRV_RTC_DEV, errno);
     }
     else if (ioctl(fd, RTC_RD_TIME, &rtc_time) < 0)
     {
-        DG_DRV_UTIL_set_error_string("ioctl failed to get RTC time, errno=%d (%s)",
-                                     errno, strerror(errno));
+        DG_DRV_UTIL_set_error_string("ioctl failed to get RTC time, errno=%d(%m)", errno);
     }
     else
     {
@@ -143,13 +142,12 @@ BOOL DG_CMN_DRV_RTC_set(DG_CMN_DRV_RTC_DATE_T* date)
 
     if ((fd = open(DG_CMN_DRV_RTC_DEV, O_RDONLY)) < 0)
     {
-        DG_DRV_UTIL_set_error_string("can not open %s to set RTC time, errno=%d (%s)",
-                                     DG_CMN_DRV_RTC_DEV, errno, strerror(errno));
+        DG_DRV_UTIL_set_error_string("can not open %s to set RTC time, errno=%d(%m)",
+                                     DG_CMN_DRV_RTC_DEV, errno);
     }
     else if (ioctl(fd, RTC_SET_TIME, &rtc_time) < 0)
     {
-        DG_DRV_UTIL_set_error_string("ioctl failed to set RTC time, errno=%d (%s)",
-                                     errno, strerror(errno));
+        DG_DRV_UTIL_set_error_string("ioctl failed to set RTC time, errno=%d(%m)", errno);
     }
     else
     {

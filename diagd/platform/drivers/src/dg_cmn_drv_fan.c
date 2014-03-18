@@ -12,6 +12,7 @@
 #include "dg_handler_inc.h"
 #include "dg_drv_util.h"
 #include "dg_cmn_drv_fan.h"
+#include "dg_cmn_drv_i2c.h"
 
 
 /** @addtogroup dg_common_drivers
@@ -30,6 +31,33 @@ implementation of the FAN driver
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
+#define DG_CMN_DRV_FAN_I2C_BUS        DG_CMN_DRV_I2C_MUX_CPU
+#define DG_CMN_DRV_FAN_I2C_ADDR       0x2c /** ADT7470 I2C address */
+
+/* ADT7470 registers, just use the ADT7470 naming conversion */
+#define ADT7470_REG_FAN_NO_PRESENT    0x36
+#define ADT7470_REG_FAN_STATUS        0x42
+
+#define ADT7470_REG_FAN_BASE_ADDR     0x2A
+#define ADT7470_REG_FAN_MIN_BASE_ADDR 0x58
+#define ADT7470_REG_FAN_MAX_BASE_ADDR 0x60
+
+#define ADT7470_REG_FAN(x)            (ADT7470_REG_FAN_BASE_ADDR + ((x) * 2))
+#define ADT7470_REG_FAN_MIN(x)        (ADT7470_REG_FAN_MIN_BASE_ADDR + ((x) * 2))
+#define ADT7470_REG_FAN_MAX(x)        (ADT7470_REG_FAN_MAX_BASE_ADDR + ((x) * 2))
+
+#define ADT7470_REG_PWM_BASE_ADDR     0x32
+#define ADT7470_REG_PWM_MAX_BASE_ADDR 0x38
+#define ADT7470_REG_PWM_MIN_BASE_ADDR 0x6A
+
+#define ADT7470_REG_PWM(x)            (ADT7470_REG_PWM_BASE_ADDR + (x))
+#define ADT7470_REG_PWM_MAX(x)        (ADT7470_REG_PWM_MAX_BASE_ADDR + (x))
+#define ADT7470_REG_PWM_MIN(x)        (ADT7470_REG_PWM_MIN_BASE_ADDR + (x))
+
+/* Fan Speed (RPM) = (90,000 * 60 )/Fan Tach Reading*/
+#define ADT7470_PERIOD_TO_RPM(x)      ((UINT16)((90000 * 60) / (x)))
+/* Fan PWM = percentage * 255 / 100 */
+#define ADT7470_PERCENTAGE_TO_PWM(x)  ((UINT8)(2.55 * (x)))
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -38,6 +66,11 @@ implementation of the FAN driver
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
+/** just use the ADT7470 naming conversion for the low level driver interface */
+static BOOL adt7470_read_byte(UINT8 reg, UINT8* p_data);
+static BOOL adt7470_write_byte(UINT8 reg, UINT8 value);
+static BOOL adt7470_read_short(UINT8 reg, UINT16* p_data);
+static BOOL adt7470_write_short(UINT8 reg, UINT16 value);
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -46,7 +79,6 @@ implementation of the FAN driver
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
-static DG_CMN_DRV_FAN_PWM_T dg_cmn_drv_fan_pwm_max[4] = { 90 }; /* 4 fans max pwm simulation */
 
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
@@ -69,9 +101,21 @@ BOOL DG_CMN_DRV_FAN_get_rpm(DG_CMN_DRV_FAN_ID_T fan, DG_CMN_DRV_FAN_RPM_T* rpm)
     }
     else
     {
-        *rpm = 1000;
-        DG_DBG_TRACE("FAN %d got RPM: %d", fan, *rpm);
-        ret = TRUE;
+        UINT16 tach;
+        if (adt7470_read_short(ADT7470_REG_FAN(fan), &tach))
+        {
+            if ((tach != 0))
+            {
+                *rpm = ADT7470_PERIOD_TO_RPM(tach);
+                DG_DBG_TRACE("FAN %d got RPM: %d", fan, *rpm);
+
+                ret = TRUE;
+            }
+            else
+            {
+                DG_DRV_UTIL_set_error_string("Invalid tach value, tach=0");
+            }
+        }
     }
 
     return ret;
@@ -97,10 +141,26 @@ BOOL DG_CMN_DRV_FAN_get_rpm_limit(DG_CMN_DRV_FAN_ID_T   fan,
     }
     else
     {
-        *min = 500;
-        *max = 3000;
-        DG_DBG_TRACE("FAN %d got RPM limit: min=%d, max=%d", fan, *min, *max);
-        ret = TRUE;
+        UINT16 tach_min;
+        UINT16 tach_max;
+        if (adt7470_read_short(ADT7470_REG_FAN_MIN(fan), &tach_min) &&
+            adt7470_read_short(ADT7470_REG_FAN_MAX(fan), &tach_max))
+        {
+            if ((tach_min != 0) && (tach_max != 0))
+            {
+                *min = ADT7470_PERIOD_TO_RPM(tach_min);
+                *min = ADT7470_PERIOD_TO_RPM(tach_max);
+
+                DG_DBG_TRACE("FAN %d got RPM limit: min=%d, max=%d", fan, *min, *max);
+
+                ret = TRUE;
+            }
+            else
+            {
+                DG_DRV_UTIL_set_error_string("Invalid tach limit values, tach_min=%d, tach_max=%d",
+                                             tach_min, tach_max);
+            }
+        }
     }
 
     return ret;
@@ -125,16 +185,16 @@ BOOL DG_CMN_DRV_FAN_set_pwm(DG_CMN_DRV_FAN_ID_T fan, DG_CMN_DRV_FAN_PWM_T pwm)
     {
         DG_DRV_UTIL_set_error_string("FAN PWM Percentage invalid. PWM=%d%%", pwm);
     }
-    else if (pwm > dg_cmn_drv_fan_pwm_max[fan])
-    {
-        DG_DRV_UTIL_set_error_string("FAN PWM Percentage exceeds. PWM=%d%%, MAX_PWM=%d%%",
-                                     pwm, dg_cmn_drv_fan_pwm_max[fan]);
-    }
     else
     {
-        DG_DBG_TRACE("FAN %d set PWM: PWM=%d%%", fan, pwm);
+        UINT8 pwm_data = ADT7470_PERCENTAGE_TO_PWM(pwm);
 
-        ret = TRUE;
+        if (adt7470_write_byte(ADT7470_REG_PWM(fan), pwm_data))
+        {
+            DG_DBG_TRACE("FAN %d set PWM: PWM=%d%%", fan, pwm);
+
+            ret = TRUE;
+        }
     }
 
     return ret;
@@ -162,10 +222,14 @@ BOOL DG_CMN_DRV_FAN_set_pwm_max(DG_CMN_DRV_FAN_ID_T fan, DG_CMN_DRV_FAN_PWM_T ma
     }
     else
     {
-        dg_cmn_drv_fan_pwm_max[fan] = max;
-        DG_DBG_TRACE("FAN %d set MAX PWM: MAX_PWM=%d%%", fan, max);
+        UINT8 pwm_data = ADT7470_PERCENTAGE_TO_PWM(max);
 
-        ret = TRUE;
+        if (adt7470_write_byte(ADT7470_REG_PWM_MAX(fan), pwm_data))
+        {
+            DG_DBG_TRACE("FAN %d set MAX PWM: MAX_PWM=%d%%", fan, max);
+
+            ret = TRUE;
+        }
     }
 
     return ret;
@@ -188,9 +252,31 @@ BOOL DG_CMN_DRV_FAN_get_status(DG_CMN_DRV_FAN_ID_T fan, DG_CMN_DRV_FAN_STATUS_T*
     }
     else
     {
-        *status = DG_CMN_DRV_FAN_STATUS_NO_ERROR;
-        DG_DBG_TRACE("FAN %d got status: status=%d", fan, *status);
-        ret = TRUE;
+        UINT8 no_present;
+        UINT8 error;
+        if (adt7470_read_byte(ADT7470_REG_FAN_NO_PRESENT, &no_present) &&
+            adt7470_read_byte(ADT7470_REG_FAN_STATUS, &error))
+        {
+            if (no_present & (1 << fan))
+            {
+                *status = DG_CMN_DRV_FAN_STATUS_NO_PRESENT;
+                DG_DBG_TRACE("FAN %d no present", fan);
+            }
+            else if (error & (0x10 << fan))
+            {
+                *status = DG_CMN_DRV_FAN_STATUS_ERROR;
+
+                DG_DBG_TRACE("FAN %d error detected", fan);
+            }
+            else
+            {
+                *status = DG_CMN_DRV_FAN_STATUS_NO_ERROR;
+
+                DG_DBG_TRACE("FAN %d no error", fan);
+            }
+
+            ret = TRUE;
+        }
     }
 
     return ret;
@@ -199,6 +285,75 @@ BOOL DG_CMN_DRV_FAN_get_status(DG_CMN_DRV_FAN_ID_T fan, DG_CMN_DRV_FAN_STATUS_T*
 /*==================================================================================================
                                           LOCAL FUNCTIONS
 ==================================================================================================*/
+/*=============================================================================================*//**
+@brief Read byte from ADT7470
+
+@param[in]  reg    - the register address
+@param[out] p_data - The read out byte
+
+*//*==============================================================================================*/
+BOOL adt7470_read_byte(UINT8 reg, UINT8* p_data)
+{
+    return DG_CMN_DRV_I2C_read_bus(DG_CMN_DRV_FAN_I2C_BUS,
+                                   DG_CMN_DRV_FAN_I2C_ADDR,
+                                   reg, 1, p_data);
+}
+
+/*=============================================================================================*//**
+@brief Write byte to ADT7470
+
+@param[in] reg   - the register address
+@param[in] value - The byte value to write
+
+*//*==============================================================================================*/
+BOOL adt7470_write_byte(UINT8 reg, UINT8 value)
+{
+    return DG_CMN_DRV_I2C_write_bus(DG_CMN_DRV_FAN_I2C_BUS,
+                                    DG_CMN_DRV_FAN_I2C_ADDR,
+                                    reg, 1, &value);
+}
+
+/*=============================================================================================*//**
+@brief Read word from ADT7470
+
+@param[in]  reg    - the register address
+@param[out] p_data - The read out word
+
+*//*==============================================================================================*/
+BOOL adt7470_read_short(UINT8 reg, UINT16* p_data)
+{
+    UINT8 data[2];
+
+    BOOL ret = DG_CMN_DRV_I2C_read_bus(DG_CMN_DRV_FAN_I2C_BUS,
+                                       DG_CMN_DRV_FAN_I2C_ADDR,
+                                       reg, 2, data);
+    if (ret)
+    {
+        *p_data  = data[0];
+        *p_data |= ((UINT16)data[1] << 8);
+    }
+
+    return ret;
+}
+
+/*=============================================================================================*//**
+@brief Write word to ADT7470
+
+@param[in] reg   - the register address
+@param[in] value - The word value to write
+
+*//*==============================================================================================*/
+BOOL adt7470_write_short(UINT8 reg, UINT16 value)
+{
+    UINT8 data[2];
+
+    data[0] = (UINT8)(value & 0xff);
+    data[1] = (UINT8)(value >> 8);
+
+    return DG_CMN_DRV_I2C_write_bus(DG_CMN_DRV_FAN_I2C_BUS,
+                                    DG_CMN_DRV_FAN_I2C_ADDR,
+                                    reg, 2, data);
+}
 
 /** @} */
 /** @} */
