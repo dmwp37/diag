@@ -56,8 +56,10 @@ implementation of the FAN driver
 
 /* Fan Speed (RPM) = (90,000 * 60 )/Fan Tach Reading*/
 #define ADT7470_PERIOD_TO_RPM(x)      ((UINT16)((90000 * 60) / (x)))
+#define ADT7470_RPM_TO_PERIOD         ADT7470_PERIOD_TO_RPM
 /* Fan PWM = percentage * 255 / 100 */
 #define ADT7470_PERCENTAGE_TO_PWM(x)  ((UINT8)(2.55 * (x)))
+#define ADT7470_PWM_TO_PERCENTAGE(x)  ((UINT8)(0.392 * (x)))
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -184,10 +186,21 @@ BOOL DG_CMN_DRV_FAN_set_rpm_limit(DG_CMN_DRV_FAN_ID_T  fan,
     {
         DG_DRV_UTIL_set_error_string("Invalid fan=%d", fan);
     }
+    else if ((min == 0) || (max == 0) || (min > max))
+    {
+        DG_DRV_UTIL_set_error_string("Invalid RPM limit: min=%d, max=%d", min, max);
+    }
     else
     {
-        DG_DBG_TRACE("FAN %d set RPM limit: min=%d, max=%d", fan, min, max);
-        ret = TRUE;
+        UINT16 tach_min = ADT7470_RPM_TO_PERIOD(min);
+        UINT16 tach_max = ADT7470_RPM_TO_PERIOD(max);
+
+        if (adt7470_write_short(ADT7470_REG_FAN_MIN(fan), tach_min) &&
+            adt7470_write_short(ADT7470_REG_FAN_MAX(fan), tach_max))
+        {
+            DG_DBG_TRACE("FAN %d set RPM limit: min=%d, max=%d", fan, min, max);
+            ret = TRUE;
+        }
     }
 
     return ret;
@@ -210,10 +223,16 @@ BOOL DG_CMN_DRV_FAN_get_pwm(DG_CMN_DRV_FAN_ID_T fan, DG_CMN_DRV_FAN_PWM_T* pwm)
     }
     else
     {
-        *pwm = 85;
-        DG_DBG_TRACE("FAN %d get PWM: PWM=%d%%", fan, *pwm);
+        UINT8 pwm_data;
 
-        ret = TRUE;
+        if (adt7470_read_byte(ADT7470_REG_PWM(fan), &pwm_data))
+        {
+            *pwm = ADT7470_PWM_TO_PERCENTAGE(pwm_data);
+
+            DG_DBG_TRACE("FAN %d get PWM: PWM=%d%%", fan, *pwm);
+
+            ret = TRUE;
+        }
     }
 
     return ret;
