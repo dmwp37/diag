@@ -63,13 +63,13 @@ void DG_DBG_data_dump(void* data_buf, int len)
     int   max_col      = DG_DBG_MAX_DUMP_COLS;
     int   row          = 0;
     int   col          = 0;
-    int   num_col;
+    int   num_col      = 0;
     int   buffer_index = 0;
     UINT8 value;
 
-    char  string_buffer[(DG_DBG_MAX_DUMP_COLS * 3) + 1];  /* Each column takes up 3 characters, plus NULL */
+    char string_buffer[(DG_DBG_MAX_DUMP_COLS * 3) + 1]; /* Each column takes up 3 characters, plus NULL */
 
-    if (DG_DBG_LVL_TRACE >= dg_dbg_level)
+    if (DG_DBG_LVL_VERBOSE == dg_dbg_level)
     {
         for (row = 0; row <= (len / max_col); row++)
         {
@@ -94,3 +94,4 @@ void DG_DBG_data_dump(void* data_buf, int len)
 /*==================================================================================================
                                           LOCAL FUNCTIONS
 ==================================================================================================*/
+

@@ -14,7 +14,9 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include "dg_platform_defs.h"
 #include "dg_client_api.h"
 
@@ -28,7 +30,7 @@
 #endif
 
 #define DG_SEND_ERROR(x ...) do { printf("DIAG_SEND ERROR: "x); printf("\n"); } while (0)
-#define DG_SEND_PRINT(x ...) do { printf(x); printf("\n"); } while (0)
+#define DG_SEND_PRINT(x ...) do { printf(x); printf("\n"); fflush(stdout); } while (0)
 
 /*==================================================================================================
                              LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -97,6 +99,8 @@ int main(int argc, char* argv[])
 
     DG_SEND_TRACE("Enter diag send main application");
 
+    signal(SIGPIPE, SIG_IGN);
+
     if (argc < 2)
     {
         DG_SEND_PRINT("Usage: %s [-l<server>] cmd1 ... cmdN | -f [file_name]", argv[0]);
@@ -141,8 +145,7 @@ int main(int argc, char* argv[])
         fp = fopen(argv[argnum], "r");
         if (fp == NULL)
         {
-            DG_SEND_PRINT("-- Unable to open file '%s': errno=%d (%s)",
-                          argv[argnum], errno, strerror(errno));
+            DG_SEND_PRINT("-- Unable to open file '%s': errno=%d(%m)", argv[argnum], errno);
             exit(1);
         }
     }
@@ -182,7 +185,6 @@ int main(int argc, char* argv[])
             if (!dg_send_process_raw_command(diag_session, buffer))
             {
                 ret = -1;
-                break;
             }
         }
         if (fp != NULL)
@@ -394,16 +396,44 @@ void dg_send_dump(UINT8* buf, UINT32 len)
 *//*==============================================================================================*/
 void dg_send_print_output(UINT16 opcode, UINT8* buf, UINT32 len)
 {
+    BOOL b_out = FALSE;
+
     DG_SEND_PRINT("-> Data success received");
+
     switch (opcode)
     {
     case 0x0000: /* version */
-        DG_SEND_PRINT("%s", (const char*)buf);
+        DG_SEND_PRINT("%s", (char*)buf);
+        b_out = TRUE;
+        break;
+
+    case 0x0003: /* temperature */
+        if (len == sizeof(UINT32))
+        {
+            UINT32 data = ntohl(*(UINT32*)buf);
+            float  temp = *(float*)(&data);
+            DG_SEND_PRINT("%+.02f°C", temp);
+            b_out = TRUE;
+        }
+        break;
+
+    case 0x0005: /* voltage */
+        if (len == sizeof(UINT32))
+        {
+            UINT32 data    = ntohl(*(UINT32*)buf);
+            float  voltage = *(float*)(&data);
+            DG_SEND_PRINT("%+.02fV", voltage);
+            b_out = TRUE;
+        }
         break;
 
     default:
-        dg_send_dump(buf, len);
         break;
+    }
+
+    if (!b_out)
+    {
+        dg_send_dump(buf, len);
     }
 }
 

@@ -46,7 +46,6 @@ typedef UINT8 DG_RESET_ACTION_T;
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-static const UINT32 DG_RESET_REQ_LEN_MIN = sizeof(DG_RESET_ACTION_T);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -77,7 +76,7 @@ void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req)
 
     /* Verify action parameter was given */
     DG_DBG_TRACE("In DG_RESET_handler_main begin to parse Request");
-    if (DG_ENGINE_UTIL_req_len_check_at_least(req, DG_RESET_REQ_LEN_MIN, rsp))
+    if (DG_ENGINE_UTIL_req_len_check_at_least(req, sizeof(action), rsp))
     {
         /* Parse and switch on action */
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
@@ -87,14 +86,17 @@ void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req)
         switch (action)
         {
         case DG_RESET_ACTION_SYS_RESET:
-            if (!DG_CMN_DRV_RESET_reset(DG_CMN_DRV_RESET_SYS, TRUE))
+            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, 0, rsp))
             {
-                DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                                                        "Failed to Reset System");
-            }
-            else
-            {
-                DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
+                if (!DG_CMN_DRV_RESET_reset(DG_CMN_DRV_RESET_SYS, TRUE))
+                {
+                    DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
+                                                            "Failed to Reset System");
+                }
+                else
+                {
+                    DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
+                }
             }
             break;
 
@@ -103,12 +105,14 @@ void DG_RESET_handler_main(DG_DEFS_DIAG_REQ_T* req)
             if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(comp), rsp))
             {
                 BOOL is_reset = (action == DG_RESET_ACTION_CHIP_RESET);
+
                 DG_ENGINE_UTIL_req_parse_data_ntoh(req, comp);
+
                 if (!DG_CMN_DRV_RESET_reset(comp, is_reset))
                 {
                     DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                                                            "Failed to Reset System, reset=%d",
-                                                            is_reset);
+                                                            "Failed to %s chip",
+                                                            is_reset ? "reset" : "recover");
                 }
                 else
                 {

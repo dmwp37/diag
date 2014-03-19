@@ -20,7 +20,6 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 #include <sys/socket.h>
 #include <pthread.h>
 #include <signal.h>
-#include <string.h>
 #include <stdlib.h>
 #include <errno.h>
 #include "dg_defs.h"
@@ -463,8 +462,7 @@ void* dg_client_comm_diag_handler_exec(void* diag_void)
     {
         if (pthread_cond_wait(&(diag->delete_cond), &(diag->delete_mutex)) != 0)
         {
-            DG_DBG_ERROR("Error waiting on delete condition, errno = %d (%s)",
-                         errno, strerror(errno));
+            DG_DBG_ERROR("Error waiting on delete condition, errno=%d(%m)", errno);
         }
     }
     pthread_mutex_unlock(&(diag->delete_mutex));
@@ -708,8 +706,7 @@ void dg_client_comm_alt_timer_create_thread(DG_DEFS_DIAG_REQ_T* diag)
         if (gettimeofday(&time_of_day, NULL) != 0)
         {
             DG_ENGINE_UTIL_rsp_set_error_string(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                                                "Failed to get time of day, errno = %d (%s)",
-                                                errno, strerror(errno));
+                                                "Failed to get time of day, errno=%d(%m)", errno);
         }
         else
         {
@@ -723,8 +720,8 @@ void dg_client_comm_alt_timer_create_thread(DG_DEFS_DIAG_REQ_T* diag)
             if (status != 0)
             {
                 DG_ENGINE_UTIL_rsp_set_error_string(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                                                    "Creating handler thread failed, status = %d (%s)",
-                                                    status, strerror(errno));
+                                                    "Creating handler thread failed, errno=%d(%m)",
+                                                    errno);
             }
             else
             {
@@ -745,7 +742,7 @@ void dg_client_comm_alt_timer_create_thread(DG_DEFS_DIAG_REQ_T* diag)
                     {
                         /* If a time out occurred, return a timeout response */
                         DG_ENGINE_UTIL_rsp_set_error_string(rsp, DG_RSP_CODE_ASCII_RSP_TIMEOUT,
-                                                            "Handler thread timed out, time out = %d seconds",
+                                                            "Handler thread timed out, time out=%d seconds",
                                                             (diag_handler->timeout_msec / 1000));
                         break;
                     }
@@ -753,8 +750,8 @@ void dg_client_comm_alt_timer_create_thread(DG_DEFS_DIAG_REQ_T* diag)
                     {
                         /* If an error other than time out occurred, send an error response */
                         DG_ENGINE_UTIL_rsp_set_error_string(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
-                                                            "Waiting for handler thread failed, status = %d (%s)",
-                                                            status, strerror(errno));
+                                                            "Waiting for handler thread failed, errno=%d(%m)",
+                                                            errno);
                         break;
                     }
 

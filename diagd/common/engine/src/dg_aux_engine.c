@@ -22,7 +22,6 @@ Xudong Huang    - xudongh    2013/12/20     xxxxx-0002   Update diag req protoco
 #include <stdint.h>
 #include <pthread.h>
 #include <signal.h>
-#include <string.h>
 #include <errno.h>
 #include "dg_defs.h"
 #include "dg_dbg.h"
@@ -885,8 +884,8 @@ void dg_aux_engine_init_impl(int aux_id)
             {
                 dg_aux_engine_listener_thread_hndl[aux_id] = 0;
                 dg_aux_engine_listener_run_ctrl[aux_id]    = FALSE;
-                DG_DBG_ERROR("Aux engine %d listener thread failed to start, errno = %d (%s)",
-                             aux_id, errno, strerror(errno));
+                DG_DBG_ERROR("Aux engine %d listener thread failed to start, errno=%d(%m)",
+                             aux_id, errno);
             }
         }
     }

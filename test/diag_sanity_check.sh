@@ -44,6 +44,17 @@ if [ $? != 0 ]; then
   exit -1
 fi
 
+
+SUB_TEST_FILES=$(ls $CUR_PATH/*_test.sh)
+
+for test_file in $SUB_TEST_FILES; do
+  $test_file
+  if [ $? != 0 ]; then
+    echo sub test failed!
+    exit -1
+  fi
+done
+
 # stop the diagd
 $CUR_PATH/kill_diagd.sh
 

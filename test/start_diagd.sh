@@ -11,6 +11,7 @@ if [ ! -e $DIAGD_PID_FILE ]; then
 
   rm -f $DIAGD_LOG_FILE
   $DIAGD_APP > $DIAGD_LOG_FILE 2>&1 &
+  chmod 666 $DIAGD_LOG_FILE
 
   # wait the daemon started
   sleep 1

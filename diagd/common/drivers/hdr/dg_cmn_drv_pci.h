@@ -94,5 +94,5 @@ BOOL DG_CMN_DRV_PCI_mem_read(UINT8 domain, UINT8 bus, UINT8 dev, UINT8 func,
 /** @} */
 /** @} */
 
-#endif /* _DG_CMN_DRV_DBG_LVL_H_  */
+#endif /* _DG_CMN_DRV_PCI_H_  */
 

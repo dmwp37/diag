@@ -9,7 +9,6 @@
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
-#include <stdlib.h>
 #include "dg_handler_inc.h"
 #include "dg_cmn_drv_rtc.h"
 
@@ -25,7 +24,7 @@
 <b>RTC - 0x000F</b>
 
 @par
-Get the last pressed RTC.
+Get/Set RTC.
 */
 
 /*==================================================================================================
@@ -47,12 +46,12 @@ typedef UINT8 DG_RTC_ACTION_T;
                                           LOCAL CONSTANTS
 ==================================================================================================*/
 /* we can't use sizeof(DG_CMN_DRV_RTC_DATE_T) for padding issue */
-static UINT32 DG_RTC_DATE_SIZE = sizeof(((DG_CMN_DRV_RTC_DATE_T*)NULL)->year) +
-                                 sizeof(((DG_CMN_DRV_RTC_DATE_T*)NULL)->month) +
-                                 sizeof(((DG_CMN_DRV_RTC_DATE_T*)NULL)->day) +
-                                 sizeof(((DG_CMN_DRV_RTC_DATE_T*)NULL)->hour) +
-                                 sizeof(((DG_CMN_DRV_RTC_DATE_T*)NULL)->minute) +
-                                 sizeof(((DG_CMN_DRV_RTC_DATE_T*)NULL)->second);
+static const UINT32 DG_RTC_DATE_SIZE = sizeof(((DG_CMN_DRV_RTC_DATE_T*)NULL)->year) +
+                                       sizeof(((DG_CMN_DRV_RTC_DATE_T*)NULL)->month) +
+                                       sizeof(((DG_CMN_DRV_RTC_DATE_T*)NULL)->day) +
+                                       sizeof(((DG_CMN_DRV_RTC_DATE_T*)NULL)->hour) +
+                                       sizeof(((DG_CMN_DRV_RTC_DATE_T*)NULL)->minute) +
+                                       sizeof(((DG_CMN_DRV_RTC_DATE_T*)NULL)->second);
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
