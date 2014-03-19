@@ -61,7 +61,12 @@ static const char* dg_cmn_drv_cpld_find();
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
-static const int dg_cmn_drv_cpld_base[] = { DG_CMN_DRV_CPLD_CB_BASE,  DG_CMN_DRV_CPLD_FEB_BASE };
+static const int dg_cmn_drv_cpld_base[] =
+{
+    DG_CMN_DRV_CPLD_CB_BASE,
+    DG_CMN_DRV_CPLD_FEB_BASE
+};
+
 static const int dg_cmn_drv_cpld_size[] =
 {
     DG_CMN_DRV_CPLD_FEB_BASE,
@@ -123,10 +128,7 @@ BOOL DG_CMN_DRV_CPLD_get(DG_CMN_DRV_CPLD_ID_T     id,
             DG_DBG_TRACE("CPLD ID %d offset 0x%04x got value: 0x%02x", id, offset, *val);
             ret = TRUE;
         }
-    }
 
-    if (cpld_base != MAP_FAILED)
-    {
         munmap(cpld_base, DG_CMN_DRV_CPLD_MEM_SIZE);
     }
 
@@ -189,6 +191,13 @@ BOOL DG_CMN_DRV_CPLD_set(DG_CMN_DRV_CPLD_ID_T     id,
             DG_DBG_TRACE("CPLD ID %d offset 0x%04x set value: %d", id, offset, val);
             ret = TRUE;
         }
+
+        munmap(cpld_base, DG_CMN_DRV_CPLD_MEM_SIZE);
+    }
+
+    if (cpld_fd > 0)
+    {
+        close(cpld_fd);
     }
 
     return ret;
@@ -213,7 +222,7 @@ const char* dg_cmn_drv_cpld_find()
         struct dirent** namelist = NULL;
         int             n;
 
-        if ((n = scandir("/sys/class/uio", &namelist, NULL,  alphasort)) < 0)
+        if ((n = scandir("/sys/class/uio", &namelist, NULL, alphasort)) < 0)
         {
             DG_DBG_ERROR("can't scan /sys/class/uio. errno=%d(%m)", errno);
         }
@@ -239,7 +248,6 @@ const char* dg_cmn_drv_cpld_find()
             }
             free(namelist);
         }
-
     }
 
     return cpld_dev;
