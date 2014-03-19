@@ -39,9 +39,11 @@ enum
 {
     DG_FAN_ACTION_GET_RPM       = 0x00,
     DG_FAN_ACTION_GET_RPM_LIMIT = 0x01,
-    DG_FAN_ACTION_SET_PWM       = 0x02,
-    DG_FAN_ACTION_SET_PWM_MAX   = 0x03,
-    DG_FAN_ACTION_GET_STATUS    = 0x04,
+    DG_FAN_ACTION_SET_RPM_LIMIT = 0x02,
+    DG_FAN_ACTION_GET_PWM       = 0x03,
+    DG_FAN_ACTION_SET_PWM       = 0x04,
+    DG_FAN_ACTION_SET_PWM_MAX   = 0x05,
+    DG_FAN_ACTION_GET_STATUS    = 0x06,
 };
 typedef UINT8 DG_FAN_ACTION_T;
 
@@ -72,14 +74,18 @@ typedef UINT8 DG_FAN_ACTION_T;
 *//*==============================================================================================*/
 void DG_FAN_handler_main(DG_DEFS_DIAG_REQ_T* req)
 {
-    DG_FAN_ACTION_T             action;
-    DG_CMN_DRV_FAN_ID_T         fan;
+    DG_FAN_ACTION_T      action;
+    DG_CMN_DRV_FAN_ID_T  fan;
+    DG_CMN_DRV_FAN_RPM_T rpm_min;
+    DG_CMN_DRV_FAN_RPM_T rpm_max;
+    DG_CMN_DRV_FAN_PWM_T pwm;
+
     DG_DEFS_DIAG_RSP_BUILDER_T* rsp = DG_ENGINE_UTIL_rsp_init();
 
-    const UINT32 min_len = sizeof(action) + sizeof(fan);
+    UINT32 req_len = sizeof(action) + sizeof(fan);
 
     DG_DBG_TRACE("In DG_FAN_handler_main begin to parse Request");
-    if (DG_ENGINE_UTIL_req_len_check_at_least(req, min_len, rsp))
+    if (DG_ENGINE_UTIL_req_len_check_at_least(req, req_len, rsp))
     {
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, action);
         DG_ENGINE_UTIL_req_parse_data_ntoh(req, fan);
@@ -112,33 +118,66 @@ void DG_FAN_handler_main(DG_DEFS_DIAG_REQ_T* req)
         case DG_FAN_ACTION_GET_RPM_LIMIT:
             if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, 0, rsp))
             {
-                DG_CMN_DRV_FAN_RPM_T min;
-                DG_CMN_DRV_FAN_RPM_T max;
-
-                if (!DG_CMN_DRV_FAN_get_rpm_limit(fan, &min, &max))
+                if (!DG_CMN_DRV_FAN_get_rpm_limit(fan, &rpm_min, &rpm_max))
                 {
                     DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
                                                             "Failed to get FAN rpm limit");
                 }
                 else
                 {
-                    UINT32 rsp_len = sizeof(min) + sizeof(max);
+                    UINT32 rsp_len = sizeof(rpm_min) + sizeof(rpm_max);
 
                     if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, rsp_len))
                     {
                         DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
-                        DG_ENGINE_UTIL_rsp_append_data_hton(rsp, min);
-                        DG_ENGINE_UTIL_rsp_append_data_hton(rsp, max);
+                        DG_ENGINE_UTIL_rsp_append_data_hton(rsp, rpm_min);
+                        DG_ENGINE_UTIL_rsp_append_data_hton(rsp, rpm_max);
+                    }
+                }
+            }
+            break;
+
+        case DG_FAN_ACTION_SET_RPM_LIMIT:
+            req_len = sizeof(rpm_min) + sizeof(rpm_max);
+            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, req_len, rsp))
+            {
+                DG_ENGINE_UTIL_req_parse_data_ntoh(req, rpm_min);
+                DG_ENGINE_UTIL_req_parse_data_ntoh(req, rpm_max);
+
+                if (!DG_CMN_DRV_FAN_set_rpm_limit(fan, rpm_min, rpm_max))
+                {
+                    DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
+                                                            "Failed to set FAN rpm limit");
+                }
+                else
+                {
+                    DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
+                }
+            }
+            break;
+
+        case DG_FAN_ACTION_GET_PWM:
+            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, 0, rsp))
+            {
+                if (!DG_CMN_DRV_FAN_get_pwm(fan, &pwm))
+                {
+                    DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
+                                                            "Failed to get FAN PWM");
+                }
+                else
+                {
+                    if (DG_ENGINE_UTIL_rsp_data_alloc(rsp, sizeof(pwm)))
+                    {
+                        DG_ENGINE_UTIL_rsp_set_code(rsp, DG_RSP_CODE_CMD_RSP_GENERIC);
+                        DG_ENGINE_UTIL_rsp_append_data_hton(rsp, pwm);
                     }
                 }
             }
             break;
 
         case DG_FAN_ACTION_SET_PWM:
-            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(DG_CMN_DRV_FAN_PWM_T), rsp))
+            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(pwm), rsp))
             {
-                DG_CMN_DRV_FAN_PWM_T pwm;
-
                 DG_ENGINE_UTIL_req_parse_data_ntoh(req, pwm);
 
                 if (!DG_CMN_DRV_FAN_set_pwm(fan, pwm))
@@ -154,13 +193,11 @@ void DG_FAN_handler_main(DG_DEFS_DIAG_REQ_T* req)
             break;
 
         case DG_FAN_ACTION_SET_PWM_MAX:
-            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(DG_CMN_DRV_FAN_PWM_T), rsp))
+            if (DG_ENGINE_UTIL_req_remain_len_check_equal(req, sizeof(pwm), rsp))
             {
-                DG_CMN_DRV_FAN_PWM_T max;
+                DG_ENGINE_UTIL_req_parse_data_ntoh(req, pwm);
 
-                DG_ENGINE_UTIL_req_parse_data_ntoh(req, max);
-
-                if (!DG_CMN_DRV_FAN_set_pwm_max(fan, max))
+                if (!DG_CMN_DRV_FAN_set_pwm_max(fan, pwm))
                 {
                     DG_ENGINE_UTIL_rsp_set_error_string_drv(rsp, DG_RSP_CODE_ASCII_RSP_GEN_FAIL,
                                                             "Failed to set FAN PWM MAX");

@@ -167,10 +167,63 @@ BOOL DG_CMN_DRV_FAN_get_rpm_limit(DG_CMN_DRV_FAN_ID_T   fan,
 }
 
 /*=============================================================================================*//**
-@brief Set PWM Duty Cycle of the fan
+@brief Set RPM limitation of the fan
+
+@param[in] fan - the selected fan
+@param[in] min - The minimum RPM of the fan
+@param[in] max - The maximum RPM of the fan
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_FAN_set_rpm_limit(DG_CMN_DRV_FAN_ID_T  fan,
+                                  DG_CMN_DRV_FAN_RPM_T min,
+                                  DG_CMN_DRV_FAN_RPM_T max)
+{
+    BOOL ret = FALSE;
+
+    if (fan > DG_CMN_DRV_FAN_ID_MAX)
+    {
+        DG_DRV_UTIL_set_error_string("Invalid fan=%d", fan);
+    }
+    else
+    {
+        DG_DBG_TRACE("FAN %d set RPM limit: min=%d, max=%d", fan, min, max);
+        ret = TRUE;
+    }
+
+    return ret;
+}
+
+/*=============================================================================================*//**
+@brief Get PWM Duty Cycle of the fan
 
 @param[in]  fan - the selected fan
-@param[out] pwm - PWM Duty Cycle Percentage. Valid rang (0~ PWM MAX Duty Cycle)%
+@param[out] pwm - PWM Duty Cycle Percentage
+
+*//*==============================================================================================*/
+BOOL DG_CMN_DRV_FAN_get_pwm(DG_CMN_DRV_FAN_ID_T fan, DG_CMN_DRV_FAN_PWM_T* pwm)
+{
+    BOOL ret = FALSE;
+
+    if (fan > DG_CMN_DRV_FAN_ID_MAX)
+    {
+        DG_DRV_UTIL_set_error_string("Invalid fan=%d", fan);
+    }
+    else
+    {
+        *pwm = 85;
+        DG_DBG_TRACE("FAN %d get PWM: PWM=%d%%", fan, *pwm);
+
+        ret = TRUE;
+    }
+
+    return ret;
+}
+
+/*=============================================================================================*//**
+@brief Set PWM Duty Cycle of the fan
+
+@param[in] fan - the selected fan
+@param[in] pwm - PWM Duty Cycle Percentage. Valid rang (0~ PWM MAX Duty Cycle)%
 
 *//*==============================================================================================*/
 BOOL DG_CMN_DRV_FAN_set_pwm(DG_CMN_DRV_FAN_ID_T fan, DG_CMN_DRV_FAN_PWM_T pwm)

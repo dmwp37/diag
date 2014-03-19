@@ -5,9 +5,12 @@ DIAG_IN="/tmp/diag_in"
 DIAG_OUT="/tmp/diag_out"
 CLI_PID_FILE="/tmp/diag_cli.pid"
 
-if [ $@ == 'stop' ]; then
-  $CUR_PATH/kill_diagd.sh
+if [ $# == 0 ]; then
+  echo Need parameter
+  exit 1
+fi
 
+if [ $1 == 'stop' ]; then
   if [ -e $CLI_PID_FILE  ]; then
     PID=`cat $CLI_PID_FILE`
     kill -TERM -$PID
@@ -27,8 +30,8 @@ fi
 
 if [ ! -e $CLI_PID_FILE ]; then
   $CUR_PATH/cli_server.sh &
-  $CUR_PATH/start_diagd.sh
   echo $$ > $CLI_PID_FILE
+  sleep 1
 fi
 
 echo $@ > $DIAG_IN

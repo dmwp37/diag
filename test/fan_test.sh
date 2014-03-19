@@ -7,10 +7,14 @@ OPCODE=0002
 
 GET_RPM=00
 GET_RPM_LIMIT=01
-SET_PWM=02
-SET_PWM_MAX=03
-GET_STATUS=04
+SET_RPM_LIMIT=02
+GET_PWM=03
+SET_PWM=04
+SET_PWM_MAX=05
+GET_STATUS=06
 
+RPM_MIN=0300
+RPM_MAX=3000
 PWM=32 #50%
 PWM_MAX=50 #80%
 
@@ -23,16 +27,20 @@ echo "#-----------------------$SEC_NAME-----------------------"
 #command array
 array_command[0]="$OPCODE""$GET_RPM""$FAN_ID"
 array_command[1]="$OPCODE""$GET_RPM_LIMIT""$FAN_ID"
-array_command[2]="$OPCODE""$SET_PWM_MAX""$FAN_ID""$PWM_MAX"
-array_command[3]="$OPCODE""$SET_PWM""$FAN_ID""$PWM"
-array_command[4]="$OPCODE""$GET_STATUS""$FAN_ID"
+array_command[2]="$OPCODE""$SET_RPM_LIMIT""$FAN_ID""$RPM_MIN""$RPM_MAX"
+array_command[3]="$OPCODE""$GET_PWM""$FAN_ID"
+array_command[4]="$OPCODE""$SET_PWM_MAX""$FAN_ID""$PWM_MAX"
+array_command[5]="$OPCODE""$SET_PWM""$FAN_ID""$PWM"
+array_command[6]="$OPCODE""$GET_STATUS""$FAN_ID"
 
 #command description array, need match with command array above.
 array_des[0]="Get FAN $FAN_ID RPM"
 array_des[1]="Get FAN $FAN_ID RPM limit"
-array_des[2]="Set FAN $FAN_ID PWM_MAX"
-array_des[3]="Set FAN $FAN_ID PWM"
-array_des[4]="Get FAN $FAN_ID Status"
+array_des[2]="Set FAN $FAN_ID RPM limit RPM_MIN=$RPM_MIN RPM_MAX=$RPM_MAX"
+array_des[3]="Get FAN $FAN_ID PWM"
+array_des[4]="Set FAN $FAN_ID PWM_MAX=$PWM_MAX"
+array_des[5]="Set FAN $FAN_ID PWM=$PWM"
+array_des[6]="Get FAN $FAN_ID Status"
 
 array_command_fail[0]="$OPCODE""05""$FAN_ID"
 
