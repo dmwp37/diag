@@ -784,6 +784,7 @@ void DG_ENGINE_UTIL_buf_append_1_byte_hton(UINT8* buf, UINT32* cur_buf_len, UINT
 void DG_ENGINE_UTIL_buf_append_2_bytes_hton(UINT8* buf, UINT32* cur_buf_len, UINT16 val)
 {
     *(UINT16*)(buf + *cur_buf_len) = htons(val);
+
     *cur_buf_len += 2;
 }
 
@@ -797,6 +798,7 @@ void DG_ENGINE_UTIL_buf_append_2_bytes_hton(UINT8* buf, UINT32* cur_buf_len, UIN
 void DG_ENGINE_UTIL_buf_append_4_bytes_hton(UINT8* buf, UINT32* cur_buf_len, UINT32 val)
 {
     *(UINT32*)(buf + *cur_buf_len) = htonl(val);
+
     *cur_buf_len += 4;
 }
 
@@ -1440,10 +1442,10 @@ void DG_ENGINE_UTIL_rsp_set_flag(DG_DEFS_DIAG_RSP_BUILDER_T* rsp, DG_DEFS_RSP_FL
 void DG_ENGINE_UTIL_rsp_set_error_string(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
                                          DG_RSP_CODE_T code, const char* format, ...)
 {
-    dg_engine_util_diag_rsp_builder_t* real_rsp           = (dg_engine_util_diag_rsp_builder_t*)rsp;
-    char*                              ascii_error_string = NULL; /* Temporary buffer for error string in ascii */
-    va_list                            args;                      /* Variable arg list                          */
-    int                                str_len;
+    dg_engine_util_diag_rsp_builder_t* real_rsp = (dg_engine_util_diag_rsp_builder_t*)rsp;
+
+    char*   ascii_error_string = NULL; /* Temporary buffer for error string in ascii */
+    va_list args;                      /* Variable arg list                          */
 
     /* Init variable arg list */
     va_start(args, format);
@@ -1451,29 +1453,17 @@ void DG_ENGINE_UTIL_rsp_set_error_string(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
     if (real_rsp->err_text_string != NULL)
     {
         /* If an string exists, ignore it and use the already set one */
-        DG_DBG_TRACE("Tried to set error string while one already existed. Try to set: %s, Current: %s",
-                     format, real_rsp->err_text_string);
+        DG_DBG_ERROR("Tried to set error string while one already existed.");
+        DG_DBG_ERROR("Try to set: %s, Current: %s", format, real_rsp->err_text_string);
     }
-    else if ((str_len = vsnprintf(NULL, 0, format, args)) < 0)
-    {
-        DG_DBG_ERROR("vsnprintf() get string length failed. errno=%d(%m)", errno);
-    }
-    else if ((ascii_error_string = (char*)malloc(str_len + 1)) == NULL)
+    else if (vasprintf(&ascii_error_string, format, args) < 0)
     {
         real_rsp->code = code;
-        /* If malloc fails, leave response code set */
-        DG_DBG_TRACE("Failed to allocate memory for string: %s", format);
+        DG_DBG_ERROR("vasprintf() set string failed. errno=%d(%m)", errno);
     }
     else
     {
-        va_list ap;
-
         real_rsp->code = code;
-
-        va_start(ap, format);
-        vsnprintf(ascii_error_string, str_len + 1, format, ap);
-        va_end(ap);
-
         DG_DBG_TRACE("Error string set to: %s", ascii_error_string);
         real_rsp->err_text_string = ascii_error_string;
     }
@@ -1500,33 +1490,19 @@ void DG_ENGINE_UTIL_rsp_set_error_string_drv(DG_DEFS_DIAG_RSP_BUILDER_T* rsp,
                                              const char* format, ...)
 {
     char*   ascii_error_string = NULL; /* Temporary buffer for error string in ascii */
-    char*   drv_error_string   = NULL; /* Temporary buffer for driver error string in ascii */
     va_list args;                      /* Variable arg list                          */
-    int     str_len;                   /* the whole error string length              */
 
     /* Init variable arg list */
     va_start(args, format);
 
-    drv_error_string = DG_DRV_UTIL_get_error_string();
-
-    str_len = vsnprintf(NULL, 0, format, args);
-
-    if (str_len < 0)
+    if (vasprintf(&ascii_error_string, format, args) < 0)
     {
-        DG_DBG_ERROR("vsnprintf() get string length failed. errno=%d(%m)", errno);
-    }
-    else if ((ascii_error_string = (char*)malloc(str_len + 1)) == NULL)
-    {
-        DG_DBG_ERROR("Failed to create ascii error string");
+        DG_DBG_ERROR("vasprintf() set ascii error string failed. errno=%d(%m)", errno);
     }
     else
     {
-        va_list ap;
-
-        /* Set error string passed in */
-        va_start(ap, format);
-        vsnprintf(ascii_error_string, str_len + 1, format, ap);
-        va_end(ap);
+        /* Temporary buffer for driver error string in ascii */
+        char* drv_error_string = DG_DRV_UTIL_get_error_string();
 
         /* If driver error string is null, just set the passed in error string */
         if (drv_error_string == NULL)
@@ -1670,11 +1646,12 @@ void dg_engine_util_send_response(DG_DEFS_DIAG_REQ_T* diag,
 
     rsp.header.unsol_rsp_flag = (final_rsp_flags & DG_DEFS_RSP_FLAG_UNSOL) ?
                                 DG_DEFS_HDR_FLAG_RESPONSE_UNSOLICITED : DG_DEFS_HDR_FLAG_RESPONSE_SOLICITED;
-    rsp.header.diag_version   = DG_DEFS_HDR_DIAG_VERSION_VALUE;
-    rsp.header.seq_tag        = diag->header.seq_tag;
-    rsp.header.opcode         = diag->header.opcode;
-    rsp.header.rsp_code       = final_rsp_code;
-    rsp.header.length         = final_rsp_length;
+
+    rsp.header.diag_version = DG_DEFS_HDR_DIAG_VERSION_VALUE;
+    rsp.header.seq_tag      = diag->header.seq_tag;
+    rsp.header.opcode       = diag->header.opcode;
+    rsp.header.rsp_code     = final_rsp_code;
+    rsp.header.length       = final_rsp_length;
 
     DG_DBG_TRACE("Response Flags - unsol = %d, data = %d, fail = %d, seq = %d",
                  rsp.header.unsol_rsp_flag,
