@@ -35,7 +35,7 @@ extern "C" {
                                                ENUMS
 ==================================================================================================*/
 
-/* SFP ID type */
+/** SFP ID type */
 enum
 {
     DG_CMN_DRV_SFP_ID_HA    = 0x00,
@@ -51,7 +51,17 @@ enum
 };
 typedef UINT8 DG_CMN_DRV_SFP_ID_T;
 
-/* SFP registers */
+/** SFP status, Bits[4-7]: Reserved */
+enum
+{
+    DG_CMN_DRV_SFP_STATUS_PRESENT_BIT  = 0x01,
+    DG_CMN_DRV_SFP_STATUS_TX_FAULT_BIT = 0x02,
+    DG_CMN_DRV_SFP_STATUS_RX_LOS_BIT   = 0x04,
+    DG_CMN_DRV_SFP_STATUS_TX_EN_BIT    = 0x08,
+};
+typedef UINT8 DG_CMN_DRV_SFP_STATUS_T;
+
+/** SFP registers */
 enum
 {
     DG_CMN_DRV_SFP_REG_A0 = 0x00,
@@ -59,7 +69,7 @@ enum
 };
 typedef UINT8 DG_CMN_DRV_SFP_REG_T;
 
-/* SFP TX config */
+/** SFP TX config */
 enum
 {
     DG_CMN_DRV_SFP_TX_DISABLE = 0x00,
@@ -70,9 +80,6 @@ typedef UINT8 DG_CMN_DRV_SFP_TX_CFG_T;
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
-
-/** SFP status */
-typedef UINT8 DG_CMN_DRV_SFP_STATUS_T;
 
 /** SFP register data */
 typedef struct

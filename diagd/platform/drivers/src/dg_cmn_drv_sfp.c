@@ -68,7 +68,12 @@ BOOL DG_CMN_DRV_SFP_get_status(DG_CMN_DRV_SFP_ID_T sfp, DG_CMN_DRV_SFP_STATUS_T*
     }
     else
     {
-        *status = 0;
+        DG_CMN_DRV_SFP_STATUS_T val = DG_CMN_DRV_SFP_STATUS_PRESENT_BIT;
+        val |= DG_CMN_DRV_SFP_STATUS_TX_EN_BIT;
+        val &= ~DG_CMN_DRV_SFP_STATUS_RX_LOS_BIT;
+        val &= ~DG_CMN_DRV_SFP_STATUS_TX_FAULT_BIT;
+
+        *status = val;
 
         DG_DBG_TRACE("SFP ID %d got status: %d", sfp, (UINT8)*status);
 

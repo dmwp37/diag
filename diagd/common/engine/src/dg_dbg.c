@@ -38,7 +38,7 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 /*==================================================================================================
                                           GLOBAL VARIABLES
 ==================================================================================================*/
-int dg_dbg_level         = DG_DBG_LVL_ERROR;
+int dg_dbg_level         = DG_DBG_LVL_TRACE;
 int dg_dbg_autolog_level = DG_DBG_LVL_DISABLE;
 
 /*==================================================================================================
@@ -67,7 +67,8 @@ void DG_DBG_data_dump(void* data_buf, int len)
     int   buffer_index = 0;
     UINT8 value;
 
-    char string_buffer[(DG_DBG_MAX_DUMP_COLS * 3) + 1]; /* Each column takes up 3 characters, plus NULL */
+    /* Each column takes up 3 characters, plus NULL */
+    char string_buffer[(DG_DBG_MAX_DUMP_COLS * 3) + 1];
 
     if (DG_DBG_LVL_VERBOSE == dg_dbg_level)
     {
@@ -83,7 +84,8 @@ void DG_DBG_data_dump(void* data_buf, int len)
                 for (col = 0; col < num_col; col++)
                 {
                     value = ((UINT8*)data_buf)[buffer_index++];
-                    sprintf(string_buffer, "%s%02x ", string_buffer, value);
+                    snprintf(string_buffer, sizeof(string_buffer),
+                             "%s%02x ", string_buffer, value);
                 }
                 DG_DBG_VERBOSE("%s", string_buffer);
             }
