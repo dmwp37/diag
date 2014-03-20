@@ -13,6 +13,7 @@ LOCAL_PATH := $(call my-dir)
 include $(LOCAL_PATH)/dg_cfg.mk
 
 DG_FLAGS := $(DG_CFG_FLAGS)
+DG_FLAGS += -D_GNU_SOURCE
 
 
 #===================================================

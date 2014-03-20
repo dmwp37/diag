@@ -88,20 +88,13 @@ void DG_DRV_UTIL_set_error_string(const char* format, ...)
 {
     va_list args;       /* Variable arg list */
     char*   p_err_str;  /* pointer to the error string */
-    int     str_len;    /* error string length*/
 
     /* Init variable arg list */
     va_start(args, format);
-    str_len = vsnprintf(NULL, 0, format, args);
-    va_end(args);
 
-    if (str_len < 0)
+    if (vasprintf(&p_err_str, format, args) < 0)
     {
-        DG_DBG_ERROR("vsnprintf() get string length failed. errno=%d(%m)", errno);
-    }
-    else if ((p_err_str = (char*)malloc(str_len + 1)) == NULL)
-    {
-        DG_DBG_ERROR("Failed to create driver error string");
+        DG_DBG_ERROR("vasprintf() set error string failed. errno=%d(%m)", errno);
     }
     else
     {
@@ -114,18 +107,18 @@ void DG_DRV_UTIL_set_error_string(const char* format, ...)
             free(old_err_str);
         }
 
-        va_start(args, format);
-        vsnprintf(p_err_str, str_len + 1, format, args);
-        va_end(args);
-
-        DG_DBG_ERROR("Driver error string set to: %s", p_err_str);
-
         /* Set new error string */
         if (pthread_setspecific(dg_drv_util_error_string_key, p_err_str) != 0)
         {
             DG_DBG_ERROR("pthread_setspecific() set error string failed. errno=%d(%m)", errno);
         }
+        else
+        {
+            DG_DBG_ERROR("Driver error string set to: %s", p_err_str);
+        }
     }
+
+    va_end(args);
 }
 
 /*=============================================================================================*//**

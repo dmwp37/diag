@@ -15,12 +15,12 @@ Xudong Huang    - xudongh    2013/12/11     xxxxx-0000   Creation
 ====================================================================================================
                                             INCLUDE FILES
 ==================================================================================================*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "dg_main.h"
 #include "dg_handler_table.h"
 #include "dg_dbg.h"
-
-#include <stdio.h>
-#include <unistd.h>
 
 
 /*==================================================================================================
@@ -141,12 +141,12 @@ static int dg_main_task_switch_to_user(void)
 *//*=============================================================================================*/
 static int dg_check_for_stale_pid_file(void)
 {
-    const char* pid_file           = DG_CFG_PID_FILE; /* Storage location of current PID */
-    const char* identity_sig       = "diagd";
-    char        identity_file[256] = { 0 };
-    char        cmdline[256];
-    FILE*       f;
-    int         stored_pid = 0;
+    const char* pid_file     = DG_CFG_PID_FILE; /* Storage location of current PID */
+    const char* identity_sig = "diagd";
+
+    int   stored_pid = 0;
+    int   ret        = 0;
+    FILE* f;
 
     if ((f = fopen(pid_file, "r")) != NULL)
     {
@@ -159,31 +159,53 @@ static int dg_check_for_stale_pid_file(void)
     /* no file or the same PID then nothing to care about */
     if ((stored_pid != 0) && (stored_pid != getpid()))
     {
-        snprintf(identity_file, sizeof(identity_file), "/proc/%d/cmdline", stored_pid);
-        /* process with the same pid exists */
-        if (access(identity_file, F_OK) == 0)
-        {
-            FILE* f;
+        char* identity_file = NULL;
 
-            if ((f = fopen(identity_file, "r")) != NULL)
+        if (asprintf(&identity_file, "/proc/%d/cmdline", stored_pid) < 0)
+        {
+            DG_DBG_ERROR("asprintf() failed to make identity_file!");
+        }
+        else
+        {
+            /* process with the same pid exists */
+            if (access(identity_file, F_OK) == 0)
             {
-                fgets(cmdline, sizeof(cmdline), f);
-                fclose(f);
-                if (strstr(cmdline, identity_sig) != NULL)
+                if ((f = fopen(identity_file, "r")) != NULL)
                 {
-                    /* second instance of DIAG is being launched */
-                    DG_DBG_ERROR("diag daemon already started!");
-                    return -1;
+                    size_t len;
+                    char*  cmdline = NULL;
+
+                    if (getline(&cmdline, &len, f) < 0)
+                    {
+                        DG_DBG_ERROR("can't getline from %s!", identity_file);
+                    }
+                    else
+                    {
+                        DG_DBG_TRACE("previous launcher is %s", cmdline);
+                        if (strstr(cmdline, identity_sig) != NULL)
+                        {
+                            /* second instance of DIAG is being launched */
+                            DG_DBG_ERROR("diag daemon already started!");
+                            ret = -1;
+                        }
+
+                        free(cmdline);
+                    }
+                    fclose(f);
                 }
             }
+            else
+            {
+                /* pid file exists while process does not - stale pid file */
+                remove(pid_file);
+                sync();
+                usleep(1000);
+                DG_DBG_TRACE("remove stale pid file with pid %d", stored_pid);
+            }
+            free(identity_file);
         }
-        /* pid file exists while process does not - stale pid file */
-        remove(pid_file);
-        sync();
-        usleep(1000);
-        DG_DBG_TRACE("remove stale pid file with pid %d, launcher is %s", stored_pid, cmdline);
     }
 
-    return 0;
+    return ret;
 }
 
