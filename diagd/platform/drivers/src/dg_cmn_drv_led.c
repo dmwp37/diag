@@ -12,6 +12,7 @@
 #include "dg_handler_inc.h"
 #include "dg_drv_util.h"
 #include "dg_cmn_drv_led.h"
+#include "dg_cmn_drv_cpld.h"
 
 
 /** @addtogroup dg_common_drivers
@@ -46,6 +47,37 @@ implementation of the LED driver
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
+/** the address of the led register */
+static UINT16 dg_cmn_drv_led_reg_addr[] =
+{
+    0x0002, /* power  */
+    0x0002, /* status */
+    0x0002, /* alarm  */
+    0x0002, /* HA     */
+    0x0003, /* SSD    */
+    0x0003  /* RPS    */
+};
+
+/** the 2 bits shift of the led mask */
+/** mask = 0x03 << offset */
+static UINT8 dg_cmn_drv_led_mask_shift[] =
+{
+    0x06, /* power  */
+    0x02, /* status */
+    0x04, /* alarm  */
+    0x00, /* HA     */
+    0x02, /* SSD    */
+    0x00  /* RPS    */
+};
+
+/** the color value of the led register */
+static UINT8 dg_cmn_drv_led_color[] =
+{
+    0x01, /* default */
+    0x01, /* green   */
+    0x02, /* red     */
+    0x03  /* orange  */
+};
 
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
@@ -59,40 +91,40 @@ implementation of the LED driver
 *//*==============================================================================================*/
 BOOL DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LED_COLOR_T led_color)
 {
-    BOOL ret = FALSE;
+    BOOL  ret = FALSE;
+    UINT8 value;
 
-    switch (led_id)
+    if (led_id >= DG_ARRAY_SIZE(dg_cmn_drv_led_reg_addr))
     {
-    case DG_CMN_DRV_LED_POWER:
-    case DG_CMN_DRV_LED_STATUS:
-    case DG_CMN_DRV_LED_ALARM:
-    case DG_CMN_DRV_LED_HA:
-    case DG_CMN_DRV_LED_STORAGE:
-    case DG_CMN_DRV_LED_RPS:
-        switch (led_color)
-        {
-        case DG_CMN_DRV_LED_COLOR_DEFAULT:
-        case DG_CMN_DRV_LED_COLOR_RED:
-        case DG_CMN_DRV_LED_COLOR_GREEN:
-        case DG_CMN_DRV_LED_COLOR_YELLOW:
-            ret = TRUE;
-            DG_DBG_TRACE("Enable LED driver: led_id=0x%02x, led_color=0x%02x",
-                         led_id, led_color);
-            break;
-
-        default:
-            break;
-        }
-        break;
-
-    default:
-        break;
+        DG_DRV_UTIL_set_error_string("Invalid led: led_id=0x%02x", led_id);
     }
-
-    if (!ret)
+    else if (led_color >= DG_ARRAY_SIZE(dg_cmn_drv_led_color))
     {
-        DG_DRV_UTIL_set_error_string("Enable LED failed: led_id=0x%02x, led_color=0x%02x",
-                                     led_id, led_color);
+        DG_DRV_UTIL_set_error_string("Invalid led color: led_color=0x%02x", led_color);
+    }
+    else if (!DG_CMN_DRV_CPLD_get(DG_CMN_DRV_CPLD_FEB,
+                                  dg_cmn_drv_led_reg_addr[led_id], &value))
+    {
+        DG_DBG_ERROR("can't get CPLD led register");
+    }
+    else
+    {
+        /* clear the bits and then set the bit */
+        value &= (0x03 << dg_cmn_drv_led_mask_shift[led_id]);
+        value |= (dg_cmn_drv_led_color[led_color] << dg_cmn_drv_led_mask_shift[led_id]);
+
+        if (!DG_CMN_DRV_CPLD_set(DG_CMN_DRV_CPLD_FEB,
+                                 dg_cmn_drv_led_reg_addr[led_id],
+                                 value))
+        {
+            DG_DBG_ERROR("can't set CPLD led register");
+        }
+        else
+        {
+            DG_DBG_TRACE("Enable LED: led_id=0x%02x, led_color=0x%02x",
+                         led_id, led_color);
+            ret = TRUE;
+        }
     }
 
     return ret;
@@ -105,27 +137,34 @@ BOOL DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LED_COLOR_T le
 *//*==============================================================================================*/
 BOOL DG_CMN_DRV_LED_disable(DG_CMN_DRV_LED_ID_T led_id)
 {
-    BOOL ret = FALSE;
+    BOOL  ret = FALSE;
+    UINT8 value;
 
-    switch (led_id)
+    if (led_id >= DG_ARRAY_SIZE(dg_cmn_drv_led_reg_addr))
     {
-    case DG_CMN_DRV_LED_POWER:
-    case DG_CMN_DRV_LED_STATUS:
-    case DG_CMN_DRV_LED_ALARM:
-    case DG_CMN_DRV_LED_HA:
-    case DG_CMN_DRV_LED_STORAGE:
-    case DG_CMN_DRV_LED_RPS:
-        ret = TRUE;
-        DG_DBG_TRACE("Disable LED driver: led_id=0x%02x", led_id);
-        break;
-
-    default:
-        break;
+        DG_DRV_UTIL_set_error_string("Invalid led: led_id=0x%02x", led_id);
     }
-
-    if (!ret)
+    else if (!DG_CMN_DRV_CPLD_get(DG_CMN_DRV_CPLD_FEB,
+                                  dg_cmn_drv_led_reg_addr[led_id], &value))
     {
-        DG_DRV_UTIL_set_error_string("Disable LED failed: led_id=0x%02x", led_id);
+        DG_DBG_ERROR("can't get CPLD led register");
+    }
+    else
+    {
+        /* clear the bit of the led */
+        value &= (0x03 << dg_cmn_drv_led_mask_shift[led_id]);
+
+        if (!DG_CMN_DRV_CPLD_set(DG_CMN_DRV_CPLD_FEB,
+                                 dg_cmn_drv_led_reg_addr[led_id],
+                                 value))
+        {
+            DG_DBG_ERROR("can't set CPLD led register");
+        }
+        else
+        {
+            DG_DBG_TRACE("Disable LED: led_id=0x%02x", led_id);
+            ret = TRUE;
+        }
     }
 
     return ret;
