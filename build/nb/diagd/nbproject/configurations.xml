@@ -19,6 +19,7 @@
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_i2c.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_int_loop.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_led.h</itemPath>
+          <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_loop.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_pci.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_phy.h</itemPath>
           <itemPath>../../../diagd/common/drivers/hdr/dg_cmn_drv_port_led.h</itemPath>
@@ -92,6 +93,7 @@
           <itemPath>../../../diagd/common/handlers/src/dg_i2c.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_int_loop.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_led.c</itemPath>
+          <itemPath>../../../diagd/common/handlers/src/dg_loop.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_pci.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_phy.c</itemPath>
           <itemPath>../../../diagd/common/handlers/src/dg_ping.c</itemPath>
@@ -134,6 +136,7 @@
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_i2c.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_int_loop.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_led.c</itemPath>
+          <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_loop.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_pci.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_phy.c</itemPath>
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_port_led.c</itemPath>
@@ -320,6 +323,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_led.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_loop.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -599,6 +607,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_loop.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_pci.c"
             ex="false"
             tool="0"
@@ -766,6 +779,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_led.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_loop.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -990,6 +1008,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_loop.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/drivers/hdr/dg_cmn_drv_pci.h"
             ex="false"
             tool="3"
@@ -1265,6 +1288,11 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/common/handlers/src/dg_loop.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/common/handlers/src/dg_pci.c"
             ex="false"
             tool="0"
@@ -1432,6 +1460,11 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_led.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/drivers/src/dg_cmn_drv_loop.c"
             ex="false"
             tool="0"
             flavor2="0">

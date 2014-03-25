@@ -2,33 +2,31 @@
 
 CUR_PATH=$(dirname $0)
 
-SEC_NAME="RTC Test"
-OPCODE=0016
+SEC_NAME="Normal Loopback Test"
+OPCODE=0023
 
-GET_ACTION=00
-SET_ACTION=01
-
-#2014-02-20 17:50:58
-DATE_VALUE=07de021411323a
+TX_PORT=01
+RX_PORT=04
+SIZE=0400
+PATTERN=AA
+NUM=0020
 
 echo "#-----------------------$SEC_NAME-----------------------"
 
 #Define array for command and description: following Diag and DVT Spec
 
 #command array
-array_command[0]="$OPCODE""$GET_ACTION"
-array_command[1]="$OPCODE""$GET_ACTION"
-array_command[2]="$OPCODE""$SET_ACTION""$DATE_VALUE"
-array_command[3]="$OPCODE""$GET_ACTION"
+array_command[0]=01000102
+array_command[1]="$OPCODE""$TX_PORT""$RX_PORT""$SIZE""$PATTERN""$NUM"
 
 #command description array, need match with command array above.
-array_des[0]="Get RTC date"
-array_des[1]="Get RTC date"
-array_des[2]="Set RTC date"
-array_des[3]="Get RTC date"
+array_des[0]="Suspend the DUT"
+array_des[1]="normal loopback test"
 
-array_command_fail[0]=$OPCODE""03
-array_des_fail[0]="Invalid action"
+RX_PORT=40
+array_command_fail[0]="$OPCODE""$TX_PORT""$RX_PORT""$SIZE""$PATTERN""$NUM"
+
+array_des_fail[0]="Invalide Port"
 
 . $CUR_PATH/diag_verify.sh
 

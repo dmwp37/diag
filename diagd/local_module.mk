@@ -109,6 +109,7 @@ DG_HANDLERS_CMN_SRC := \
   common/handlers/src/dg_i2c.c \
   common/handlers/src/dg_int_loop.c \
   common/handlers/src/dg_led.c \
+  common/handlers/src/dg_loop.c \
   common/handlers/src/dg_pci.c \
   common/handlers/src/dg_phy.c \
   common/handlers/src/dg_ping.c \
@@ -153,6 +154,7 @@ DG_DRIVERS_PLAT_SRC := \
   platform/drivers/src/dg_cmn_drv_i2c.c \
   platform/drivers/src/dg_cmn_drv_int_loop.c \
   platform/drivers/src/dg_cmn_drv_led.c \
+  platform/drivers/src/dg_cmn_drv_loop.c \
   platform/drivers/src/dg_cmn_drv_pci.c \
   platform/drivers/src/dg_cmn_drv_phy.c \
   platform/drivers/src/dg_cmn_drv_port_led.c \
