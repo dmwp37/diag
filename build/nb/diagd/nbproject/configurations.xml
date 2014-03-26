@@ -235,19 +235,19 @@
         </cTool>
         <linkerTool>
           <linkerLibItems>
+            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
             <linkerLibProjectItem>
-              <makeArtifact PL="../libdiagapi"
+              <makeArtifact PL="../libdg_client_api"
                             CT="3"
                             CN="Debug"
                             AC="true"
                             BL="true"
-                            WD="../libdiagapi"
+                            WD="../libdg_client_api"
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
-                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdiagapi.a">
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdg_client_api.a">
               </makeArtifact>
             </linkerLibProjectItem>
-            <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
           </linkerLibItems>
           <commandLine>-mconsole</commandLine>
         </linkerTool>

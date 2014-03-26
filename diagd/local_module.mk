@@ -36,7 +36,7 @@ DG_DIAG_INC := \
 
 LOCAL_C_INCLUDES :=  $(addprefix $(LOCAL_PATH)/, $(DG_DIAG_INC))
 
-LOCAL_STATIC_LIBRARIES := libdiagapi
+LOCAL_STATIC_LIBRARIES := libdg_client_api
 LOCAL_LDLIBS +=
 
 #Common Engine

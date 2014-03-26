@@ -62,7 +62,7 @@
           <warningLevel>3</warningLevel>
         </cTool>
         <archiverTool>
-          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdiagapi.a</output>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdg_client_api.a</output>
         </archiverTool>
       </compileType>
       <item path="../../../diag_lib/client_api/common/hdr/dg_client_api.h"
