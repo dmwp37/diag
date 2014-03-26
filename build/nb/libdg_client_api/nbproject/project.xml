@@ -3,15 +3,14 @@
     <type>org.netbeans.modules.cnd.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>libdiagapi</name>
+            <name>libdg_client_api</name>
             <c-extensions>c</c-extensions>
             <cpp-extensions/>
             <header-extensions>h</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>../../../diagd/common</sourceRootElem>
-                <sourceRootElem>../../../diagd/platform</sourceRootElem>
+                <sourceRootElem>../../../diag_lib/client_api</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

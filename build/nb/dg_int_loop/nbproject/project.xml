@@ -3,13 +3,13 @@
     <type>org.netbeans.modules.cnd.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>diag_send</name>
+            <name>dg_int_loop</name>
             <c-extensions>c</c-extensions>
             <cpp-extensions/>
             <header-extensions/>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects>
-                <make-dep-project>../libdg_client_api</make-dep-project>
+                <make-dep-project>../libdg_loop</make-dep-project>
             </make-dep-projects>
             <sourceRootList/>
             <confList>

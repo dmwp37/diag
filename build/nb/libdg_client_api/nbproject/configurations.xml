@@ -2,31 +2,24 @@
 <configurationDescriptor version="90">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="common" displayName="common" projectFiles="true">
-      <logicalFolder name="client_api" displayName="client_api" projectFiles="true">
+      <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
+        <itemPath>../../../diag_lib/client_api/common/hdr/dg_client_api.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="pal" displayName="pal" projectFiles="true">
         <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
-          <itemPath>../../../diagd/common/client_api/hdr/dg_client_api.h</itemPath>
+          <itemPath>../../../diag_lib/client_api/common/pal/hdr/dg_pal_client_api.h</itemPath>
         </logicalFolder>
-        <logicalFolder name="pal" displayName="pal" projectFiles="true">
-          <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
-            <itemPath>../../../diagd/common/client_api/pal/hdr/dg_pal_client_api.h</itemPath>
-          </logicalFolder>
-        </logicalFolder>
-        <logicalFolder name="src" displayName="src" projectFiles="true">
-          <itemPath>../../../diagd/common/client_api/src/dg_client_api.c</itemPath>
-        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="src" displayName="src" projectFiles="true">
+        <itemPath>../../../diag_lib/client_api/common/src/dg_client_api.c</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="platform" displayName="platform" projectFiles="true">
-      <logicalFolder name="pal" displayName="pal" projectFiles="true">
-        <logicalFolder name="client_api" displayName="client_api" projectFiles="true">
-          <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
-            <itemPath>../../../diagd/platform/pal/client_api/hdr/dg_pal_client_platform_inc.h</itemPath>
-            <itemPath>../../../diagd/platform/pal/client_api/hdr/dg_platform_defs.h</itemPath>
-          </logicalFolder>
-          <logicalFolder name="src" displayName="src" projectFiles="true">
-            <itemPath>../../../diagd/platform/pal/client_api/src/dg_pal_client_api.c</itemPath>
-          </logicalFolder>
-        </logicalFolder>
+      <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
+        <itemPath>../../../diag_lib/client_api/platform/hdr/dg_pal_client_platform_inc.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="src" displayName="src" projectFiles="true">
+        <itemPath>../../../diag_lib/client_api/platform/src/dg_pal_client_api.c</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -42,8 +35,7 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>../../../diagd/common</Elem>
-    <Elem>../../../diagd/platform</Elem>
+    <Elem>../../../diag_lib/client_api</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -56,10 +48,11 @@
       <compileType>
         <cTool>
           <incDir>
-            <pElem>../../../diagd/common/client_api/hdr</pElem>
-            <pElem>../../../diagd/common/client_api/pal/hdr</pElem>
-            <pElem>../../../diagd/platform/pal/client_api/hdr</pElem>
+            <pElem>../../../diag_lib/client_api/common/hdr</pElem>
+            <pElem>../../../diag_lib/client_api/platform/hdr</pElem>
+            <pElem>../../../diag_lib/client_api/common/pal/hdr</pElem>
             <pElem>../../../diagd/common/engine/hdr</pElem>
+            <pElem>../../../diagd/platform/engine/hdr</pElem>
           </incDir>
           <commandLine>-pipe -Wall -Wextra</commandLine>
           <preprocessorList>
@@ -69,35 +62,30 @@
           <warningLevel>3</warningLevel>
         </cTool>
         <archiverTool>
-          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdiagapi.a</output>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdg_client_api.a</output>
         </archiverTool>
       </compileType>
-      <item path="../../../diagd/common/client_api/hdr/dg_client_api.h"
+      <item path="../../../diag_lib/client_api/common/hdr/dg_client_api.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../../diagd/common/client_api/pal/hdr/dg_pal_client_api.h"
+      <item path="../../../diag_lib/client_api/common/pal/hdr/dg_pal_client_api.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../../diagd/common/client_api/src/dg_client_api.c"
+      <item path="../../../diag_lib/client_api/common/src/dg_client_api.c"
             ex="false"
             tool="0"
             flavor2="0">
       </item>
-      <item path="../../../diagd/platform/pal/client_api/hdr/dg_pal_client_platform_inc.h"
+      <item path="../../../diag_lib/client_api/platform/hdr/dg_pal_client_platform_inc.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../../diagd/platform/pal/client_api/hdr/dg_platform_defs.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/pal/client_api/src/dg_pal_client_api.c"
+      <item path="../../../diag_lib/client_api/platform/src/dg_pal_client_api.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -125,32 +113,27 @@
         <archiverTool>
         </archiverTool>
       </compileType>
-      <item path="../../../diagd/common/client_api/hdr/dg_client_api.h"
+      <item path="../../../diag_lib/client_api/common/hdr/dg_client_api.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../../diagd/common/client_api/pal/hdr/dg_pal_client_api.h"
+      <item path="../../../diag_lib/client_api/common/pal/hdr/dg_pal_client_api.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../../diagd/common/client_api/src/dg_client_api.c"
+      <item path="../../../diag_lib/client_api/common/src/dg_client_api.c"
             ex="false"
             tool="0"
             flavor2="0">
       </item>
-      <item path="../../../diagd/platform/pal/client_api/hdr/dg_pal_client_platform_inc.h"
+      <item path="../../../diag_lib/client_api/platform/hdr/dg_pal_client_platform_inc.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../../diagd/platform/pal/client_api/hdr/dg_platform_defs.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/pal/client_api/src/dg_pal_client_api.c"
+      <item path="../../../diag_lib/client_api/platform/src/dg_pal_client_api.c"
             ex="false"
             tool="0"
             flavor2="0">

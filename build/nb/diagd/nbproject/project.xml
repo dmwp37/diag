@@ -9,11 +9,10 @@
             <header-extensions>h</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects>
-                <make-dep-project>../libdiagapi</make-dep-project>
+                <make-dep-project>../libdg_client_api</make-dep-project>
             </make-dep-projects>
             <sourceRootList>
-                <sourceRootElem>../../../diagd/common</sourceRootElem>
-                <sourceRootElem>../../../diagd/platform</sourceRootElem>
+                <sourceRootElem>../../../diagd</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
