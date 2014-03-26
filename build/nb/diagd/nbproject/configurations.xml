@@ -155,6 +155,22 @@
           <itemPath>../../../diagd/platform/drivers/src/dg_cmn_drv_voltage.c</itemPath>
         </logicalFolder>
       </logicalFolder>
+      <logicalFolder name="engine" displayName="engine" projectFiles="true">
+        <logicalFolder name="f1" displayName="hdr" projectFiles="true">
+          <itemPath>../../../diagd/platform/engine/hdr/dg_platform_defs.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="pal" displayName="pal" projectFiles="true">
+          <logicalFolder name="f1" displayName="src" projectFiles="true">
+            <itemPath>../../../diagd/platform/engine/pal/src/dg_pal_aux_engine.c</itemPath>
+            <itemPath>../../../diagd/platform/engine/pal/src/dg_pal_dbg.c</itemPath>
+            <itemPath>../../../diagd/platform/engine/pal/src/dg_pal_security.c</itemPath>
+            <itemPath>../../../diagd/platform/engine/pal/src/dg_pal_util.c</itemPath>
+          </logicalFolder>
+        </logicalFolder>
+        <logicalFolder name="src" displayName="src" projectFiles="true">
+          <itemPath>../../../diagd/platform/engine/src/dg_main_task.c</itemPath>
+        </logicalFolder>
+      </logicalFolder>
       <logicalFolder name="handlers" displayName="handlers" projectFiles="true">
         <logicalFolder name="hdr" displayName="hdr" projectFiles="true">
           <itemPath>../../../diagd/platform/handlers/hdr/dg_handler_table.h</itemPath>
@@ -162,17 +178,6 @@
         <logicalFolder name="src" displayName="src" projectFiles="true">
           <itemPath>../../../diagd/platform/handlers/src/dg_aux_cmd.c</itemPath>
           <itemPath>../../../diagd/platform/handlers/src/dg_handler_table.c</itemPath>
-        </logicalFolder>
-      </logicalFolder>
-      <logicalFolder name="pal" displayName="pal" projectFiles="true">
-        <logicalFolder name="engine" displayName="engine" projectFiles="true">
-          <logicalFolder name="src" displayName="src" projectFiles="true">
-            <itemPath>../../../diagd/platform/pal/engine/src/dg_main_task.c</itemPath>
-            <itemPath>../../../diagd/platform/pal/engine/src/dg_pal_aux_engine.c</itemPath>
-            <itemPath>../../../diagd/platform/pal/engine/src/dg_pal_dbg.c</itemPath>
-            <itemPath>../../../diagd/platform/pal/engine/src/dg_pal_security.c</itemPath>
-            <itemPath>../../../diagd/platform/pal/engine/src/dg_pal_util.c</itemPath>
-          </logicalFolder>
         </logicalFolder>
       </logicalFolder>
       <itemPath>../../../diagd/platform/README.txt</itemPath>
@@ -197,8 +202,7 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>../../../diagd/common</Elem>
-    <Elem>../../../diagd/platform</Elem>
+    <Elem>../../../diagd</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -213,10 +217,10 @@
           <incDir>
             <pElem>../../../diagd/common/engine/hdr</pElem>
             <pElem>../../../diagd/common/engine/pal/hdr</pElem>
-            <pElem>../../../diagd/common/client_api/hdr</pElem>
+            <pElem>../../../diag_lib/client_api/common/hdr</pElem>
             <pElem>../../../diagd/common/handlers/hdr</pElem>
             <pElem>../../../diagd/common/drivers/hdr</pElem>
-            <pElem>../../../diagd/platform/pal/client_api/hdr</pElem>
+            <pElem>../../../diagd/platform/engine/hdr</pElem>
             <pElem>../../../diagd/platform/handlers/hdr</pElem>
             <pElem>../../../diagd/platform/drivers/hdr</pElem>
             <pElem>../../../out</pElem>
@@ -868,6 +872,36 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/platform/engine/hdr/dg_platform_defs.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/engine/pal/src/dg_pal_aux_engine.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/engine/pal/src/dg_pal_dbg.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/engine/pal/src/dg_pal_security.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/engine/pal/src/dg_pal_util.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/engine/src/dg_main_task.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/platform/handlers/hdr/dg_handler_table.h"
             ex="false"
             tool="3"
@@ -879,31 +913,6 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/handlers/src/dg_handler_table.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/pal/engine/src/dg_main_task.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/pal/engine/src/dg_pal_aux_engine.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/pal/engine/src/dg_pal_dbg.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/pal/engine/src/dg_pal_security.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/pal/engine/src/dg_pal_util.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -1549,6 +1558,36 @@
             tool="0"
             flavor2="0">
       </item>
+      <item path="../../../diagd/platform/engine/hdr/dg_platform_defs.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/engine/pal/src/dg_pal_aux_engine.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/engine/pal/src/dg_pal_dbg.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/engine/pal/src/dg_pal_security.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/engine/pal/src/dg_pal_util.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diagd/platform/engine/src/dg_main_task.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
       <item path="../../../diagd/platform/handlers/hdr/dg_handler_table.h"
             ex="false"
             tool="3"
@@ -1560,31 +1599,6 @@
             flavor2="0">
       </item>
       <item path="../../../diagd/platform/handlers/src/dg_handler_table.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/pal/engine/src/dg_main_task.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/pal/engine/src/dg_pal_aux_engine.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/pal/engine/src/dg_pal_dbg.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/pal/engine/src/dg_pal_security.c"
-            ex="false"
-            tool="0"
-            flavor2="0">
-      </item>
-      <item path="../../../diagd/platform/pal/engine/src/dg_pal_util.c"
             ex="false"
             tool="0"
             flavor2="0">

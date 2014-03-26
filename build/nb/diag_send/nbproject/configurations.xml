@@ -29,9 +29,8 @@
       <compileType>
         <cTool>
           <incDir>
-            <pElem>../../../diagd/common/client_api/hdr</pElem>
-            <pElem>../../../diagd/common/client_api/pal/hdr</pElem>
-            <pElem>../../../diagd/platform/pal/client_api/hdr</pElem>
+            <pElem>../../../diag_lib/client_api/common/hdr</pElem>
+            <pElem>../../../diagd/platform/engine/hdr</pElem>
           </incDir>
           <commandLine>-pipe -Wall -Wextra</commandLine>
           <preprocessorList>

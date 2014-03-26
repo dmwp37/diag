@@ -10,8 +10,7 @@
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>../../../diagd/common</sourceRootElem>
-                <sourceRootElem>../../../diagd/platform</sourceRootElem>
+                <sourceRootElem>../../../diag_lib/client_api</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
