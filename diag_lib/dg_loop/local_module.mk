@@ -7,7 +7,7 @@
 #===================================================================================================
 LOCAL_PATH := $(call my-dir)
 
-DG_FLAGS := -D_GNU_SOURCE
+DG_FLAGS := -D_GNU_SOURCE -DDG_DEBUG=1
 
 ifeq ($(DG_DEBUG), 1)
     DG_FLAGS += -DDG_DEBUG=1
