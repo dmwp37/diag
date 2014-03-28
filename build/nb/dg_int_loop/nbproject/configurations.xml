@@ -12,6 +12,17 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
     </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
     <itemPath>../../../diag_tools/dg_int_loop/dg_int_loop.c</itemPath>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
@@ -52,6 +63,7 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibdg_loop.a">
               </makeArtifact>
             </linkerLibProjectItem>
+            <linkerOptionItem>-largp</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>

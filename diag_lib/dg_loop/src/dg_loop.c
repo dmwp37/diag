@@ -88,7 +88,7 @@ int DG_LOOP_open(DG_LOOP_PORT_T port, char** err_str)
     if (dg_loop_port_fd[port] > 0)
     {
         /* already opened */
-        return port;
+        return dg_loop_port_fd[port];
     }
 
     /* open the loop device to simulate the port */

@@ -22,8 +22,6 @@ LOCAL_MODULE := libdg_loop
 
 LOCAL_CFLAGS := $(DG_FLAGS)
 
-DG_UTIL_INC := 
-
 DG_LOOP_EXPORT_INC := \
   ../../diagd/platform/engine/hdr \
   hdr \
