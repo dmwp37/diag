@@ -11,7 +11,9 @@
 ==================================================================================================*/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <argp.h>
+#include <unistd.h>
 #include <errno.h>
 #include "dg_platform_defs.h"
 #include "dg_loop.h"
@@ -49,6 +51,7 @@ typedef struct
 ==================================================================================================*/
 static error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state);
 static BOOL    dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T* args);
+static void    dg_int_loop_print_result(DG_LOOP_TEST_STATISTIC_T* result);
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -57,6 +60,7 @@ static BOOL    dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
+static BOOL dg_int_loop_run = TRUE;
 
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
@@ -73,10 +77,15 @@ int main(int argc, char** argv)
     DG_INT_LOOP_ARG_T args =
     {              /* Default values. */
         .pattern = DG_INT_LOOP_DEFAULT_PATTERN,
-        .port    = DG_INT_LOOP_DEFAULT_PORT,
+        .port    = 1,
         .size    = DG_INT_LOOP_DEFAULT_PACKET_SIZE,
         .time    = DG_INT_LOOP_DEFAULT_RUN_TIME
     };
+
+    int                      ret     = 0;
+    char*                    err_str = NULL;
+    DG_LOOP_TEST_T           test;
+    DG_LOOP_TEST_STATISTIC_T result;
 
     if (!dg_int_loop_prepare_args(argc, argv, &args))
     {
@@ -89,7 +98,43 @@ int main(int argc, char** argv)
            "PORT        = 0x%02x\n",
            args.pattern, args.time, args.size, args.port);
 
-    exit(0);
+    memset(&test, 0, sizeof(test));
+    test.tx_port = args.port;
+    test.rx_port = args.port;
+    test.pattern = args.pattern;
+    test.size    = args.size;
+    test.number  = DG_LOOP_RUN_IFINITE;
+
+    if (args.port != 0)
+    {
+        if (!DG_LOOP_start_test(&test, &err_str))
+        {
+            printf("failed to start loopback test, %s\n", err_str);
+            ret = 1;
+        }
+        else
+        {
+            while (dg_int_loop_run)
+            {
+                sleep(1);
+                dg_int_loop_print_result(&result);
+
+                if (args.time != 0)
+                {
+                    args.time--;
+                    if (args.time == 0)
+                    {
+                        dg_int_loop_run = FALSE;
+                    }
+                }
+            }
+
+            DG_LOOP_stop_test(&test, &result);
+            dg_int_loop_print_result(&result);
+        }
+    }
+
+    return ret;
 }
 
 /*==================================================================================================
@@ -99,9 +144,9 @@ int main(int argc, char** argv)
 /*=============================================================================================*//**
 @brief Do argument check
 
-@param[in] argc - Number of arguments
-@param[in] argv - Array of each argument passed
-@param[in] args - dg_int_loop argument struct
+@param[in]  argc - Number of arguments
+@param[in]  argv - Array of each argument passed
+@param[out] args - dg_int_loop own argument
 
 @return TRUE if no error
 *//*==============================================================================================*/
@@ -242,5 +287,30 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
     }
 
     return 0;
+}
+
+/*=============================================================================================*//**
+@brief pint out the statistic result
+
+@param[in] result - loop test result
+*//*==============================================================================================*/
+void dg_int_loop_print_result(DG_LOOP_TEST_STATISTIC_T* result)
+{
+    printf("total send %d\n", result->total_send);
+    printf("total recv %d\n", result->total_recv);
+    printf("failed send %d\n", result->fail_send);
+    printf("failed recv %d\n", result->fail_recv);
+
+    if (result->send_err != NULL)
+    {
+        printf("send error: %s\n", result->send_err);
+        free(result->send_err);
+    }
+
+    if (result->recv_err != NULL)
+    {
+        printf("recv error: %s\n", result->recv_err);
+        free(result->recv_err);
+    }
 }
 
