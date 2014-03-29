@@ -86,23 +86,25 @@ typedef UINT8 DG_LOOP_CFG_T;
 ==================================================================================================*/
 typedef struct
 {
-    DG_LOOP_PORT_T tx_port; /* the port that will send data */
-    DG_LOOP_PORT_T rx_port; /* the port that will recv data */
-    UINT8          pattern; /* packet data pattern          */
-    int            size;    /* packet size of each transfer */
-    int            number;  /* how many times to send/recv  */
-    void*          control; /* the internal control block   */
-} DG_LOOP_TEST_T;
+    int fail_send;  /* failed send packets number     */
+    int fail_recv;  /* failed recv packets number     */
+    int total_send; /* total send packets number      */
+    int total_recv; /* total recv packets number      */
+    int wrong_recv; /* wrong recv packets number      */
+} DG_LOOP_TEST_STATISTIC_T;
 
 typedef struct
 {
-    int   fail_send;  /* failed send packets number     */
-    int   fail_recv;  /* failed recv packets number     */
-    int   total_send; /* total send packets number      */
-    int   total_recv; /* total recv packets number      */
-    char* send_err;   /* error message from send thread */
-    char* recv_err;   /* error message from recv thread */
-} DG_LOOP_TEST_STATISTIC_T;
+    void* control; /* the internal control block */
+
+    DG_LOOP_PORT_T           tx_port; /* [in]  - the port that will send data */
+    DG_LOOP_PORT_T           rx_port; /* [in]  - the port that will recv data */
+    UINT8                    pattern; /* [in]  - packet data pattern          */
+    int                      size;    /* [in]  - packet size of each transfer */
+    int                      number;  /* [in]  - how many times to send/recv  */
+    DG_LOOP_TEST_STATISTIC_T result;  /* [out] - test result */
+} DG_LOOP_TEST_T;
+
 /*==================================================================================================
                                    GLOBAL VARIABLE DECLARATIONS
 ==================================================================================================*/
@@ -189,24 +191,25 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg,
 - this function would start two threads in the background and return immediately
 - one thread for sending the packets and one thread for receiving packets
 - if test->number == DG_LOOP_RUN_IFINITE, the test would run forever
-- user can all DG_Loop_stop_test() to stop the test and get the statistic result
+- the statistic result is stored in test->result
+- user can READ it any time to print out the result
+- user can all DG_LOOP_stop_test() to stop the test
 - caller must free the *err_str
+- caller must free the test->result.send_err and test->result.recv_err
 *//*==============================================================================================*/
 BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test, char** err_str);
 
 /*=============================================================================================*//**
 @brief stop the loopback test
 
-@param[in]  test    - which test to stop
-@param[in]  result  - the statistic result of the test
+@param[in]  test - which test to stop
 
 @note
 - this function would stop the two threads in the background that start by DG_LOOP_start_test()
 - if test->number == DG_LOOP_RUN_IFINITE, it will stop the test immediately
-- otherwise this function would block untill all the packets has been send/recv
-- caller must free the result->send_err and result->recv_err
+- otherwise this function would block until all the packets has been send/recv
 *//*==============================================================================================*/
-void DG_LOOP_stop_test(DG_LOOP_TEST_T* test, DG_LOOP_TEST_STATISTIC_T* result);
+void DG_LOOP_stop_test(DG_LOOP_TEST_T* test);
 
 #ifdef __cplusplus
 }

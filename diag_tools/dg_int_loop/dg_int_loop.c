@@ -29,7 +29,7 @@ const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
 ==================================================================================================*/
 #define DG_INT_LOOP_PORT_MAX            DG_LOOP_PORT_10GE_3
 #define DG_INT_LOOP_DEFAULT_PORT        0   /* 0 means test for all data ports */
-#define DG_INT_LOOP_DEFAULT_RUN_TIME    0   /* 0 means run the program for ever */
+#define DG_INT_LOOP_DEFAULT_RUN_TIME    -1  /* negtive means run the program for ever */
 #define DG_INT_LOOP_DEFAULT_PACKET_SIZE 1024
 #define DG_INT_LOOP_DEFAULT_PATTERN     0x5A
 
@@ -51,6 +51,7 @@ typedef struct
 ==================================================================================================*/
 static error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state);
 static BOOL    dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T* args);
+static BOOL    dg_int_loop_get_int_arg(const char* arg, long* value);
 static void    dg_int_loop_print_result(DG_LOOP_TEST_STATISTIC_T* result);
 
 /*==================================================================================================
@@ -82,10 +83,12 @@ int main(int argc, char** argv)
         .time    = DG_INT_LOOP_DEFAULT_RUN_TIME
     };
 
-    int                      ret     = 0;
-    char*                    err_str = NULL;
-    DG_LOOP_TEST_T           test;
-    DG_LOOP_TEST_STATISTIC_T result;
+    int            ret     = 0;
+    char*          err_str = NULL;
+    DG_LOOP_TEST_T test;
+
+    /* init the test struct */
+    memset(&test, 0, sizeof(test));
 
     if (!dg_int_loop_prepare_args(argc, argv, &args))
     {
@@ -98,7 +101,6 @@ int main(int argc, char** argv)
            "PORT        = 0x%02x\n",
            args.pattern, args.time, args.size, args.port);
 
-    memset(&test, 0, sizeof(test));
     test.tx_port = args.port;
     test.rx_port = args.port;
     test.pattern = args.pattern;
@@ -107,6 +109,8 @@ int main(int argc, char** argv)
 
     if (args.port != 0)
     {
+        DG_LOOP_TEST_STATISTIC_T* result = &test.result;
+
         if (!DG_LOOP_start_test(&test, &err_str))
         {
             printf("failed to start loopback test, %s\n", err_str);
@@ -116,21 +120,22 @@ int main(int argc, char** argv)
         {
             while (dg_int_loop_run)
             {
-                sleep(1);
-                dg_int_loop_print_result(&result);
+                if (args.time == 0)
+                {
+                    break;
+                }
 
-                if (args.time != 0)
+                if (args.time > 0)
                 {
                     args.time--;
-                    if (args.time == 0)
-                    {
-                        dg_int_loop_run = FALSE;
-                    }
                 }
+
+                sleep(1);
+                dg_int_loop_print_result(result);
             }
 
-            DG_LOOP_stop_test(&test, &result);
-            dg_int_loop_print_result(&result);
+            DG_LOOP_stop_test(&test);
+            dg_int_loop_print_result(result);
         }
     }
 
@@ -167,7 +172,7 @@ BOOL dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T* args)
         { "port",   'p', "PORT", 0, "Select on which port to do the internal loopback test", 0 },
         { "size",   's', "SIZE", 0, "Set the packet size for each frame",                    0 },
         { "time",   't', "TIME", 0, "How long the program would run",                        0 },
-        { 0 }
+        { NULL,     0,   NULL,   0, NULL,                                                    0 }
     };
 
     struct argp dg_argp =
@@ -194,17 +199,13 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
        know is a pointer to our arguments structure. */
     DG_INT_LOOP_ARG_T* dg_arg = state->input;
 
-    long  value;
-    char* p_ch;
+    long value;
 
     switch (key)
     {
     case 'p':
-        errno = 0;
-        value = (UINT8)strtol(arg, &p_ch, 0);
-        if (errno != 0)
+        if (!dg_int_loop_get_int_arg(arg, &value))
         {
-            printf("can't recognize port: %s, errno=%d(%m)\n", arg, errno);
             return EINVAL;
         }
         else if ((value < 0) || (value > DG_INT_LOOP_PORT_MAX))
@@ -219,11 +220,8 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
         break;
 
     case 's':
-        errno = 0;
-        value = strtol(arg, NULL, 0);
-        if (errno != 0)
+        if (!dg_int_loop_get_int_arg(arg, &value))
         {
-            printf("can't recognize size: %s, errno=%d(%m)\n", arg, errno);
             return EINVAL;
         }
         else if ((value < DG_LOOP_PACKET_SIZE_MIN) || (value > DG_LOOP_PACKET_SIZE_MAX))
@@ -239,14 +237,11 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
         break;
 
     case 't':
-        errno = 0;
-        value = strtol(arg, NULL, 0);
-        if (errno != 0)
+        if (!dg_int_loop_get_int_arg(arg, &value))
         {
-            printf("can't recognize time: %s, errno=%d(%m)\n", arg, errno);
             return EINVAL;
         }
-        else if (value == 0)
+        else if (value < 0)
         {
             printf("invalid time: %s\n", arg);
             return EINVAL;
@@ -264,14 +259,11 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
             argp_usage(state);
         }
 
-        errno = 0;
-        value = (UINT8)strtol(arg, NULL, 16);
-        if (errno != 0)
+        if (!dg_int_loop_get_int_arg(arg, &value))
         {
-            printf("can't recognize pattern: %s, errno=%d(%m)\n", arg, errno);
             return EINVAL;
         }
-        else if ((value < 0) || (value > 0XFF))
+        else if ((value < 0) || (value > 0xFF))
         {
             printf("invalid pattern: %s\n", arg);
             return EINVAL;
@@ -290,27 +282,49 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
 }
 
 /*=============================================================================================*//**
+@brief convert string arg to int
+
+@param[in]  arg   - the string arg
+@param[out] value - the convert value
+
+@return TRUE if success
+*//*==============================================================================================*/
+BOOL dg_int_loop_get_int_arg(const char* arg, long* value)
+{
+    BOOL  ret = FALSE;
+    char* p_ch;
+    long  i;
+
+    errno = 0;
+
+    i = strtol(arg, &p_ch, 0);
+    if (errno != 0)
+    {
+        printf("can't convert to int: %s, errno=%d(%m)\n", arg, errno);
+    }
+    else if ((i == 0) && (p_ch == arg))
+    {
+        printf("invalid value: %s\n", arg);
+    }
+    else
+    {
+        *value = i;
+        ret    = TRUE;
+    }
+
+    return ret;
+}
+/*=============================================================================================*//**
 @brief pint out the statistic result
 
 @param[in] result - loop test result
 *//*==============================================================================================*/
 void dg_int_loop_print_result(DG_LOOP_TEST_STATISTIC_T* result)
 {
-    printf("total send %d\n", result->total_send);
-    printf("total recv %d\n", result->total_recv);
-    printf("failed send %d\n", result->fail_send);
-    printf("failed recv %d\n", result->fail_recv);
-
-    if (result->send_err != NULL)
-    {
-        printf("send error: %s\n", result->send_err);
-        free(result->send_err);
-    }
-
-    if (result->recv_err != NULL)
-    {
-        printf("recv error: %s\n", result->recv_err);
-        free(result->recv_err);
-    }
+    printf("total_send=%d  ", result->total_send);
+    printf("failed_send=%d\n", result->fail_send);
+    printf("total_recv=%d  ", result->total_recv);
+    printf("failed_recv=%d  ", result->fail_recv);
+    printf("wrong_recv=%d\n\n", result->wrong_recv);
 }
 

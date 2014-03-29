@@ -24,7 +24,7 @@
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-#define DG_LOOP_PORT_MAX (DG_LOOP_PORT_10GE_3 + 1)
+#define DG_LOOP_PORT_MAX         (DG_LOOP_PORT_10GE_3 + 1)
 
 /*==================================================================================================
                                            LOCAL MACROS
@@ -52,11 +52,9 @@
 /** internally use struct to control the send/revc thread */
 typedef struct
 {
-    pthread_t send_thread;           /* send thread          */
-    pthread_t recv_thread;           /* recv thread          */
-    BOOL      b_run;                 /* thread run control   */
-
-    DG_LOOP_TEST_STATISTIC_T result; /* the statistic result */
+    pthread_t send_thread; /* send thread        */
+    pthread_t recv_thread; /* recv thread        */
+    BOOL      b_run;       /* thread run control */
 } DG_LOOP_TEST_CONTROL_T;
 
 /*==================================================================================================
@@ -242,9 +240,11 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg,
 
 @note
 - this function would start two threads in the background and return immediately
-- one thread for sending the packets and one thread to receiving packet
+- one thread for sending the packets and one thread for receiving packets
 - if test->number == DG_LOOP_RUN_IFINITE, the test would run forever
-- user can all DG_Loop_stop_test() to stop the test and get the statistic result
+- the statistic result is stored in test->result
+- user can READ it any time to print out the result
+- user can all DG_LOOP_stop_test() to stop the test
 - caller must free the *err_str
 *//*==============================================================================================*/
 BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test, char** err_str)
@@ -315,16 +315,14 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test, char** err_str)
 /*=============================================================================================*//**
 @brief stop the loopback test
 
-@param[in]  test    - which test to stop
-@param[in]  result  - the statistic result of the test
+@param[in]  test - which test to stop
 
 @note
 - this function would stop the two threads in the background that start by DG_LOOP_start_test()
 - if test->number == DG_LOOP_RUN_IFINITE, it will stop the test immediately
-- otherwise this function would block untill all the packets has been send/recv
-- caller must free the result->send_err and result->recv_err
+- otherwise this function would block until all the packets has been send/recv
 *//*==============================================================================================*/
-void DG_LOOP_stop_test(DG_LOOP_TEST_T* test, DG_LOOP_TEST_STATISTIC_T* result)
+void DG_LOOP_stop_test(DG_LOOP_TEST_T* test)
 {
     DG_LOOP_TEST_CONTROL_T* p_control = test->control;
 
@@ -342,8 +340,6 @@ void DG_LOOP_stop_test(DG_LOOP_TEST_T* test, DG_LOOP_TEST_STATISTIC_T* result)
     {
         pthread_join(p_control->recv_thread, NULL);
     }
-
-    memcpy(result, &(p_control->result), sizeof(DG_LOOP_TEST_STATISTIC_T));
 
     free(p_control);
 }
@@ -411,17 +407,19 @@ void* dg_loop_send_thread(void* arg)
 {
     DG_LOOP_TEST_T*           test      = (DG_LOOP_TEST_T*)arg;
     DG_LOOP_TEST_CONTROL_T*   p_control = test->control;
-    DG_LOOP_TEST_STATISTIC_T* result    = &(p_control->result);
+    DG_LOOP_TEST_STATISTIC_T* result    = &test->result;
 
     int    fd;
     int    number   = test->number;
     int    size     = test->size;
     UINT8* send_buf = NULL;
 
-    DG_LOOP_TRACE("enter into send thread: %p", pthread_self());
+    char* err_str;
+
+    DG_LOOP_TRACE("enter into send thread: %p", (void*)pthread_self());
 
     /* open the port for sending data */
-    if ((fd = DG_LOOP_open(test->tx_port, &result->send_err)) < 0)
+    if ((fd = DG_LOOP_open(test->tx_port, &err_str)) < 0)
     {
         DG_LOOP_ERROR("failed to open send port, tx_port=0x%02x", test->tx_port);
         return NULL;
@@ -430,7 +428,7 @@ void* dg_loop_send_thread(void* arg)
     /* prepare the data to send */
     if ((send_buf = malloc(size)) == NULL)
     {
-        DG_LOOP_SET_ERROR(&result->send_err, "failed to malloc send buf, size=%d", size);
+        DG_LOOP_SET_ERROR(&err_str, "failed to malloc send buf, size=%d", size);
         return NULL;
     }
 
@@ -438,7 +436,18 @@ void* dg_loop_send_thread(void* arg)
 
     while (p_control->b_run)
     {
-        if (!DG_LOOP_send(fd, send_buf, size, &result->send_err))
+        if (number == 0)
+        {
+            DG_LOOP_TRACE("send thread %p finished", (void*)pthread_self());
+            break;
+        }
+
+        if (number > 0)
+        {
+            number--;
+        }
+
+        if (!DG_LOOP_send(fd, send_buf, size, &err_str))
         {
             result->fail_send++;
         }
@@ -446,19 +455,11 @@ void* dg_loop_send_thread(void* arg)
         {
             result->total_send++;
         }
-
-        if (number != DG_LOOP_RUN_IFINITE)
-        {
-            number--;
-            if (number == 0)
-            {
-                DG_LOOP_TRACE("send thread %p finished", pthread_self());
-                break;
-            }
-        }
     }
 
-    DG_LOOP_TRACE("leave send thread: %p", pthread_self());
+    free(send_buf);
+
+    DG_LOOP_TRACE("leave send thread: %p", (void*)pthread_self());
 
     return NULL;
 }
@@ -474,19 +475,20 @@ void* dg_loop_recv_thread(void* arg)
 {
     DG_LOOP_TEST_T*           test      = (DG_LOOP_TEST_T*)arg;
     DG_LOOP_TEST_CONTROL_T*   p_control = test->control;
-    DG_LOOP_TEST_STATISTIC_T* result    = &(p_control->result);
+    DG_LOOP_TEST_STATISTIC_T* result    = &test->result;
 
     int    fd;
-    int    number   = test->number;
-    int    size     = test->size;
-    UINT8* recv_buf = NULL;
+    int    number       = test->number;
+    int    size         = test->size;
+    UINT8* recv_buf     = NULL;
+    UINT8  init_pattern = ~test->pattern;
 
-    UINT8 init_pattern = ~test->pattern;
+    char* err_str;
 
-    DG_LOOP_TRACE("enter into recv thread: %p", pthread_self());
+    DG_LOOP_TRACE("enter into recv thread: %p", (void*)pthread_self());
 
     /* open the port for sending data */
-    if ((fd = DG_LOOP_open(test->tx_port, &result->recv_err)) < 0)
+    if ((fd = DG_LOOP_open(test->tx_port, &err_str)) < 0)
     {
         DG_LOOP_ERROR("failed to open send port, tx_port=0x%02x", test->tx_port);
         return NULL;
@@ -495,16 +497,27 @@ void* dg_loop_recv_thread(void* arg)
     /* prepare the data to send */
     if ((recv_buf = malloc(size)) == NULL)
     {
-        DG_LOOP_SET_ERROR(&result->recv_err, "failed to malloc recv buf, size=%d", size);
+        DG_LOOP_SET_ERROR(&err_str, "failed to malloc recv buf, size=%d", size);
         return NULL;
     }
 
     while (p_control->b_run)
     {
+        if (number == 0)
+        {
+            DG_LOOP_TRACE("recv thread %p finished", (void*)pthread_self());
+            break;
+        }
+
+        if (number > 0)
+        {
+            number--;
+        }
+
         /* init the buffer with different data first */
         memset(recv_buf, init_pattern, size);
 
-        if (!DG_LOOP_recv(fd, recv_buf, size, &result->send_err))
+        if (!DG_LOOP_recv(fd, recv_buf, size, &err_str))
         {
             result->fail_recv++;
         }
@@ -513,24 +526,16 @@ void* dg_loop_recv_thread(void* arg)
             /* verify the data */
             if (!dg_loop_check_recv_data(recv_buf, size, test->pattern))
             {
-                result->fail_recv++;
-                DG_LOOP_SET_ERROR(&result->recv_err, "receive wrong data");
+                result->wrong_recv++;
+                DG_LOOP_SET_ERROR(&err_str, "receive wrong data");
             }
             result->total_recv++;
         }
-
-        if (number != DG_LOOP_RUN_IFINITE)
-        {
-            number--;
-            if (number == 0)
-            {
-                DG_LOOP_TRACE("recv thread %p finished", pthread_self());
-                break;
-            }
-        }
     }
 
-    DG_LOOP_TRACE("leave recv thread: %p", pthread_self());
+    free(recv_buf);
+
+    DG_LOOP_TRACE("leave recv thread: %p", (void*)pthread_self());
     return NULL;
 }
 
