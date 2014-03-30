@@ -16,7 +16,9 @@ LOCAL_MODULE := dg_int_loop
 
 LOCAL_CFLAGS :=
 
-LOCAL_C_INCLUDES :=
+DG_INT_LOOP_INC := ../../out
+
+LOCAL_C_INCLUDES := $(addprefix $(LOCAL_PATH)/, $(DG_INT_LOOP_INC))
 
 LOCAL_STATIC_LIBRARIES := libdg_loop
 LOCAL_LDLIBS += -largp

@@ -17,11 +17,12 @@
 #include <errno.h>
 #include "dg_platform_defs.h"
 #include "dg_loop.h"
+#include "diag_version.h"
 
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-const char* argp_program_version     = "dg_int_loop v1.0";
+const char* argp_program_version     = DIAG_VERSION;
 const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
 
 /*==================================================================================================

@@ -38,6 +38,7 @@
           <incDir>
             <pElem>../../../diag_lib/dg_loop/hdr</pElem>
             <pElem>../../../diagd/platform/engine/hdr</pElem>
+            <pElem>../../../out</pElem>
           </incDir>
           <commandLine>-pipe -Wall -Wextra</commandLine>
           <preprocessorList>
