@@ -117,14 +117,13 @@ typedef struct
 @brief open port for send/recv data
 
 @param[in]  port    - the path to open on which port
-@param[out] err_str - error string if any
 
 @return the file descriptor, -1 if error happened
 
 @note
-- caller must free the *err_str
+- if error happened, call DG_LOOP_get_err_string() to get the last error
 *//*==============================================================================================*/
-int DG_LOOP_open(DG_LOOP_PORT_T port, char** err_str);
+int DG_LOOP_open(DG_LOOP_PORT_T port);
 
 /*=============================================================================================*//**
 @brief close port
@@ -139,14 +138,13 @@ void DG_LOOP_close(int fd);
 @param[in]  fd      - the fd that opened by DG_LOOP_open()
 @param[in]  buf     - the buffer contains the data to send
 @param[in]  len     - the data length need to send
-@param[out] err_str - error string if any
 
 @return the file descriptor, -1 if error happened
 
 @note
-- caller must free the *err_str
+- if error happened, call DG_LOOP_get_err_string() to get the last error
 *//*==============================================================================================*/
-BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len, char** err_str);
+BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len);
 
 /*=============================================================================================*//**
 @brief receive data from the loopback file descriptor
@@ -154,14 +152,13 @@ BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len, char** err_str);
 @param[in]  fd      - the fd that opened by DG_LOOP_open()
 @param[out] buf     - the buffer to receive data
 @param[in]  len     - the data length need to receive
-@param[out] err_str - error string if any
 
 @return the file descriptor, -1 if error happened
 
 @note
-- caller must free the *err_str
+- if error happened, call DG_LOOP_get_err_string() to get the last error
 *//*==============================================================================================*/
-BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len, char** err_str);
+BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len);
 
 /*=============================================================================================*//**
 @brief loopback node configuration
@@ -169,21 +166,34 @@ BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len, char** err_str);
 @param[in]  port    - the path to config on which port
 @param[in]  node    - where to loopback packet
 @param[in]  cfg     - configuration type
-@param[out] err_str - error string if any
 
 @return TRUE if success
 
 @note
 - if the port doesn't contains the node or doesn't support the configuration, FALSE will be returned
-- caller must free the *err_str
+- if error happened, call DG_LOOP_get_err_string() to get the last error
 *//*==============================================================================================*/
-BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg, char** err_str);
+BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg);
+
+/*=============================================================================================*//**
+@brief get that last error string
+
+@return the error string, or NULL
+
+@note
+- caller must free the error string
+*//*==============================================================================================*/
+char* DG_LOOP_get_err_string();
+
+/*=============================================================================================*//**
+@brief print the last error string
+*//*==============================================================================================*/
+void DG_LOOP_print_err_string();
 
 /*=============================================================================================*//**
 @brief loopback test between a pair of ports
 
 @param[in]  test    - the test parameter
-@param[out] err_str - error string if any
 
 @return TRUE if success
 
@@ -194,10 +204,9 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg,
 - the statistic result is stored in test->result
 - user can READ it any time to print out the result
 - user can all DG_LOOP_stop_test() to stop the test
-- caller must free the *err_str
-- caller must free the test->result.send_err and test->result.recv_err
+- if error happened, call DG_LOOP_get_err_string() to get the last error
 *//*==============================================================================================*/
-BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test, char** err_str);
+BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test);
 
 /*=============================================================================================*//**
 @brief stop the loopback test

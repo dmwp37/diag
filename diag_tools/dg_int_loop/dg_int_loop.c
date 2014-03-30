@@ -84,8 +84,7 @@ int main(int argc, char** argv)
         .time    = DG_INT_LOOP_DEFAULT_RUN_TIME
     };
 
-    int            ret     = 0;
-    char*          err_str = NULL;
+    int            ret = 0;
     DG_LOOP_TEST_T test;
 
     /* init the test struct */
@@ -112,9 +111,10 @@ int main(int argc, char** argv)
     {
         DG_LOOP_TEST_STATISTIC_T* result = &test.result;
 
-        if (!DG_LOOP_start_test(&test, &err_str))
+        if (!DG_LOOP_start_test(&test))
         {
-            printf("failed to start loopback test, %s\n", err_str);
+            printf("failed to start loopback test: ");
+            DG_LOOP_print_err_string();
             ret = 1;
         }
         else
