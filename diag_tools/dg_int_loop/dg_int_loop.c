@@ -15,6 +15,7 @@
 #include <argp.h>
 #include <unistd.h>
 #include <errno.h>
+#include <signal.h>
 #include "dg_platform_defs.h"
 #include "dg_loop.h"
 #include "dg_dbg.h"
@@ -55,6 +56,7 @@ static error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* stat
 static BOOL    dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T* args);
 static BOOL    dg_int_loop_get_int_arg(const char* arg, long* value);
 static void    dg_int_loop_print_result(DG_LOOP_TEST_STATISTIC_T* result);
+static void    dg_int_loop_exit_handler(int sig);
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -88,13 +90,20 @@ int main(int argc, char** argv)
     int            ret = 0;
     DG_LOOP_TEST_T test;
 
-    /* init the test struct */
-    memset(&test, 0, sizeof(test));
+    struct sigaction actions;
 
     if (!dg_int_loop_prepare_args(argc, argv, &args))
     {
         return 1;
     }
+
+    /* signal setup */
+    memset(&actions, 0, sizeof(actions));
+    sigemptyset(&actions.sa_mask);
+    actions.sa_flags   = 0;
+    actions.sa_handler = dg_int_loop_exit_handler;
+    sigaction(SIGINT, &actions, NULL);
+    signal(SIGPIPE, SIG_IGN);
 
     printf("PATTERN     = 0x%02x\n"
            "RUN TIME    = %ds\n"
@@ -102,6 +111,8 @@ int main(int argc, char** argv)
            "PORT        = 0x%02x\n",
            args.pattern, args.time, args.size, args.port);
 
+    /* init the test struct */
+    memset(&test, 0, sizeof(test));
     test.tx_port = args.port;
     test.rx_port = args.port;
     test.pattern = args.pattern;
@@ -136,6 +147,7 @@ int main(int argc, char** argv)
                 dg_int_loop_print_result(result);
             }
 
+            DG_DBG_TRACE("test finished");
             DG_LOOP_stop_test(&test);
             dg_int_loop_print_result(result);
         }
@@ -338,5 +350,19 @@ void dg_int_loop_print_result(DG_LOOP_TEST_STATISTIC_T* result)
     printf("total_recv=%d  ", result->total_recv);
     printf("failed_recv=%d  ", result->fail_recv);
     printf("wrong_recv=%d\n\n", result->wrong_recv);
+}
+
+/*=============================================================================================*//**
+@brief This function handle the SIGINT signal
+
+@param[in] sig - The signal
+
+@note
+  - This function is a way to exit the dg_int_loop
+*//*==============================================================================================*/
+void dg_int_loop_exit_handler(int sig)
+{
+    dg_int_loop_run = FALSE;
+    DG_DBG_TRACE("got signaled: sig = %d", sig);
 }
 
