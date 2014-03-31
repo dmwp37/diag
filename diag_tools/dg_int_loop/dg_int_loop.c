@@ -200,13 +200,13 @@ BOOL dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T* args)
     /* The options we understand. */
     struct argp_option dg_options[] =
     {
-        { "verbose", 'v', 0,      0, "Produce verbose output",                                0 },
-        { "quiet",   'q', 0,      0, "Don't produce any output",                              0 },
-        { "port",    'p', "PORT", 0, "Select on which port to do internal loop test",         0 },
-        { "node",    'n', "NODE", 0, "Select on which node to config internal loop",          0 },
-        { "size",    's', "SIZE", 0, "Set the packet size for each frame",                    0 },
-        { "time",    't', "TIME", 0, "How long the program would run",                        0 },
-        { NULL,      0,   NULL,   0, NULL,                                                    0 }
+        { "verbose", 'v', 0,      0, "Produce verbose output",                        0 },
+        { "quiet",   'q', 0,      0, "Don't produce any output",                      0 },
+        { "port",    'p', "PORT", 0, "Select on which port to do internal loop test", 0 },
+        { "node",    'n', "NODE", 0, "Select on which node to config internal loop",  0 },
+        { "size",    's', "SIZE", 0, "Set the packet size for each frame",            0 },
+        { "time",    't', "TIME", 0, "How long the program would run",                0 },
+        { NULL,      0,   NULL,   0, NULL,                                            0 }
     };
 
     struct argp dg_argp =
@@ -399,4 +399,3 @@ void dg_int_loop_exit_handler(int sig)
     dg_int_loop_run = FALSE;
     DG_DBG_TRACE("got signaled: sig = %d", sig);
 }
-
