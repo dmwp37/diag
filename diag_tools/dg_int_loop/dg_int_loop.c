@@ -17,6 +17,7 @@
 #include <errno.h>
 #include "dg_platform_defs.h"
 #include "dg_loop.h"
+#include "dg_dbg.h"
 #include "diag_version.h"
 
 /*==================================================================================================
@@ -170,10 +171,12 @@ BOOL dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T* args)
     /* The options we understand. */
     struct argp_option dg_options[] =
     {
-        { "port",   'p', "PORT", 0, "Select on which port to do the internal loopback test", 0 },
-        { "size",   's', "SIZE", 0, "Set the packet size for each frame",                    0 },
-        { "time",   't', "TIME", 0, "How long the program would run",                        0 },
-        { NULL,     0,   NULL,   0, NULL,                                                    0 }
+        { "verbose", 'v', 0,      0, "Produce verbose output",                                0 },
+        { "quiet",   'q', 0,      0, "Don't produce any output",                              0 },
+        { "port",    'p', "PORT", 0, "Select on which port to do internal loop test",         0 },
+        { "size",    's', "SIZE", 0, "Set the packet size for each frame",                    0 },
+        { "time",    't', "TIME", 0, "How long the program would run",                        0 },
+        { NULL,      0,   NULL,   0, NULL,                                                    0 }
     };
 
     struct argp dg_argp =
@@ -204,6 +207,14 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
 
     switch (key)
     {
+    case 'q':
+        DG_DBG_set_dbg_level(DG_DBG_LVL_DISABLE);
+        break;
+
+    case 'v':
+        DG_DBG_set_dbg_level(DG_DBG_LVL_VERBOSE);
+        break;
+
     case 'p':
         if (!dg_int_loop_get_int_arg(arg, &value))
         {
