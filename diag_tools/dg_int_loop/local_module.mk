@@ -20,7 +20,7 @@ DG_INT_LOOP_INC := ../../out
 
 LOCAL_C_INCLUDES := $(addprefix $(LOCAL_PATH)/, $(DG_INT_LOOP_INC))
 
-LOCAL_STATIC_LIBRARIES := libdg_loop
+LOCAL_STATIC_LIBRARIES := libdg_loop libdg_dbg
 LOCAL_LDLIBS += -largp
 
 LOCAL_REQUIRED_MODULES :=

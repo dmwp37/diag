@@ -30,13 +30,11 @@
       <compileType>
         <cTool>
           <incDir>
-            <pElem>../../../diag_lib/dg_loop/hdr</pElem>
             <pElem>../../../diagd/platform/engine/hdr</pElem>
+            <pElem>../../../diag_lib/dg_dbg/hdr</pElem>
+            <pElem>../../../diag_lib/dg_loop/hdr</pElem>
           </incDir>
           <commandLine>-pipe -Wall -Wextra</commandLine>
-          <preprocessorList>
-            <Elem>DG_DEBUG=1</Elem>
-          </preprocessorList>
         </cTool>
         <archiverTool>
         </archiverTool>

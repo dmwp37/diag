@@ -7,11 +7,7 @@
 #===================================================================================================
 LOCAL_PATH := $(call my-dir)
 
-DG_FLAGS := -D_GNU_SOURCE -DDG_DEBUG=1
-
-ifeq ($(DG_DEBUG), 1)
-    DG_FLAGS += -DDG_DEBUG=1
-endif
+DG_FLAGS := -D_GNU_SOURCE
 
 #===================================================
 # dg_loop library
@@ -31,6 +27,8 @@ DG_LOOP_INC := $(DG_LOOP_EXPORT_INC)
 LOCAL_C_INCLUDES := $(addprefix $(LOCAL_PATH)/, $(DG_LOOP_INC))
 
 LOCAL_EXPORT_C_INCLUDE_DIRS :=  $(addprefix $(LOCAL_PATH)/, $(DG_LOOP_EXPORT_INC))
+
+LOCAL_STATIC_LIBRARIES := libdg_dbg
 
 LOCAL_SRC_FILES := \
   src/dg_loop.c

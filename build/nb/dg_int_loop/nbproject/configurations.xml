@@ -36,8 +36,9 @@
       <compileType>
         <cTool>
           <incDir>
-            <pElem>../../../diag_lib/dg_loop/hdr</pElem>
             <pElem>../../../diagd/platform/engine/hdr</pElem>
+            <pElem>../../../diag_lib/dg_dbg/hdr</pElem>
+            <pElem>../../../diag_lib/dg_loop/hdr</pElem>
             <pElem>../../../out</pElem>
           </incDir>
           <commandLine>-pipe -Wall -Wextra</commandLine>
@@ -47,10 +48,8 @@
           <warningLevel>3</warningLevel>
         </cTool>
         <linkerTool>
-          <linkerAddLib>
-            <pElem>DG_DEBUG=1</pElem>
-          </linkerAddLib>
           <linkerLibItems>
+            <linkerOptionItem>-largp</linkerOptionItem>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
             <linkerLibProjectItem>
               <makeArtifact PL="../libdg_loop"
@@ -64,7 +63,18 @@
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibdg_loop.a">
               </makeArtifact>
             </linkerLibProjectItem>
-            <linkerOptionItem>-largp</linkerOptionItem>
+            <linkerLibProjectItem>
+              <makeArtifact PL="../libdg_dbg"
+                            CT="3"
+                            CN="Debug"
+                            AC="true"
+                            BL="true"
+                            WD="../libdg_dbg"
+                            BC="${MAKE}  -f Makefile CONF=Debug"
+                            CC="${MAKE}  -f Makefile CONF=Debug clean"
+                            OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/liblibdg_dbg.a">
+              </makeArtifact>
+            </linkerLibProjectItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>

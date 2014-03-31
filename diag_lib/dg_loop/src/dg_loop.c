@@ -15,6 +15,7 @@
 #include <pthread.h>
 #include <errno.h>
 #include "dg_platform_defs.h"
+#include "dg_dbg.h"
 #include "dg_loop.h"
 
 
@@ -29,23 +30,16 @@
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#ifdef DG_DEBUG
-    #define DG_LOOP_TRACE(x ...) do { printf("DG_LOOP: "x); printf("\n"); } while (0)
-    #define DG_LOOP_ERROR(x ...) do { printf("DG_LOOP ERROR: "x); printf("\n"); } while (0)
-#else
-    #define DG_LOOP_TRACE(x ...)
-    #define DG_LOOP_ERROR(x ...)
-#endif
-
 #define DG_LOOP_SET_ERROR(x ...) \
     do \
     { \
         if (dg_loop_last_err_string != NULL) \
         { \
             free(dg_loop_last_err_string); \
+            dg_loop_last_err_string = NULL; \
         } \
         asprintf(&dg_loop_last_err_string, x); \
-        DG_LOOP_ERROR("%s", dg_loop_last_err_string); \
+        DG_DBG_ERROR("%s", dg_loop_last_err_string); \
     } while (0)
 
 
@@ -110,7 +104,7 @@ int DG_LOOP_open(DG_LOOP_PORT_T port)
     }
 
     /* open the loop device to simulate the port */
-    DG_LOOP_TRACE("open loop port 0x%02x", port);
+    DG_DBG_TRACE("open loop port 0x%02x", port);
 
     fd = port;
 
@@ -130,7 +124,7 @@ void DG_LOOP_close(int fd)
 
     if (dg_loop_check_port(port))
     {
-        DG_LOOP_TRACE("close loop port 0x%02x", port);
+        DG_DBG_TRACE("close loop port 0x%02x", port);
         if (dg_loop_port_fd[port] > 0)
         {
             /* close the fd*/
@@ -161,7 +155,7 @@ BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len)
         return FALSE;
     }
 
-    DG_LOOP_TRACE("send to port 0x%02x, buf=%p, len=%d", port, buf, len);
+    DG_DBG_TRACE("send to port 0x%02x, buf=%p, len=%d", port, buf, len);
 
     return TRUE;
 }
@@ -187,7 +181,7 @@ BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len)
         return FALSE;
     }
 
-    DG_LOOP_TRACE("recv from port 0x%02x, buf=%p, len=%d", port, buf, len);
+    DG_DBG_TRACE("recv from port 0x%02x, buf=%p, len=%d", port, buf, len);
 
     return TRUE;
 }
@@ -224,7 +218,7 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
         return FALSE;
     }
 
-    DG_LOOP_TRACE("DG_LOOP_config() port=0x%02x, node=%d, cfg=%d", port, node, cfg);
+    DG_DBG_TRACE("DG_LOOP_config() port=0x%02x, node=%d, cfg=%d", port, node, cfg);
 
     return TRUE;
 }
@@ -301,19 +295,19 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
 
     if (pthread_create(&p_control->recv_thread, NULL, dg_loop_recv_thread, test) != 0)
     {
-        DG_LOOP_ERROR("failed to start recv thread, rx_port=0x%02x, errno=%d(%m)",
-                      test->rx_port, errno);
+        DG_DBG_ERROR("failed to start recv thread, rx_port=0x%02x, errno=%d(%m)",
+                     test->rx_port, errno);
     }
     else if (pthread_create(&p_control->send_thread, NULL, dg_loop_send_thread, test) != 0)
     {
-        DG_LOOP_ERROR("failed to start send thread, tx_port=0x%02x, errno=%d(%m)",
-                      test->tx_port, errno);
+        DG_DBG_ERROR("failed to start send thread, tx_port=0x%02x, errno=%d(%m)",
+                     test->tx_port, errno);
     }
     else
     {
         ret = TRUE;
-        DG_LOOP_TRACE("Successfully create send/recv thread pair, tx_port=0x%02x, tx_port=0x%02x",
-                      test->tx_port, test->rx_port);
+        DG_DBG_TRACE("Successfully create send/recv thread pair, tx_port=0x%02x, tx_port=0x%02x",
+                     test->tx_port, test->rx_port);
     }
 
     /* clean up */
@@ -441,12 +435,12 @@ void* dg_loop_send_thread(void* arg)
     int    size     = test->size;
     UINT8* send_buf = NULL;
 
-    DG_LOOP_TRACE("enter into send thread: %p", (void*)pthread_self());
+    DG_DBG_TRACE("enter into send thread: %p", (void*)pthread_self());
 
     /* open the port for sending data */
     if ((fd = DG_LOOP_open(test->tx_port)) < 0)
     {
-        DG_LOOP_ERROR("failed to open send port, tx_port=0x%02x", test->tx_port);
+        DG_DBG_ERROR("failed to open send port, tx_port=0x%02x", test->tx_port);
         return NULL;
     }
 
@@ -463,7 +457,7 @@ void* dg_loop_send_thread(void* arg)
     {
         if (number == 0)
         {
-            DG_LOOP_TRACE("send thread %p finished", (void*)pthread_self());
+            DG_DBG_TRACE("send thread %p finished", (void*)pthread_self());
             break;
         }
 
@@ -484,7 +478,7 @@ void* dg_loop_send_thread(void* arg)
 
     free(send_buf);
 
-    DG_LOOP_TRACE("leave send thread: %p", (void*)pthread_self());
+    DG_DBG_TRACE("leave send thread: %p", (void*)pthread_self());
 
     return NULL;
 }
@@ -508,12 +502,12 @@ void* dg_loop_recv_thread(void* arg)
     UINT8* recv_buf     = NULL;
     UINT8  init_pattern = ~test->pattern;
 
-    DG_LOOP_TRACE("enter into recv thread: %p", (void*)pthread_self());
+    DG_DBG_TRACE("enter into recv thread: %p", (void*)pthread_self());
 
     /* open the port for sending data */
     if ((fd = DG_LOOP_open(test->tx_port)) < 0)
     {
-        DG_LOOP_ERROR("failed to open send port, tx_port=0x%02x", test->tx_port);
+        DG_DBG_ERROR("failed to open send port, tx_port=0x%02x", test->tx_port);
         return NULL;
     }
 
@@ -528,7 +522,7 @@ void* dg_loop_recv_thread(void* arg)
     {
         if (number == 0)
         {
-            DG_LOOP_TRACE("recv thread %p finished", (void*)pthread_self());
+            DG_DBG_TRACE("recv thread %p finished", (void*)pthread_self());
             break;
         }
 
@@ -558,7 +552,7 @@ void* dg_loop_recv_thread(void* arg)
 
     free(recv_buf);
 
-    DG_LOOP_TRACE("leave recv thread: %p", (void*)pthread_self());
+    DG_DBG_TRACE("leave recv thread: %p", (void*)pthread_self());
     return NULL;
 }
 

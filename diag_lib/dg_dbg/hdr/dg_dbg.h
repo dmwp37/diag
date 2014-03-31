@@ -23,7 +23,7 @@ extern "C" {
                                               MACROS
 ==================================================================================================*/
 #define DG_DBG_VERBOSE(x ...) DG_DBG_print(DG_DBG_LVL_VERBOSE, x)
-#define DG_DBG_TRACE(x ...)   DG_DBG_print(DG_DBG_LVL_DBG, x)
+#define DG_DBG_TRACE(x ...)   DG_DBG_print(DG_DBG_LVL_TRACE, x)
 #define DG_DBG_WARN(x ...)    DG_DBG_print(DG_DBG_LVL_WARNING, x)
 #define DG_DBG_ERROR(x ...)   DG_DBG_print(DG_DBG_LVL_ERROR, "ERROR: "x)
 
