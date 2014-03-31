@@ -31,6 +31,7 @@ const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
                                            LOCAL MACROS
 ==================================================================================================*/
 #define DG_INT_LOOP_PORT_MAX            DG_LOOP_PORT_10GE_3
+#define DG_INT_LOOP_NODE_MAX            DG_LOOP_NODE_PORT
 #define DG_INT_LOOP_DEFAULT_PORT        0   /* 0 means test for all data ports */
 #define DG_INT_LOOP_DEFAULT_RUN_TIME    -1  /* negtive means run the program for ever */
 #define DG_INT_LOOP_DEFAULT_PACKET_SIZE 1024
@@ -44,6 +45,7 @@ const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
 typedef struct
 {
     UINT8 pattern;  /* data pattern from argument*/
+    UINT8 node;
     UINT8 port;
     int   size;
     int   time;
@@ -83,6 +85,7 @@ int main(int argc, char** argv)
     {              /* Default values. */
         .pattern = DG_INT_LOOP_DEFAULT_PATTERN,
         .port    = 1,
+        .node    = DG_LOOP_NODE_PORT,
         .size    = DG_INT_LOOP_DEFAULT_PACKET_SIZE,
         .time    = DG_INT_LOOP_DEFAULT_RUN_TIME
     };
@@ -108,8 +111,9 @@ int main(int argc, char** argv)
     printf("PATTERN     = 0x%02x\n"
            "RUN TIME    = %ds\n"
            "PACKET SIZE = %d bytes\n"
-           "PORT        = 0x%02x\n",
-           args.pattern, args.time, args.size, args.port);
+           "PORT        = 0x%02x\n"
+           "NODE        = %d\n",
+           args.pattern, args.time, args.size, args.port, args.node);
 
     /* init the test struct */
     memset(&test, 0, sizeof(test));
@@ -123,7 +127,14 @@ int main(int argc, char** argv)
     {
         DG_LOOP_TEST_STATISTIC_T* result = &test.result;
 
-        if (!DG_LOOP_start_test(&test))
+        if (!DG_LOOP_config(args.port, args.node, DG_LOOP_CFG_INTERNAL))
+        {
+            printf("failed to config internal loop back, port=0x%02x, node=%d: ",
+                   args.port, args.node);
+            DG_LOOP_print_err_string();
+            ret = 1;
+        }
+        else if (!DG_LOOP_start_test(&test))
         {
             printf("failed to start loopback test: ");
             DG_LOOP_print_err_string();
@@ -186,6 +197,7 @@ BOOL dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T* args)
         { "verbose", 'v', 0,      0, "Produce verbose output",                                0 },
         { "quiet",   'q', 0,      0, "Don't produce any output",                              0 },
         { "port",    'p', "PORT", 0, "Select on which port to do internal loop test",         0 },
+        { "node",    'n', "NODE", 0, "Select on which node to config internal loop",          0 },
         { "size",    's', "SIZE", 0, "Set the packet size for each frame",                    0 },
         { "time",    't', "TIME", 0, "How long the program would run",                        0 },
         { NULL,      0,   NULL,   0, NULL,                                                    0 }
@@ -240,6 +252,22 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
         else
         {
             dg_arg->port = (UINT8)value;
+        }
+        break;
+
+    case 'n':
+        if (!dg_int_loop_get_int_arg(arg, &value))
+        {
+            return EINVAL;
+        }
+        else if ((value < 0) || (value > DG_INT_LOOP_NODE_MAX))
+        {
+            printf("out range node: %s, max=%d\n", arg, DG_INT_LOOP_NODE_MAX);
+            return EINVAL;
+        }
+        else
+        {
+            dg_arg->node = (UINT8)value;
         }
         break;
 
