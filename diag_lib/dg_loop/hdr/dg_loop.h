@@ -68,7 +68,7 @@ enum
     DG_LOOP_NODE_FPGA = 0x00,
     DG_LOOP_NODE_MAC  = 0x01,
     DG_LOOP_NODE_PHY  = 0x02,
-    DG_LOOP_NODE_PORT = 0x03, /** External loopback cable/SFP/SFP+ */
+    DG_LOOP_NODE_HDR  = 0x03, /** External loopback cable/SFP/SFP+ */
 };
 typedef UINT8 DG_LOOP_NODE_T;
 
@@ -174,6 +174,16 @@ BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len);
 - if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg);
+
+/*=============================================================================================*//**
+@brief configurate all the port node to normal mode
+
+@return TRUE if success
+
+@note
+- if error happened, call DG_DBG_get_err_string() to get the last error
+*//*==============================================================================================*/
+BOOL DG_LOOP_config_all_normal();
 
 /*=============================================================================================*//**
 @brief print the last error string

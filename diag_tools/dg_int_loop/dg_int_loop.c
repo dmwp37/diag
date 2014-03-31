@@ -31,7 +31,7 @@ const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
                                            LOCAL MACROS
 ==================================================================================================*/
 #define DG_INT_LOOP_PORT_MAX            DG_LOOP_PORT_10GE_3
-#define DG_INT_LOOP_NODE_MAX            DG_LOOP_NODE_PORT
+#define DG_INT_LOOP_NODE_MAX            DG_LOOP_NODE_HDR
 #define DG_INT_LOOP_DEFAULT_PORT        0   /* 0 means test for all data ports */
 #define DG_INT_LOOP_DEFAULT_RUN_TIME    -1  /* negtive means run the program for ever */
 #define DG_INT_LOOP_DEFAULT_PACKET_SIZE 1024
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
     {              /* Default values. */
         .pattern = DG_INT_LOOP_DEFAULT_PATTERN,
         .port    = 1,
-        .node    = DG_LOOP_NODE_PORT,
+        .node    = DG_LOOP_NODE_HDR,
         .size    = DG_INT_LOOP_DEFAULT_PACKET_SIZE,
         .time    = DG_INT_LOOP_DEFAULT_RUN_TIME
     };
@@ -168,6 +168,8 @@ int main(int argc, char** argv)
             DG_LOOP_stop_test(&test);
             dg_int_loop_print_result(result);
         }
+        /* revert all the configuration */
+        DG_LOOP_config_all_normal();
     }
 
     return ret;
@@ -399,3 +401,4 @@ void dg_int_loop_exit_handler(int sig)
     dg_int_loop_run = FALSE;
     DG_DBG_TRACE("got signaled: sig = %d", sig);
 }
+

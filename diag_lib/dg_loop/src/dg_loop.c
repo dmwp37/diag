@@ -17,6 +17,7 @@
 #include "dg_platform_defs.h"
 #include "dg_dbg.h"
 #include "dg_loop.h"
+#include "dg_loop_cfg.h"
 
 
 /** @addtogroup libdg_loop
@@ -192,7 +193,7 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
         return FALSE;
     }
 
-    if (node > DG_LOOP_NODE_PORT)
+    if (node > DG_LOOP_NODE_HDR)
     {
         DG_DBG_set_err_string("Invalid node selection, node=%d", node);
         return FALSE;
@@ -204,9 +205,7 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
         return FALSE;
     }
 
-    DG_DBG_TRACE("DG_LOOP_config() port=0x%02x, node=%d, cfg=%d", port, node, cfg);
-
-    return TRUE;
+    return DG_LOOP_cfg_impl(port, node, cfg);
 }
 
 /*=============================================================================================*//**
