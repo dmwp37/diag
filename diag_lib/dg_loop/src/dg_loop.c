@@ -30,18 +30,6 @@
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_LOOP_SET_ERROR(x ...) \
-    do \
-    { \
-        if (dg_loop_last_err_string != NULL) \
-        { \
-            free(dg_loop_last_err_string); \
-            dg_loop_last_err_string = NULL; \
-        } \
-        asprintf(&dg_loop_last_err_string, x); \
-        DG_DBG_ERROR("%s", dg_loop_last_err_string); \
-    } while (0)
-
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -72,8 +60,6 @@ static BOOL  dg_loop_check_recv_data(UINT8* buf, UINT32 size, UINT8 pattern);
 /** internal real file descriptor array for each ports */
 static int dg_loop_port_fd[DG_LOOP_PORT_MAX] = { -1 };
 
-static char* dg_loop_last_err_string = NULL;
-
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
 ==================================================================================================*/
@@ -86,7 +72,7 @@ static char* dg_loop_last_err_string = NULL;
 @return the file descriptor, -1 if error happened
 
 @note
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 int DG_LOOP_open(DG_LOOP_PORT_T port)
 {
@@ -144,7 +130,7 @@ void DG_LOOP_close(int fd)
 @return the file descriptor, -1 if error happened
 
 @note
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len)
 {
@@ -170,7 +156,7 @@ BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len)
 @return the file descriptor, -1 if error happened
 
 @note
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len)
 {
@@ -197,7 +183,7 @@ BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len)
 
 @note
 - if the port doesn't contains the node or doesn't support the configuration, FALSE will be returned
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
 {
@@ -208,13 +194,13 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
 
     if (node > DG_LOOP_NODE_PORT)
     {
-        DG_LOOP_SET_ERROR("Invalid node selection, node=%d", node);
+        DG_DBG_set_err_string("Invalid node selection, node=%d", node);
         return FALSE;
     }
 
     if (cfg > DG_LOOP_CFG_EXTERNAL)
     {
-        DG_LOOP_SET_ERROR("Invalid configuration, cfg=%d", cfg);
+        DG_DBG_set_err_string("Invalid configuration, cfg=%d", cfg);
         return FALSE;
     }
 
@@ -224,28 +210,11 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
 }
 
 /*=============================================================================================*//**
-@brief get that last error string
-
-@return the error string, or NULL
-
-@note
-- caller must free the error string
-*//*==============================================================================================*/
-char* DG_LOOP_get_err_string()
-{
-    char* err_str = dg_loop_last_err_string;
-
-    dg_loop_last_err_string = NULL;
-
-    return err_str;
-}
-
-/*=============================================================================================*//**
 @brief print the last error string
 *//*==============================================================================================*/
 void DG_LOOP_print_err_string()
 {
-    char* err_str = DG_LOOP_get_err_string();
+    char* err_str = DG_DBG_get_err_string();
     if (err_str != NULL)
     {
         printf("%s\n", err_str);
@@ -267,7 +236,7 @@ void DG_LOOP_print_err_string()
 - the statistic result is stored in test->result
 - user can READ it any time to print out the result
 - user can all DG_LOOP_stop_test() to stop the test
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
 {
@@ -284,7 +253,7 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
     /* init the test control block */
     if ((p_control = malloc(sizeof(DG_LOOP_TEST_CONTROL_T))) == NULL)
     {
-        DG_LOOP_SET_ERROR("failed to malloc loop test control block");
+        DG_DBG_set_err_string("failed to malloc loop test control block");
         return FALSE;
     }
 
@@ -422,7 +391,7 @@ BOOL dg_loop_check_port(DG_LOOP_PORT_T port)
         break;
 
     default:
-        DG_LOOP_SET_ERROR("Invalid Port selection, port=0x%02x", port);
+        DG_DBG_set_err_string("Invalid Port selection, port=0x%02x", port);
         return FALSE;
     }
 
@@ -459,7 +428,7 @@ void* dg_loop_send_thread(void* arg)
     /* prepare the data to send */
     if ((send_buf = malloc(size)) == NULL)
     {
-        DG_LOOP_SET_ERROR("failed to malloc send buf, size=%d", size);
+        DG_DBG_set_err_string("failed to malloc send buf, size=%d", size);
         return NULL;
     }
 
@@ -529,7 +498,7 @@ void* dg_loop_recv_thread(void* arg)
     /* prepare the data to send */
     if ((recv_buf = malloc(size)) == NULL)
     {
-        DG_LOOP_SET_ERROR("failed to malloc recv buf, size=%d", size);
+        DG_DBG_set_err_string("failed to malloc recv buf, size=%d", size);
         return NULL;
     }
 
@@ -564,7 +533,7 @@ void* dg_loop_recv_thread(void* arg)
             if (!dg_loop_check_recv_data(recv_buf, size, test->pattern))
             {
                 result->wrong_recv++;
-                DG_LOOP_SET_ERROR("receive wrong data");
+                DG_DBG_set_err_string("receive wrong data");
             }
             result->total_recv++;
         }

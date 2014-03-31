@@ -10,6 +10,7 @@
                                            INCLUDE FILES
 ==================================================================================================*/
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include "dg_dbg.h"
 
@@ -41,6 +42,9 @@
 ==================================================================================================*/
 /*default dbg level is just print error */
 static int dg_dbg_level = DG_DBG_LVL_ERROR;
+
+/** last error string */
+static char* dg_dbg_last_err_string = NULL;
 
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
@@ -88,6 +92,44 @@ void DG_DBG_print(int debug_level, const char* format, ...)
     va_end(args);
 }
 
+/*=============================================================================================*//**
+@brief set the error string
+
+@param[in]   format, .... the formated string
+*//*==============================================================================================*/
+void DG_DBG_set_err_string(const char* format, ...)
+{
+    va_list args;
+
+    va_start(args, format);
+
+    if (dg_dbg_last_err_string != NULL)
+    {
+        free(dg_dbg_last_err_string);
+        dg_dbg_last_err_string = NULL;
+    }
+    vasprintf(&dg_dbg_last_err_string, format, args);
+    DG_DBG_ERROR("%s", dg_dbg_last_err_string);
+
+    va_end(args);
+}
+
+/*=============================================================================================*//**
+@brief get that last error string
+
+@return the error string, or NULL
+
+@note
+- caller must free the error string
+*//*==============================================================================================*/
+char* DG_DBG_get_err_string()
+{
+    char* err_str = dg_dbg_last_err_string;
+
+    dg_dbg_last_err_string = NULL;
+
+    return err_str;
+}
 
 /*==================================================================================================
                                           LOCAL FUNCTIONS

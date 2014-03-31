@@ -121,7 +121,7 @@ typedef struct
 @return the file descriptor, -1 if error happened
 
 @note
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 int DG_LOOP_open(DG_LOOP_PORT_T port);
 
@@ -142,7 +142,7 @@ void DG_LOOP_close(int fd);
 @return the file descriptor, -1 if error happened
 
 @note
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len);
 
@@ -156,7 +156,7 @@ BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len);
 @return the file descriptor, -1 if error happened
 
 @note
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len);
 
@@ -171,19 +171,9 @@ BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len);
 
 @note
 - if the port doesn't contains the node or doesn't support the configuration, FALSE will be returned
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg);
-
-/*=============================================================================================*//**
-@brief get that last error string
-
-@return the error string, or NULL
-
-@note
-- caller must free the error string
-*//*==============================================================================================*/
-char* DG_LOOP_get_err_string();
 
 /*=============================================================================================*//**
 @brief print the last error string
@@ -204,7 +194,7 @@ void DG_LOOP_print_err_string();
 - the statistic result is stored in test->result
 - user can READ it any time to print out the result
 - user can all DG_LOOP_stop_test() to stop the test
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test);
 
