@@ -156,6 +156,12 @@ int main(int argc, char** argv)
 
                 sleep(1);
                 dg_int_loop_print_result(result);
+
+                if (!DG_LOOP_query_test(&test))
+                {
+                    DG_DBG_TRACE("test has been finished!");
+                    break;
+                }
             }
 
             DG_DBG_TRACE("test finished");

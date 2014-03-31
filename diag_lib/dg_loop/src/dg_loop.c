@@ -341,8 +341,6 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
 
 @note
 - this function would stop the two threads in the background that start by DG_LOOP_start_test()
-- if test->number == DG_LOOP_RUN_IFINITE, it will stop the test immediately
-- otherwise this function would block until all the packets has been send/recv
 *//*==============================================================================================*/
 void DG_LOOP_stop_test(DG_LOOP_TEST_T* test)
 {
@@ -364,6 +362,20 @@ void DG_LOOP_stop_test(DG_LOOP_TEST_T* test)
     }
 
     free(p_control);
+}
+
+/*=============================================================================================*//**
+@brief query if the test is still running
+
+@param[in]  test - which test to query
+
+@return TRUE if the background send/recv thread is still running
+*//*==============================================================================================*/
+BOOL DG_LOOP_query_test(DG_LOOP_TEST_T* test)
+{
+    DG_LOOP_TEST_CONTROL_T* p_control = test->control;
+
+    return p_control->b_run;
 }
 
 /*==================================================================================================
@@ -455,13 +467,16 @@ void* dg_loop_send_thread(void* arg)
 
     while (p_control->b_run)
     {
-        if (number == 0)
+        if (number < 0)
+        {
+            /* do nothing to run forever */
+        }
+        else if (number == 0)
         {
             DG_DBG_TRACE("send thread %p finished", (void*)pthread_self());
             break;
         }
-
-        if (number > 0)
+        else
         {
             number--;
         }
@@ -520,13 +535,18 @@ void* dg_loop_recv_thread(void* arg)
 
     while (p_control->b_run)
     {
-        if (number == 0)
+        if (number < 0)
+        {
+            /* do nothing to run forever */
+        }
+        else if (number == 0)
         {
             DG_DBG_TRACE("recv thread %p finished", (void*)pthread_self());
+            /* only let the recv thread update the control */
+            p_control->b_run = FALSE;
             break;
         }
-
-        if (number > 0)
+        else
         {
             number--;
         }

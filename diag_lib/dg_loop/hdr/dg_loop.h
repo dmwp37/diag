@@ -215,10 +215,17 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test);
 
 @note
 - this function would stop the two threads in the background that start by DG_LOOP_start_test()
-- if test->number == DG_LOOP_RUN_IFINITE, it will stop the test immediately
-- otherwise this function would block until all the packets has been send/recv
 *//*==============================================================================================*/
 void DG_LOOP_stop_test(DG_LOOP_TEST_T* test);
+
+/*=============================================================================================*//**
+@brief query if the test is still running
+
+@param[in]  test - which test to query
+
+@return TRUE if the background send/recv thread is still running
+*//*==============================================================================================*/
+BOOL DG_LOOP_query_test(DG_LOOP_TEST_T* test);
 
 #ifdef __cplusplus
 }
