@@ -31,7 +31,7 @@ LOCAL_CFLAGS := $(DG_FLAGS)
 DG_CLIENT_EXPORT_INC := \
   ../../diagd/platform/engine/hdr \
   common/hdr \
-  
+
 DG_CLIENT_INC := $(DG_CLIENT_EXPORT_INC)
 DG_CLIENT_INC += \
   ../../diagd/common/engine/hdr \

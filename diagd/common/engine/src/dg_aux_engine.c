@@ -753,7 +753,7 @@ void dg_aux_engine_listener_thread_exit_handler(int sig)
 {
     int aux_id;
 
-    DG_DBG_TRACE("AUX listener thead got signaled: sig = %d", sig);
+    DG_DBG_TRACE("AUX listener thread got signaled: sig = %d", sig);
     for (aux_id = 0; aux_id < DG_CFG_AUX_NUM; aux_id++)
     {
         if ((dg_aux_engine_listener_thread_hndl[aux_id] != 0) &&

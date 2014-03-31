@@ -2,10 +2,10 @@
 <configurationDescriptor version="90">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="HeaderFiles" displayName="hdr" projectFiles="true">
-      <itemPath>../../../diag_lib/dg_loop/hdr/dg_loop.h</itemPath>
+      <itemPath>../../../diag_lib/dg_dbg/hdr/dg_dbg.h</itemPath>
     </logicalFolder>
-    <logicalFolder name="SourceFiles" displayName="src" projectFiles="true">
-      <itemPath>../../../diag_lib/dg_loop/src/dg_loop.c</itemPath>
+    <logicalFolder name="ResourceFiles" displayName="src" projectFiles="true">
+      <itemPath>../../../diag_lib/dg_dbg/src/dg_dbg.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -30,21 +30,20 @@
       <compileType>
         <cTool>
           <incDir>
-            <pElem>../../../diagd/platform/engine/hdr</pElem>
             <pElem>../../../diag_lib/dg_dbg/hdr</pElem>
-            <pElem>../../../diag_lib/dg_loop/hdr</pElem>
           </incDir>
           <commandLine>-pipe -Wall -Wextra</commandLine>
+          <warningLevel>3</warningLevel>
         </cTool>
         <archiverTool>
         </archiverTool>
       </compileType>
-      <item path="../../../diag_lib/dg_loop/hdr/dg_loop.h"
+      <item path="../../../diag_lib/dg_dbg/hdr/dg_dbg.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../../diag_lib/dg_loop/src/dg_loop.c"
+      <item path="../../../diag_lib/dg_dbg/src/dg_dbg.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -72,12 +71,12 @@
         <archiverTool>
         </archiverTool>
       </compileType>
-      <item path="../../../diag_lib/dg_loop/hdr/dg_loop.h"
+      <item path="../../../diag_lib/dg_dbg/hdr/dg_dbg.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../../diag_lib/dg_loop/src/dg_loop.c"
+      <item path="../../../diag_lib/dg_dbg/src/dg_dbg.c"
             ex="false"
             tool="0"
             flavor2="0">
