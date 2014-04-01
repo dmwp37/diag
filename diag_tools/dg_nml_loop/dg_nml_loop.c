@@ -57,9 +57,9 @@ typedef struct
 static error_t dg_nml_loop_arg_parse(int key, char* arg, struct argp_state* state);
 static BOOL    dg_nml_loop_prepare_args(int argc, char** argv, DG_NML_LOOP_ARG_T* args);
 static BOOL    dg_nml_loop_get_int_arg(const char* arg, long* value);
-/* static void    dg_nml_loop_print_result(DG_LOOP_TEST_STATISTIC_T* result); */
-static void dg_nml_loop_exit_handler(int sig);
-static void dg_nml_loop_dump_config();
+static void    dg_nml_loop_print_result();
+static void    dg_nml_loop_exit_handler(int sig);
+static void    dg_nml_loop_dump_config();
 
 static DG_NML_LOOP_CONFIG_T* dg_nml_loop_read_config(const char* file);
 
@@ -92,6 +92,11 @@ static DG_NML_LOOP_CONFIG_T dg_nml_loop_default_cfg[] =
     { 0, 0, 0, 0 }
 };
 
+static DG_NML_LOOP_CONFIG_T* dg_nml_loop_cfg_settings = NULL;
+
+static /* test control blocks */
+DG_LOOP_TEST_T dg_nml_loop_test[DG_NML_LOOP_PORT_PAIR_MAX][2];
+
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
 ==================================================================================================*/
@@ -104,7 +109,8 @@ static DG_NML_LOOP_CONFIG_T dg_nml_loop_default_cfg[] =
 *//*==============================================================================================*/
 int main(int argc, char** argv)
 {
-    int ret = 0;
+    int ret   = 0;
+    int index = 0;
 
     /* default argument. */
     DG_NML_LOOP_ARG_T args =
@@ -115,12 +121,7 @@ int main(int argc, char** argv)
 
     struct sigaction actions;
 
-    DG_NML_LOOP_CONFIG_T* cfg_settings;
     DG_NML_LOOP_CONFIG_T* p_cfg;
-
-    /* test control blocks */
-    DG_LOOP_TEST_T test[DG_NML_LOOP_PORT_PAIR_MAX][2];
-    int            index = 0;
 
     if (!dg_nml_loop_prepare_args(argc, argv, &args))
     {
@@ -141,37 +142,37 @@ int main(int argc, char** argv)
 
     if (args.cfg_file != NULL)
     {
-        if ((cfg_settings = dg_nml_loop_read_config(args.cfg_file)) == NULL)
+        if ((dg_nml_loop_cfg_settings = dg_nml_loop_read_config(args.cfg_file)) == NULL)
         {
             exit(0);
         }
     }
     else
     {
-        cfg_settings = dg_nml_loop_default_cfg;
+        dg_nml_loop_cfg_settings = dg_nml_loop_default_cfg;
     }
 
     /* init the test blocks */
-    memset(test, 0, sizeof(test));
+    memset(dg_nml_loop_test, 0, sizeof(dg_nml_loop_test));
 
     /* start all the test thread */
-    p_cfg = cfg_settings;
+    p_cfg = dg_nml_loop_cfg_settings;
     index = 0;
     while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
     {
-        test[index][0].tx_port = p_cfg->port1;
-        test[index][0].rx_port = p_cfg->port2;
-        test[index][0].pattern = p_cfg->pattern;
-        test[index][0].size    = p_cfg->size;
-        test[index][0].number  = DG_LOOP_RUN_IFINITE;
+        dg_nml_loop_test[index][0].tx_port = p_cfg->port1;
+        dg_nml_loop_test[index][0].rx_port = p_cfg->port2;
+        dg_nml_loop_test[index][0].pattern = p_cfg->pattern;
+        dg_nml_loop_test[index][0].size    = p_cfg->size;
+        dg_nml_loop_test[index][0].number  = DG_LOOP_RUN_IFINITE;
 
-        test[index][1].tx_port = p_cfg->port2;
-        test[index][1].rx_port = p_cfg->port1;
-        test[index][1].pattern = p_cfg->pattern;
-        test[index][1].size    = p_cfg->size;
-        test[index][1].number  = DG_LOOP_RUN_IFINITE;
+        dg_nml_loop_test[index][1].tx_port = p_cfg->port2;
+        dg_nml_loop_test[index][1].rx_port = p_cfg->port1;
+        dg_nml_loop_test[index][1].pattern = p_cfg->pattern;
+        dg_nml_loop_test[index][1].size    = p_cfg->size;
+        dg_nml_loop_test[index][1].number  = DG_LOOP_RUN_IFINITE;
 
-        if (!DG_LOOP_start_test(&test[index][0]))
+        if (!DG_LOOP_start_test(&dg_nml_loop_test[index][0]))
         {
             printf("failed to start loopback test tx_port=0x%02x rx_port=0x%02x: ",
                    p_cfg->port1, p_cfg->port2);
@@ -179,7 +180,7 @@ int main(int argc, char** argv)
             ret = 1;
         }
 
-        if (!DG_LOOP_start_test(&test[index][1]))
+        if (!DG_LOOP_start_test(&dg_nml_loop_test[index][1]))
         {
             printf("failed to start loopback test tx_port=0x%02x rx_port=0x%02x: ",
                    p_cfg->port2, p_cfg->port1);
@@ -191,18 +192,48 @@ int main(int argc, char** argv)
         p_cfg++;
     }
 
-    /* clean up thread */
-    p_cfg = cfg_settings;
+    /* print out thread statistics */
+    while (dg_nml_loop_run)
+    {
+        if (args.time == 0)
+        {
+            break;
+        }
+
+        if (args.time > 0)
+        {
+            args.time--;
+        }
+
+        sleep(1);
+        dg_nml_loop_print_result();
+    }
+
+    /* stop the thread */
+    p_cfg = dg_nml_loop_cfg_settings;
     index = 0;
     while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
     {
-        DG_LOOP_stop_test(&test[index][0]);
-        DG_LOOP_stop_test(&test[index][1]);
+        DG_LOOP_stop_test(&dg_nml_loop_test[index][0]);
+        DG_LOOP_stop_test(&dg_nml_loop_test[index][1]);
         index++;
         p_cfg++;
     }
 
-    printf("asdfasdf\n");
+    /* clean up thread */
+    p_cfg = dg_nml_loop_cfg_settings;
+    index = 0;
+    while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
+    {
+        DG_LOOP_wait_test(&dg_nml_loop_test[index][0]);
+        DG_LOOP_wait_test(&dg_nml_loop_test[index][1]);
+        index++;
+        p_cfg++;
+    }
+
+    dg_nml_loop_print_result();
+
+    printf("normal loop test finished\n");
 
     return ret;
 }
@@ -350,16 +381,33 @@ BOOL dg_nml_loop_get_int_arg(const char* arg, long* value)
 
 @param[in] result - loop test result
 *//*==============================================================================================*/
-#if 0
-void dg_nml_loop_print_result(DG_LOOP_TEST_STATISTIC_T* result)
+void dg_nml_loop_print_result()
 {
-    printf("total_send=%d  ", result->total_send);
-    printf("failed_send=%d\n", result->fail_send);
-    printf("total_recv=%d  ", result->total_recv);
-    printf("failed_recv=%d  ", result->fail_recv);
-    printf("wrong_recv=%d\n\n", result->wrong_recv);
+    int index = 0;
+
+    DG_NML_LOOP_CONFIG_T* p_cfg = dg_nml_loop_cfg_settings;
+
+    while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
+    {
+        printf("tx_port=0x%02x, rx_port=0x%02x\n", p_cfg->port1, p_cfg->port2);
+        printf("total_send=%d  ", dg_nml_loop_test[index][0].result.total_send);
+        printf("failed_send=%d  ", dg_nml_loop_test[index][0].result.fail_send);
+        printf("total_recv=%d  ", dg_nml_loop_test[index][0].result.total_recv);
+        printf("failed_recv=%d  ", dg_nml_loop_test[index][0].result.fail_recv);
+        printf("wrong_recv=%d\n\n", dg_nml_loop_test[index][0].result.wrong_recv);
+
+        printf("tx_port=0x%02x, rx_port=0x%02x\n", p_cfg->port2, p_cfg->port1);
+        printf("total_send=%d  ", dg_nml_loop_test[index][1].result.total_send);
+        printf("failed_send=%d  ", dg_nml_loop_test[index][1].result.fail_send);
+        printf("total_recv=%d  ", dg_nml_loop_test[index][1].result.total_recv);
+        printf("failed_recv=%d  ", dg_nml_loop_test[index][1].result.fail_recv);
+        printf("wrong_recv=%d\n\n", dg_nml_loop_test[index][1].result.wrong_recv);
+
+        index++;
+        p_cfg++;
+    }
 }
-#endif
+
 /*=============================================================================================*//**
 @brief This function handle the SIGINT signal
 
