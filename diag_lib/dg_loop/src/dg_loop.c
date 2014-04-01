@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
 #include "dg_platform_defs.h"
 #include "dg_dbg.h"
 #include "dg_loop.h"
@@ -130,6 +131,8 @@ BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len)
     }
 
     DG_DBG_TRACE("send to port 0x%02x, buf=%p, len=%d", port, buf, len);
+    
+	usleep(1000);
 
     return TRUE;
 }
@@ -156,6 +159,8 @@ BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len)
     }
 
     DG_DBG_TRACE("recv from port 0x%02x, buf=%p, len=%d", port, buf, len);
+
+    usleep(1000);
 
     return TRUE;
 }

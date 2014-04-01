@@ -165,7 +165,7 @@ int main(int argc, char** argv)
             }
 
             DG_DBG_TRACE("test finished");
-            DG_LOOP_stop_test(&test);
+            DG_LOOP_wait_test(&test);
             dg_int_loop_print_result(result);
         }
         /* revert all the configuration */

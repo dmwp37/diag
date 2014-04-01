@@ -215,6 +215,7 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test);
 
 @note
 - this function would stop the two threads in the background that start by DG_LOOP_start_test()
+- the function would return immediately
 *//*==============================================================================================*/
 void DG_LOOP_stop_test(DG_LOOP_TEST_T* test);
 
@@ -226,6 +227,17 @@ void DG_LOOP_stop_test(DG_LOOP_TEST_T* test);
 @return TRUE if the background send/recv thread is still running
 *//*==============================================================================================*/
 BOOL DG_LOOP_query_test(DG_LOOP_TEST_T* test);
+
+/*=============================================================================================*//**
+@brief wait the loopback test finished
+
+@param[in]  test - which test to wait
+
+@note
+- this function would wait the two threads in the background that started by DG_LOOP_start_test()
+- it should be used after DG_LOOP_stop_test(), and block until all the thread released
+*//*==============================================================================================*/
+void DG_LOOP_wait_test(DG_LOOP_TEST_T* test);
 
 #ifdef __cplusplus
 }

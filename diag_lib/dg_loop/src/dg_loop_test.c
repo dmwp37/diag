@@ -154,20 +154,6 @@ void DG_LOOP_stop_test(DG_LOOP_TEST_T* test)
 
     /* tell the thread to stop */
     p_control->b_run = FALSE;
-
-    /* wait the thread to finish */
-    if (p_control->send_thread != 0)
-    {
-        pthread_join(p_control->send_thread, NULL);
-    }
-
-    /* wait the thread to finish */
-    if (p_control->recv_thread != 0)
-    {
-        pthread_join(p_control->recv_thread, NULL);
-    }
-
-    free(p_control);
 }
 
 /*=============================================================================================*//**
@@ -182,6 +168,37 @@ BOOL DG_LOOP_query_test(DG_LOOP_TEST_T* test)
     DG_LOOP_TEST_CONTROL_T* p_control = test->control;
 
     return p_control->b_run;
+}
+
+/*=============================================================================================*//**
+@brief stop and wait the loopback test finished
+
+@param[in]  test - which test to wait
+
+@note
+- this function would stop and wait the two threads that started by DG_LOOP_start_test()
+- it will block until all the thread released
+*//*==============================================================================================*/
+void DG_LOOP_wait_test(DG_LOOP_TEST_T* test)
+{
+    DG_LOOP_TEST_CONTROL_T* p_control = test->control;
+
+    /* tell the thread to stop */
+    p_control->b_run = FALSE;
+
+    /* wait the thread to finish */
+    if (p_control->send_thread != 0)
+    {
+        pthread_join(p_control->send_thread, NULL);
+    }
+
+    /* wait the thread to finish */
+    if (p_control->recv_thread != 0)
+    {
+        pthread_join(p_control->recv_thread, NULL);
+    }
+
+    free(p_control);
 }
 
 /*==================================================================================================
