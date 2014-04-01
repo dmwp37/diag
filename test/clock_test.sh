@@ -19,14 +19,10 @@ echo "#-----------------------$SEC_NAME-----------------------"
 #command array
 array_command[0]=01000102
 array_command[1]="$OPCODE""$GET_ACTION""$CLOCK_REG"
-array_command[2]="$OPCODE""$SET_ACTION""$CLOCK_REG""$REG_VAL"
-array_command[3]="$OPCODE""$GET_ACTION""$CLOCK_REG"
 
 #command description array, need match with command array above.
 array_des[0]="Suspend the DUT"
 array_des[1]="Get CLock Register $CLOCK_REG"
-array_des[2]="Set CLock Register $CLOCK_REG"
-array_des[3]="Get CLock Register $CLOCK_REG"
 
 array_command_fail[0]="$OPCODE""04""$CLOCK_REG"
 
