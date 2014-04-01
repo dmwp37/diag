@@ -3,11 +3,11 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="HeaderFiles" displayName="hdr" projectFiles="true">
       <itemPath>../../../diag_lib/dg_loop/hdr/dg_loop.h</itemPath>
-      <itemPath>../../../diag_lib/dg_loop/local_hdr/dg_loop_cfg.h</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles" displayName="src" projectFiles="true">
       <itemPath>../../../diag_lib/dg_loop/src/dg_loop.c</itemPath>
       <itemPath>../../../diag_lib/dg_loop/src/dg_loop_cfg.c</itemPath>
+      <itemPath>../../../diag_lib/dg_loop/src/dg_loop_test.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -34,7 +34,6 @@
           <incDir>
             <pElem>../../../diagd/platform/engine/hdr</pElem>
             <pElem>../../../diag_lib/dg_dbg/hdr</pElem>
-            <pElem>../../../diag_lib/dg_loop/local_hdr</pElem>
             <pElem>../../../diag_lib/dg_loop/hdr</pElem>
           </incDir>
           <commandLine>-pipe -Wall -Wextra</commandLine>
@@ -48,17 +47,17 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../../diag_lib/dg_loop/local_hdr/dg_loop_cfg.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="../../../diag_lib/dg_loop/src/dg_loop.c"
             ex="false"
             tool="0"
             flavor2="0">
       </item>
       <item path="../../../diag_lib/dg_loop/src/dg_loop_cfg.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diag_lib/dg_loop/src/dg_loop_test.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -91,17 +90,17 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../../diag_lib/dg_loop/local_hdr/dg_loop_cfg.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="../../../diag_lib/dg_loop/src/dg_loop.c"
             ex="false"
             tool="0"
             flavor2="0">
       </item>
       <item path="../../../diag_lib/dg_loop/src/dg_loop_cfg.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diag_lib/dg_loop/src/dg_loop_test.c"
             ex="false"
             tool="0"
             flavor2="0">

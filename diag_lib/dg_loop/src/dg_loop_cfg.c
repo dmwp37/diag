@@ -13,8 +13,6 @@
 #include "dg_platform_defs.h"
 #include "dg_dbg.h"
 #include "dg_loop.h"
-#include "dg_loop_cfg.h"
-
 
 /** @addtogroup libdg_loop
 @{
@@ -22,12 +20,12 @@
 /*==================================================================================================
                                           LOCAL CONSTANTS
 ==================================================================================================*/
-#define DG_LOOP_PORT_NUM (int)DG_ARRAY_SIZE(dg_loop_port_array)
-#define DG_LOOP_NODE_NUM 4
 
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
+#define DG_LOOP_PORT_NUM (int)DG_ARRAY_SIZE(dg_loop_port_array)
+#define DG_LOOP_NODE_NUM 4
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -38,7 +36,7 @@ typedef BOOL (* DG_LOOP_CONFIG_FUNC_T) (DG_LOOP_PORT_T port, DG_LOOP_NODE_T node
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
-static int dg_loop_port_to_index(DG_LOOP_PORT_T port);
+extern int dg_loop_port_to_index(DG_LOOP_PORT_T port);
 
 static BOOL cfg_mgt_mac(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg);
 static BOOL cfg_mgt_phy(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg);
@@ -52,6 +50,7 @@ static BOOL cfg_mgt_hdr(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T 
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
+/* port number array */
 static DG_LOOP_PORT_T dg_loop_port_array[] =
 {
     DG_LOOP_PORT_MGT,
@@ -82,6 +81,7 @@ static DG_LOOP_PORT_T dg_loop_port_array[] =
     DG_LOOP_PORT_10GE_3,
 };
 
+/** configuration map */
 static DG_LOOP_CFG_T dg_loop_port_cfg[DG_LOOP_PORT_NUM][DG_LOOP_NODE_NUM] =
 {
     { DG_LOOP_CFG_NORMAL }
@@ -194,7 +194,7 @@ static DG_LOOP_CONFIG_FUNC_T dg_loop_cfg_external_func[DG_LOOP_PORT_NUM][DG_LOOP
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief loopback node configuration implementation
+@brief loopback node configuration
 
 @param[in]  port    - the path to config on which port
 @param[in]  node    - where to loopback packet
@@ -206,7 +206,7 @@ static DG_LOOP_CONFIG_FUNC_T dg_loop_cfg_external_func[DG_LOOP_PORT_NUM][DG_LOOP
 - if the port doesn't contains the node or doesn't support the configuration, FALSE will be returned
 - if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
-BOOL DG_LOOP_cfg_impl(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
+BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
 {
     BOOL ret = FALSE;
 
@@ -214,7 +214,25 @@ BOOL DG_LOOP_cfg_impl(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cf
     /* convert port id to index */
     int index = dg_loop_port_to_index(port);
 
-    DG_DBG_TRACE("DG_LOOP_cfg_impl() port=0x%02x, node=%d, cfg=%d", port, node, cfg);
+    if (index < 0)
+    {
+        DG_DBG_set_err_string("Invalid port selection, port=0x%02x", port);
+        return FALSE;
+    }
+
+    if (node > DG_LOOP_NODE_HDR)
+    {
+        DG_DBG_set_err_string("Invalid node selection, node=%d", node);
+        return FALSE;
+    }
+
+    if (cfg > DG_LOOP_CFG_EXTERNAL)
+    {
+        DG_DBG_set_err_string("Invalid configuration, cfg=%d", cfg);
+        return FALSE;
+    }
+
+    DG_DBG_TRACE("DG_LOOP_config() port=0x%02x, node=%d, cfg=%d", port, node, cfg);
 
     if (cfg == DG_LOOP_CFG_EXTERNAL)
     {
@@ -269,7 +287,7 @@ BOOL DG_LOOP_config_all_normal()
             if (dg_loop_port_cfg[index][node] != DG_LOOP_CFG_NORMAL)
             {
                 /* revert back to normal */
-                if (!DG_LOOP_cfg_impl(index, node, DG_LOOP_CFG_NORMAL))
+                if (!DG_LOOP_config(dg_loop_port_array[index], node, DG_LOOP_CFG_NORMAL))
                 {
                     ret = FALSE;
                 }
@@ -283,19 +301,29 @@ BOOL DG_LOOP_config_all_normal()
 /*==================================================================================================
                                           LOCAL FUNCTIONS
 ==================================================================================================*/
+/*=============================================================================================*//**
+@brief map the port id to index
+
+@return the internal port index, -1 if invalid
+
+@note
+- if error happened, call DG_DBG_get_err_string() to get the last error
+*//*==============================================================================================*/
 int dg_loop_port_to_index(DG_LOOP_PORT_T port)
 {
+    int ret = -1;
     int index;
 
     for (index = 0; index < DG_LOOP_PORT_NUM; index++)
     {
         if (dg_loop_port_array[index] == port)
         {
+            ret = index;
             break;
         }
     }
 
-    return index;
+    return ret;
 }
 
 /*=============================================================================================*//**

@@ -22,9 +22,7 @@ DG_LOOP_EXPORT_INC := \
   ../../diagd/platform/engine/hdr \
   hdr
 
-DG_LOOP_INC := \
-  $(DG_LOOP_EXPORT_INC) \
-  local_hdr
+DG_LOOP_INC := $(DG_LOOP_EXPORT_INC)
 
 LOCAL_C_INCLUDES := $(addprefix $(LOCAL_PATH)/, $(DG_LOOP_INC))
 
@@ -34,7 +32,8 @@ LOCAL_STATIC_LIBRARIES := libdg_dbg
 
 LOCAL_SRC_FILES := \
   src/dg_loop.c \
-  src/dg_loop_cfg.c
+  src/dg_loop_cfg.c \
+  src/dg_loop_test.c
 
 include $(BUILD_STATIC_LIBRARY)
 
