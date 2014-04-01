@@ -9,9 +9,13 @@
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
+#include <linux/i2c-dev.h>
+#include <unistd.h>
+#include <errno.h>
 #include "dg_handler_inc.h"
 #include "dg_drv_util.h"
 #include "dg_cmn_drv_pttm.h"
+#include "dg_cmn_drv_i2c.h"
 
 
 /** @addtogroup dg_common_drivers
@@ -38,6 +42,7 @@ implementation of the PTTM driver
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
+extern int dg_cmn_drv_i2c_connect_device(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address);
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -46,7 +51,12 @@ implementation of the PTTM driver
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
-static DG_CMN_DRV_PTTM_DATA_T dg_cmn_drv_pttm_data[3] = { 0 }; /* for 3 PTTM chips simulation */
+static DG_CMN_DRV_I2C_ADDR_T dg_cmn_drv_pttm_addr[] =
+{
+    [DG_CMN_DRV_PTTM_AD5247]   = 0x16,
+    [DG_CMN_DRV_PTTM_ISL90727] = 0x2e,
+    [DG_CMN_DRV_PTTM_ISL90728] = 0x3e,
+};
 
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
@@ -61,24 +71,50 @@ static DG_CMN_DRV_PTTM_DATA_T dg_cmn_drv_pttm_data[3] = { 0 }; /* for 3 PTTM chi
 *//*==============================================================================================*/
 BOOL DG_CMN_DRV_PTTM_get(DG_CMN_DRV_PTTM_CHIP_T chip, DG_CMN_DRV_PTTM_DATA_T* data)
 {
-    BOOL ret = FALSE;
+    BOOL                  ret = FALSE;
+    int                   fd;
+    DG_CMN_DRV_I2C_ADDR_T dev_addr;
 
-    if ((chip != DG_CMN_DRV_PTTM_AD5247) &&
-        (chip != DG_CMN_DRV_PTTM_ISL90727) &&
-        (chip != DG_CMN_DRV_PTTM_ISL90728))
+    if (chip > DG_ARRAY_SIZE(dg_cmn_drv_pttm_addr))
     {
-        DG_DRV_UTIL_set_error_string("Invalid chip=%d", chip);
+        DG_DRV_UTIL_set_error_string("Invalid PTTM chip=%d", chip);
+        return FALSE;
     }
-    else
+
+    dev_addr = dg_cmn_drv_pttm_addr[chip];
+
+    if ((fd = dg_cmn_drv_i2c_connect_device(DG_CMN_DRV_I2C_PCH_SMB, dev_addr)) > 0)
     {
-        *data = dg_cmn_drv_pttm_data[chip];
+        int r;
+        if (chip == DG_CMN_DRV_PTTM_AD5247)
+        {
+            if ((r = i2c_smbus_read_byte(fd)) < 0)
+            {
+                DG_DBG_ERROR("I2C driver failed to read byte from AD5247, errno=%d(%m)", errno);
+            }
+        }
+        else
+        {
+            if ((r = i2c_smbus_read_byte_data(fd, 0)) < 0)
+            {
+                DG_DBG_ERROR("PTTM failed to read byte from 0x%02x, errno=%d(%m)",
+                             dev_addr, errno);
+            }
+        }
 
-        DG_DBG_TRACE("PTTM chip %d got value: %d", chip, *data);
+        if (r >= 0)
+        {
+            DG_DBG_TRACE("PTTM successfully read from 0x%02x, value=0x%02x",
+                         dev_addr, r);
+            *data = r;
+            ret   = TRUE;
+        }
 
-        ret = TRUE;
+        close(fd);
     }
 
     return ret;
+
 }
 
 /*=============================================================================================*//**
@@ -90,25 +126,51 @@ BOOL DG_CMN_DRV_PTTM_get(DG_CMN_DRV_PTTM_CHIP_T chip, DG_CMN_DRV_PTTM_DATA_T* da
 *//*==============================================================================================*/
 BOOL DG_CMN_DRV_PTTM_set(DG_CMN_DRV_PTTM_CHIP_T chip, DG_CMN_DRV_PTTM_DATA_T data)
 {
-    BOOL ret = FALSE;
+    BOOL                  ret = FALSE;
+    int                   fd;
+    DG_CMN_DRV_I2C_ADDR_T dev_addr;
 
-    if ((chip != DG_CMN_DRV_PTTM_AD5247) &&
-        (chip != DG_CMN_DRV_PTTM_ISL90727) &&
-        (chip != DG_CMN_DRV_PTTM_ISL90728))
-    {
-        DG_DRV_UTIL_set_error_string("Invalid chip=%d", chip);
-    }
-    else if (data > DG_CMN_DRV_PTTM_DATE_MAX)
+    if (data > DG_CMN_DRV_PTTM_DATE_MAX)
     {
         DG_DRV_UTIL_set_error_string("PTTM data is not valid. val=%d", data);
+        return FALSE;
     }
-    else
+
+    if (chip > DG_ARRAY_SIZE(dg_cmn_drv_pttm_addr))
     {
-        dg_cmn_drv_pttm_data[chip] = data;
+        DG_DRV_UTIL_set_error_string("Invalid PTTM chip=%d", chip);
+        return FALSE;
+    }
 
-        DG_DBG_TRACE("PTTM chip %d set value: %d", chip, data);
+    dev_addr = dg_cmn_drv_pttm_addr[chip];
 
-        ret = TRUE;
+    if ((fd = dg_cmn_drv_i2c_connect_device(DG_CMN_DRV_I2C_PCH_SMB, dev_addr)) > 0)
+    {
+        int r;
+        if (chip == DG_CMN_DRV_PTTM_AD5247)
+        {
+            if ((r = i2c_smbus_write_byte(fd, data)) < 0)
+            {
+                DG_DBG_ERROR("I2C driver failed to write byte to AD5247, errno=%d(%m)", errno);
+            }
+        }
+        else
+        {
+            if ((r = i2c_smbus_write_byte_data(fd, 0, data)) < 0)
+            {
+                DG_DBG_ERROR("PTTM failed to write byte to 0x%02x, errno=%d(%m)",
+                             dev_addr, errno);
+            }
+        }
+
+        if (r >= 0)
+        {
+            DG_DBG_TRACE("PTTM successfully write to 0x%02x, value=0x%02x",
+                         dev_addr, data);
+            ret = TRUE;
+        }
+
+        close(fd);
     }
 
     return ret;
