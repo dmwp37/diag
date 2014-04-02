@@ -33,6 +33,8 @@ const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
 #define DG_NML_LOOP_DEFAULT_RUN_TIME -1  /* negtive means run the program for ever */
 #define DG_NML_LOOP_PORT_PAIR_MAX    13  /* the max port pair */
 
+#define DG_LOOP_CFG_MAX_BUF_SIZE     256
+
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
 ==================================================================================================*/
@@ -145,7 +147,7 @@ int main(int argc, char** argv)
     {
         if ((dg_nml_loop_cfg_settings = dg_nml_loop_read_config(args.cfg_file)) == NULL)
         {
-            exit(0);
+            exit(1);
         }
     }
     else
@@ -452,7 +454,7 @@ void dg_nml_loop_dump_config()
 
 @param[in] file - the configuration file name
 
-@return the configuration buffer
+@return the configuration buffer, NULL if error happened
 *//*==============================================================================================*/
 DG_NML_LOOP_CONFIG_T* dg_nml_loop_read_config(const char* file)
 {
@@ -460,8 +462,81 @@ DG_NML_LOOP_CONFIG_T* dg_nml_loop_read_config(const char* file)
 
     DG_NML_LOOP_CONFIG_T* ret = dg_nml_loop_default_cfg;
 
+    FILE* fp = NULL;
+    char  buf[DG_LOOP_CFG_MAX_BUF_SIZE];
+    int   line  = 1;
+    int   index = 0;
+    int   port1;
+    int   port2;
+    int   size;
+    int   pattern;
+
     memset(dg_nml_loop_default_cfg, 0, sizeof(dg_nml_loop_default_cfg));
+
+    if (access(file, F_OK) != 0)
+    {
+        DG_DBG_ERROR("can't access %s, errno=%d(%m)", file, errno);
+        return NULL;
+    }
+    else if ((fp = fopen(file, "r")) == NULL)
+    {
+        DG_DBG_ERROR("open %s failed, errno=%d(%m)", errno);
+        return NULL;
+    }
+
     DG_DBG_TRACE("reading configuration file: %s\n", file);
+
+    while (fgets(buf, DG_LOOP_CFG_MAX_BUF_SIZE, fp) != NULL)
+    {
+        if (sscanf(buf, "%x%x%d%x", &port1, &port2, &size, &pattern) == 4)
+        {
+            DG_DBG_TRACE("got %d cfg:   port1=0x%02x port2=0x%02x size=%4d pattern=0x%02x\n",
+                         index, port1, port1, size, pattern);
+
+            if (DG_LOOP_port_to_index(port1) < 0)
+            {
+                printf("line %d: port1 invalide\n", line);
+                ret = NULL;
+                break;
+            }
+
+            if (DG_LOOP_port_to_index(port2) < 0)
+            {
+                printf("line %d: port2 invalide\n", line);
+                ret = NULL;
+                break;
+            }
+
+            if ((size < DG_LOOP_PACKET_SIZE_MIN) || (size > DG_LOOP_PACKET_SIZE_MAX))
+            {
+                printf("line %d: out range packet size: %d, min=%d, max=%d\n",
+                       line, size, DG_LOOP_PACKET_SIZE_MIN, DG_LOOP_PACKET_SIZE_MAX);
+                ret = NULL;
+                break;
+            }
+
+            dg_nml_loop_default_cfg[index].port1   = (DG_LOOP_PORT_T)port1;
+            dg_nml_loop_default_cfg[index].port2   = (DG_LOOP_PORT_T)port2;
+            dg_nml_loop_default_cfg[index].size    = size;
+            dg_nml_loop_default_cfg[index].pattern = (UINT8)pattern;
+
+            index++;
+
+            if (index >= DG_NML_LOOP_PORT_PAIR_MAX)
+            {
+                break;
+            }
+        }
+        line++;
+    }
+    fclose(fp);
+
+    if (index == 0)
+    {
+        printf("%s contains no valid configuration!\n", file);
+        ret = NULL;
+    }
+
     return ret;
 }
 

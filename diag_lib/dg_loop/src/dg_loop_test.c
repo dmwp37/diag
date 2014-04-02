@@ -188,6 +188,11 @@ void DG_LOOP_wait_test(DG_LOOP_TEST_T* test)
 {
     DG_LOOP_TEST_CONTROL_T* p_control = test->control;
 
+    if (p_control == NULL)
+    {
+        return;
+    }
+
     /* tell the thread to stop */
     p_control->b_run = FALSE;
 
