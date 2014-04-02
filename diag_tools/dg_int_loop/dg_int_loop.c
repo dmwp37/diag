@@ -173,6 +173,8 @@ int main(int argc, char** argv)
         DG_LOOP_config_all_normal();
     }
 
+    printf("internal loop test finished\n");
+
     return ret;
 }
 
