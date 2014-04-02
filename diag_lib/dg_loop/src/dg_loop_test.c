@@ -42,7 +42,6 @@ typedef struct
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
-extern BOOL  dg_loop_check_port(DG_LOOP_PORT_T port);
 static void* dg_loop_send_thread(void* arg);
 static void* dg_loop_recv_thread(void* arg);
 static BOOL  dg_loop_check_recv_data(UINT8* buf, UINT32 size, UINT8 pattern);
@@ -81,9 +80,15 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
 
     DG_LOOP_TEST_CONTROL_T* p_control = NULL;
 
-    if (!dg_loop_check_port(test->tx_port) ||
-        !dg_loop_check_port(test->rx_port))
+    if (DG_LOOP_port_to_index(test->tx_port) < 0)
     {
+        DG_DBG_set_err_string("Invalid tx_port to test, port=0x%02x", test->tx_port);
+        return FALSE;
+    }
+
+    if (DG_LOOP_port_to_index(test->rx_port) < 0)
+    {
+        DG_DBG_set_err_string("Invalid rx_port to test, port=0x%02x", test->rx_port);
         return FALSE;
     }
 
@@ -269,6 +274,8 @@ void* dg_loop_send_thread(void* arg)
 
     free(send_buf);
 
+    DG_LOOP_close(fd);
+
     DG_DBG_TRACE("leave send thread: %p", (void*)pthread_self());
 
     return NULL;
@@ -347,6 +354,8 @@ void* dg_loop_recv_thread(void* arg)
     }
 
     free(recv_buf);
+
+    DG_LOOP_close(fd);
 
     DG_DBG_TRACE("leave recv thread: %p", (void*)pthread_self());
     return NULL;

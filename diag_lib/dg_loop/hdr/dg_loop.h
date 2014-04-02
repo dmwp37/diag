@@ -22,6 +22,7 @@ extern "C" {
 /*==================================================================================================
                                               MACROS
 ==================================================================================================*/
+#define DG_LOOP_PORT_NUM        26
 #define DG_LOOP_PACKET_SIZE_MAX 9000
 #define DG_LOOP_PACKET_SIZE_MIN 80
 #define DG_LOOP_RUN_IFINITE     -1
@@ -112,6 +113,30 @@ typedef struct
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
+/*=============================================================================================*//**
+@brief map the port id to index
+
+@param[in]  port - the port number according to definition
+
+@return the port index, -1 if invalid.
+
+@note
+- index is 0, 1 ... DG_LOOP_PORT_NUM-1
+- use this function to check if the port is valid
+*//*==============================================================================================*/
+int DG_LOOP_port_to_index(DG_LOOP_PORT_T port);
+
+/*=============================================================================================*//**
+@brief map the index to port
+
+@param[in]  port - the port number according to definition
+
+@return the port index, 0xFF if invalid index.
+
+@note
+- index is 0, 1 ... DG_LOOP_PORT_NUM-1
+*//*==============================================================================================*/
+DG_LOOP_PORT_T DG_LOOP_index_to_port(int index);
 
 /*=============================================================================================*//**
 @brief open port for send/recv data
@@ -184,11 +209,6 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
 - if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_config_all_normal();
-
-/*=============================================================================================*//**
-@brief print the last error string
-*//*==============================================================================================*/
-void DG_LOOP_print_err_string();
 
 /*=============================================================================================*//**
 @brief loopback test between a pair of ports

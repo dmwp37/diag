@@ -24,7 +24,6 @@
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_LOOP_PORT_NUM (int)DG_ARRAY_SIZE(dg_loop_port_array)
 #define DG_LOOP_NODE_NUM 4
 
 /*==================================================================================================
@@ -36,8 +35,6 @@ typedef BOOL (* DG_LOOP_CONFIG_FUNC_T) (DG_LOOP_PORT_T port, DG_LOOP_NODE_T node
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
-extern int dg_loop_port_to_index(DG_LOOP_PORT_T port);
-
 static BOOL cfg_mgt_mac(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg);
 static BOOL cfg_mgt_phy(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg);
 static BOOL cfg_mgt_hdr(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg);
@@ -50,36 +47,6 @@ static BOOL cfg_mgt_hdr(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T 
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
-/* port number array */
-static DG_LOOP_PORT_T dg_loop_port_array[] =
-{
-    DG_LOOP_PORT_MGT,
-    DG_LOOP_PORT_HA,
-    DG_LOOP_PORT_WTB0_1,
-    DG_LOOP_PORT_WTB0_2,
-    DG_LOOP_PORT_WTB1_1,
-    DG_LOOP_PORT_WTB1_2,
-    DG_LOOP_PORT_GE_0,
-    DG_LOOP_PORT_GE_1,
-    DG_LOOP_PORT_GE_2,
-    DG_LOOP_PORT_GE_3,
-    DG_LOOP_PORT_GE_4,
-    DG_LOOP_PORT_GE_5,
-    DG_LOOP_PORT_GE_6,
-    DG_LOOP_PORT_GE_7,
-    DG_LOOP_PORT_GE_8,
-    DG_LOOP_PORT_GE_9,
-    DG_LOOP_PORT_GE_10,
-    DG_LOOP_PORT_GE_11,
-    DG_LOOP_PORT_SFP_0,
-    DG_LOOP_PORT_SFP_1,
-    DG_LOOP_PORT_SFP_2,
-    DG_LOOP_PORT_SFP_3,
-    DG_LOOP_PORT_10GE_0,
-    DG_LOOP_PORT_10GE_1,
-    DG_LOOP_PORT_10GE_2,
-    DG_LOOP_PORT_10GE_3,
-};
 
 /** configuration map */
 static DG_LOOP_CFG_T dg_loop_port_cfg[DG_LOOP_PORT_NUM][DG_LOOP_NODE_NUM] =
@@ -212,7 +179,7 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
 
     DG_LOOP_CONFIG_FUNC_T cfg_f = NULL;
     /* convert port id to index */
-    int index = dg_loop_port_to_index(port);
+    int index = DG_LOOP_port_to_index(port);
 
     if (index < 0)
     {
@@ -276,9 +243,10 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
 *//*==============================================================================================*/
 BOOL DG_LOOP_config_all_normal()
 {
-    BOOL ret = TRUE;
-    int  index;
-    int  node;
+    BOOL           ret = TRUE;
+    int            index;
+    int            node;
+    DG_LOOP_PORT_T port;
 
     for (index = 0; index < DG_LOOP_PORT_NUM; index++)
     {
@@ -286,8 +254,9 @@ BOOL DG_LOOP_config_all_normal()
         {
             if (dg_loop_port_cfg[index][node] != DG_LOOP_CFG_NORMAL)
             {
+                port = DG_LOOP_index_to_port(index);
                 /* revert back to normal */
-                if (!DG_LOOP_config(dg_loop_port_array[index], node, DG_LOOP_CFG_NORMAL))
+                if (!DG_LOOP_config(port, node, DG_LOOP_CFG_NORMAL))
                 {
                     ret = FALSE;
                 }
@@ -301,30 +270,6 @@ BOOL DG_LOOP_config_all_normal()
 /*==================================================================================================
                                           LOCAL FUNCTIONS
 ==================================================================================================*/
-/*=============================================================================================*//**
-@brief map the port id to index
-
-@return the internal port index, -1 if invalid
-
-@note
-- if error happened, call DG_DBG_get_err_string() to get the last error
-*//*==============================================================================================*/
-int dg_loop_port_to_index(DG_LOOP_PORT_T port)
-{
-    int ret = -1;
-    int index;
-
-    for (index = 0; index < DG_LOOP_PORT_NUM; index++)
-    {
-        if (dg_loop_port_array[index] == port)
-        {
-            ret = index;
-            break;
-        }
-    }
-
-    return ret;
-}
 
 /*=============================================================================================*//**
 @brief MGT MAC config

@@ -57,6 +57,7 @@ typedef struct
 static error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state);
 static BOOL    dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T* args);
 static BOOL    dg_int_loop_get_int_arg(const char* arg, long* value);
+static void    dg_int_loop_print_err_string();
 static void    dg_int_loop_print_result(DG_LOOP_TEST_STATISTIC_T* result);
 static void    dg_int_loop_exit_handler(int sig);
 
@@ -131,13 +132,13 @@ int main(int argc, char** argv)
         {
             printf("failed to config internal loop back, port=0x%02x, node=%d: ",
                    args.port, args.node);
-            DG_LOOP_print_err_string();
+            dg_int_loop_print_err_string();
             ret = 1;
         }
         else if (!DG_LOOP_start_test(&test))
         {
             printf("failed to start loopback test: ");
-            DG_LOOP_print_err_string();
+            dg_int_loop_print_err_string();
             ret = 1;
         }
         else
@@ -400,5 +401,18 @@ void dg_int_loop_exit_handler(int sig)
 {
     dg_int_loop_run = FALSE;
     DG_DBG_TRACE("got signaled: sig = %d", sig);
+}
+
+/*=============================================================================================*//**
+@brief print the last error string
+*//*==============================================================================================*/
+void dg_int_loop_print_err_string()
+{
+    char* err_str = DG_DBG_get_err_string();
+    if (err_str != NULL)
+    {
+        printf("%s\n", err_str);
+        free(err_str);
+    }
 }
 
