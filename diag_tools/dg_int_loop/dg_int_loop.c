@@ -126,16 +126,21 @@ int main(int argc, char** argv)
     if (args.port != 0)
     {
         DG_LOOP_TEST_STATISTIC_T* result = &test.result;
-
-        if (!DG_LOOP_config(args.port, args.node, DG_LOOP_CFG_INTERNAL))
+        if (!DG_LOOP_connect(args.port, args.port))
         {
-            printf("failed to config internal loop back, port=0x%02x, node=%d: %s",
+            printf("failed to connect internal loop back, port=0x%02x%s\n",
+                   args.port, DG_DBG_get_err_string());
+            ret = 1;
+        }
+        else if (!DG_LOOP_config(args.port, args.node, DG_LOOP_CFG_INTERNAL))
+        {
+            printf("failed to config internal loop back, port=0x%02x, node=%d: %s\n",
                    args.port, args.node, DG_DBG_get_err_string());
             ret = 1;
         }
         else if (!DG_LOOP_start_test(&test))
         {
-            printf("failed to start loopback test: %s", DG_DBG_get_err_string());
+            printf("failed to start loopback test: %s\n", DG_DBG_get_err_string());
             ret = 1;
         }
         else
@@ -168,6 +173,9 @@ int main(int argc, char** argv)
         }
         /* revert all the configuration */
         DG_LOOP_config_all_normal();
+
+        /* disconnect all ports */
+        DG_LOOP_disconnect_all();
     }
 
     printf("internal loop test finished\n");

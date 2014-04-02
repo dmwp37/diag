@@ -154,8 +154,25 @@ int main(int argc, char** argv)
         dg_nml_loop_cfg_settings = dg_nml_loop_default_cfg;
     }
 
+
+
     /* init the test blocks */
     memset(dg_nml_loop_test, 0, sizeof(dg_nml_loop_test));
+
+    /* prepare connections */
+    p_cfg = dg_nml_loop_cfg_settings;
+    index = 0;
+    while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
+    {
+        if (!DG_LOOP_connect(p_cfg->port1, p_cfg->port2))
+        {
+            printf("failed to connect port1=0x%02x port2=0x%02x: %s\n",
+                   p_cfg->port1, p_cfg->port2, DG_DBG_get_err_string());
+            exit(1);
+        }
+        index++;
+        p_cfg++;
+    }
 
     /* start all the test thread */
     p_cfg = dg_nml_loop_cfg_settings;
@@ -176,14 +193,14 @@ int main(int argc, char** argv)
 
         if (!DG_LOOP_start_test(&dg_nml_loop_test[index][0]))
         {
-            printf("failed to start loopback test tx_port=0x%02x rx_port=0x%02x: %s",
+            printf("failed to start loopback test tx_port=0x%02x rx_port=0x%02x: %s\n",
                    p_cfg->port1, p_cfg->port2, DG_DBG_get_err_string());
             ret = 1;
         }
 
         if (!DG_LOOP_start_test(&dg_nml_loop_test[index][1]))
         {
-            printf("failed to start loopback test tx_port=0x%02x rx_port=0x%02x: %s",
+            printf("failed to start loopback test tx_port=0x%02x rx_port=0x%02x: %s\n",
                    p_cfg->port2, p_cfg->port1, DG_DBG_get_err_string());
             ret = 1;
         }
@@ -232,6 +249,8 @@ int main(int argc, char** argv)
     }
 
     dg_nml_loop_print_result();
+
+    DG_LOOP_disconnect_all();
 
     printf("normal loop test finished\n");
 
@@ -492,14 +511,14 @@ DG_NML_LOOP_CONFIG_T* dg_nml_loop_read_config(const char* file)
 
             if (DG_LOOP_port_to_index(port1) < 0)
             {
-                printf("line %d: port1 invalide\n", line);
+                printf("line %d: port1 invalid\n", line);
                 ret = NULL;
                 break;
             }
 
             if (DG_LOOP_port_to_index(port2) < 0)
             {
-                printf("line %d: port2 invalide\n", line);
+                printf("line %d: port2 invalid\n", line);
                 ret = NULL;
                 break;
             }

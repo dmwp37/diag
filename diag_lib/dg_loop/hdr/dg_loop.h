@@ -139,6 +139,26 @@ int DG_LOOP_port_to_index(DG_LOOP_PORT_T port);
 DG_LOOP_PORT_T DG_LOOP_index_to_port(int index);
 
 /*=============================================================================================*//**
+@brief connect two ports
+
+@param[in] port1 - the path to open on which port
+
+@return TRUE if success
+
+@note
+- this function is only for simulation
+*//*==============================================================================================*/
+BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2);
+
+/*=============================================================================================*//**
+@brief disconnect all the ports
+
+@note
+- this function is only for simulation
+*//*==============================================================================================*/
+void DG_LOOP_disconnect_all();
+
+/*=============================================================================================*//**
 @brief open port for send/recv data
 
 @param[in]  port    - the path to open on which port
