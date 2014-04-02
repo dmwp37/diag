@@ -153,7 +153,7 @@ void DG_DBG_set_err_string(const char* format, ...)
 @note
 - get error string from thread specific data
 - If no error string was set, will return NULL
-- Caller function is responsible for freeing
+- caller should NOT free the string
 *//*==============================================================================================*/
 char* DG_DBG_get_err_string()
 {

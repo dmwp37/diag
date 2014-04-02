@@ -80,6 +80,8 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
 
     DG_LOOP_TEST_CONTROL_T* p_control = NULL;
 
+    test->control = NULL;
+
     if (DG_LOOP_port_to_index(test->tx_port) < 0)
     {
         DG_DBG_set_err_string("Invalid tx_port to test, port=0x%02x", test->tx_port);
@@ -156,6 +158,11 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
 void DG_LOOP_stop_test(DG_LOOP_TEST_T* test)
 {
     DG_LOOP_TEST_CONTROL_T* p_control = test->control;
+
+    if (p_control == NULL)
+    {
+        return;
+    }
 
     /* tell the thread to stop */
     p_control->b_run = FALSE;
