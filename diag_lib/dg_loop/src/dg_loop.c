@@ -19,6 +19,7 @@
 #include "dg_platform_defs.h"
 #include "dg_dbg.h"
 #include "dg_loop.h"
+#include "dg_loop_priv.h"
 
 /** @addtogroup libdg_loop
 @{
@@ -30,13 +31,6 @@
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_LOOP_MUTEX_LOCK(x) \
-    pthread_cleanup_push(dg_loop_mutex_unlock, (x)); \
-    pthread_mutex_lock((x))
-
-#define DG_LOOP_MUTEX_UNLOCK(x) \
-    pthread_mutex_unlock(x); \
-    pthread_cleanup_pop(0)
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -52,8 +46,6 @@ typedef struct
     pthread_mutex_t mutex; /* mutex protection */
 } DG_LOOP_PORT_FD_T;
 
-typedef void (* DG_LOOP_MUTEX_UNLOCK_FUN_T) (void*);
-
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
@@ -65,6 +57,7 @@ static BOOL dg_loop_read_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_read, UINT8
 /*==================================================================================================
                                          GLOBAL VARIABLES
 ==================================================================================================*/
+DG_LOOP_MUTEX_UNLOCK_FUN_T dg_loop_mutex_unlock = (DG_LOOP_MUTEX_UNLOCK_FUN_T)&pthread_mutex_unlock;
 
 /*==================================================================================================
                                           LOCAL VARIABLES
@@ -99,9 +92,6 @@ static DG_LOOP_PORT_FD_T dg_loop_port_fd[DG_LOOP_PORT_NUM] =
     { DG_LOOP_PORT_10GE_2, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
     { DG_LOOP_PORT_10GE_3, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER }
 };
-
-static DG_LOOP_MUTEX_UNLOCK_FUN_T dg_loop_mutex_unlock =
-    (DG_LOOP_MUTEX_UNLOCK_FUN_T)&pthread_mutex_unlock;
 
 /*==================================================================================================
                                          GLOBAL FUNCTIONS

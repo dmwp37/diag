@@ -105,9 +105,12 @@ typedef struct
     int                      number;      /* [in]  - how many times to send/recv  */
     DG_LOOP_TEST_STATISTIC_T result;      /* [out] - test result                  */
     /* private sector */
-    pthread_t send_thread; /* [pri] - send thread                  */
-    pthread_t recv_thread; /* [pri] - thread                       */
-    BOOL      b_run;       /* [pri] - thread run control           */
+    pthread_t       send_thread; /* [pri] - send thread        */
+    pthread_t       recv_thread; /* [pri] - recv thread        */
+    BOOL            b_run;       /* [pri] - thread run control */
+    int             count;       /* [pri] - packet to be recv  */
+    pthread_mutex_t mutex;       /* [pri] - count mutex        */
+    pthread_cond_t  cond;        /* [pri] - count condition    */
 } DG_LOOP_TEST_T;
 
 /*==================================================================================================
