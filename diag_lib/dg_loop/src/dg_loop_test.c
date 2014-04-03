@@ -31,13 +31,6 @@
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
 ==================================================================================================*/
-/** internally use struct to control the send/revc thread */
-typedef struct
-{
-    pthread_t send_thread; /* send thread        */
-    pthread_t recv_thread; /* recv thread        */
-    BOOL      b_run;       /* thread run control */
-} DG_LOOP_TEST_CONTROL_T;
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
@@ -78,10 +71,6 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
 {
     BOOL ret = FALSE;
 
-    DG_LOOP_TEST_CONTROL_T* p_control = NULL;
-
-    test->control = NULL;
-
     if (DG_LOOP_port_to_index(test->tx_port) < 0)
     {
         DG_DBG_set_err_string("Invalid tx_port to test, port=0x%02x", test->tx_port);
@@ -94,24 +83,15 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
         return FALSE;
     }
 
-    /* init the test control block */
-    if ((p_control = malloc(sizeof(DG_LOOP_TEST_CONTROL_T))) == NULL)
-    {
-        DG_DBG_set_err_string("failed to malloc loop test control block");
-        return FALSE;
-    }
+    test->b_run = TRUE;
 
-    memset(p_control, 0, sizeof(DG_LOOP_TEST_CONTROL_T));
-    p_control->b_run = TRUE;
 
-    test->control = p_control;
-
-    if (pthread_create(&p_control->recv_thread, NULL, dg_loop_recv_thread, test) != 0)
+    if (pthread_create(&test->recv_thread, NULL, dg_loop_recv_thread, test) != 0)
     {
         DG_DBG_ERROR("failed to start recv thread, rx_port=0x%02x, errno=%d(%m)",
                      test->rx_port, errno);
     }
-    else if (pthread_create(&p_control->send_thread, NULL, dg_loop_send_thread, test) != 0)
+    else if (pthread_create(&test->send_thread, NULL, dg_loop_send_thread, test) != 0)
     {
         DG_DBG_ERROR("failed to start send thread, tx_port=0x%02x, errno=%d(%m)",
                      test->tx_port, errno);
@@ -127,21 +107,19 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
     if (!ret)
     {
         /* tell the thread to stop */
-        p_control->b_run = FALSE;
+        test->b_run = FALSE;
 
         /* wait the thread to finish */
-        if (p_control->send_thread != 0)
+        if (test->send_thread != 0)
         {
-            pthread_join(p_control->send_thread, NULL);
+            pthread_join(test->send_thread, NULL);
         }
 
         /* wait the thread to finish */
-        if (p_control->recv_thread != 0)
+        if (test->recv_thread != 0)
         {
-            pthread_join(p_control->recv_thread, NULL);
+            pthread_join(test->recv_thread, NULL);
         }
-
-        free(p_control);
     }
 
     return ret;
@@ -157,15 +135,8 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
 *//*==============================================================================================*/
 void DG_LOOP_stop_test(DG_LOOP_TEST_T* test)
 {
-    DG_LOOP_TEST_CONTROL_T* p_control = test->control;
-
-    if (p_control == NULL)
-    {
-        return;
-    }
-
     /* tell the thread to stop */
-    p_control->b_run = FALSE;
+    test->b_run = FALSE;
 }
 
 /*=============================================================================================*//**
@@ -177,9 +148,7 @@ void DG_LOOP_stop_test(DG_LOOP_TEST_T* test)
 *//*==============================================================================================*/
 BOOL DG_LOOP_query_test(DG_LOOP_TEST_T* test)
 {
-    DG_LOOP_TEST_CONTROL_T* p_control = test->control;
-
-    return p_control->b_run;
+    return test->b_run;
 }
 
 /*=============================================================================================*//**
@@ -193,29 +162,20 @@ BOOL DG_LOOP_query_test(DG_LOOP_TEST_T* test)
 *//*==============================================================================================*/
 void DG_LOOP_wait_test(DG_LOOP_TEST_T* test)
 {
-    DG_LOOP_TEST_CONTROL_T* p_control = test->control;
-
-    if (p_control == NULL)
-    {
-        return;
-    }
-
     /* tell the thread to stop */
-    p_control->b_run = FALSE;
+    test->b_run = FALSE;
 
     /* wait the thread to finish */
-    if (p_control->send_thread != 0)
+    if (test->send_thread != 0)
     {
-        pthread_join(p_control->send_thread, NULL);
+        pthread_join(test->send_thread, NULL);
     }
 
     /* wait the thread to finish */
-    if (p_control->recv_thread != 0)
+    if (test->recv_thread != 0)
     {
-        pthread_join(p_control->recv_thread, NULL);
+        pthread_join(test->recv_thread, NULL);
     }
-
-    free(p_control);
 }
 
 /*==================================================================================================
@@ -231,9 +191,8 @@ void DG_LOOP_wait_test(DG_LOOP_TEST_T* test)
 *//*==============================================================================================*/
 void* dg_loop_send_thread(void* arg)
 {
-    DG_LOOP_TEST_T*           test      = (DG_LOOP_TEST_T*)arg;
-    DG_LOOP_TEST_CONTROL_T*   p_control = test->control;
-    DG_LOOP_TEST_STATISTIC_T* result    = &test->result;
+    DG_LOOP_TEST_T*           test   = (DG_LOOP_TEST_T*)arg;
+    DG_LOOP_TEST_STATISTIC_T* result = &test->result;
 
     int    fd;
     int    number   = test->number;
@@ -258,7 +217,7 @@ void* dg_loop_send_thread(void* arg)
 
     memset(send_buf, test->pattern, size);
 
-    while (p_control->b_run)
+    while (test->b_run)
     {
         if (number < 0)
         {
@@ -302,9 +261,8 @@ void* dg_loop_send_thread(void* arg)
 *//*==============================================================================================*/
 void* dg_loop_recv_thread(void* arg)
 {
-    DG_LOOP_TEST_T*           test      = (DG_LOOP_TEST_T*)arg;
-    DG_LOOP_TEST_CONTROL_T*   p_control = test->control;
-    DG_LOOP_TEST_STATISTIC_T* result    = &test->result;
+    DG_LOOP_TEST_T*           test   = (DG_LOOP_TEST_T*)arg;
+    DG_LOOP_TEST_STATISTIC_T* result = &test->result;
 
     int    fd;
     int    number       = test->number;
@@ -315,7 +273,7 @@ void* dg_loop_recv_thread(void* arg)
     DG_DBG_TRACE("enter into recv thread: %p", (void*)pthread_self());
 
     /* open the port for sending data */
-    if ((fd = DG_LOOP_open(test->tx_port)) < 0)
+    if ((fd = DG_LOOP_open(test->rx_port)) < 0)
     {
         DG_DBG_ERROR("failed to open send port, tx_port=0x%02x", test->tx_port);
         return NULL;
@@ -328,7 +286,7 @@ void* dg_loop_recv_thread(void* arg)
         return NULL;
     }
 
-    while (p_control->b_run)
+    while (test->b_run)
     {
         if (number < 0)
         {
@@ -338,7 +296,7 @@ void* dg_loop_recv_thread(void* arg)
         {
             DG_DBG_TRACE("recv thread %p finished", (void*)pthread_self());
             /* only let the recv thread update the control */
-            p_control->b_run = FALSE;
+            test->b_run = FALSE;
             break;
         }
         else

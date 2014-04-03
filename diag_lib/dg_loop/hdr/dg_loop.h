@@ -11,6 +11,7 @@
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
+#include <pthread.h>
 
 /** @addtogroup libdg_loop
 @{
@@ -96,14 +97,17 @@ typedef struct
 
 typedef struct
 {
-    void* control; /* the internal control block */
-
-    DG_LOOP_PORT_T           tx_port; /* [in]  - the port that will send data */
-    DG_LOOP_PORT_T           rx_port; /* [in]  - the port that will recv data */
-    UINT8                    pattern; /* [in]  - packet data pattern          */
-    int                      size;    /* [in]  - packet size of each transfer */
-    int                      number;  /* [in]  - how many times to send/recv  */
-    DG_LOOP_TEST_STATISTIC_T result;  /* [out] - test result */
+    /* public sector */
+    DG_LOOP_PORT_T           tx_port;     /* [in]  - the port that will send data */
+    DG_LOOP_PORT_T           rx_port;     /* [in]  - the port that will recv data */
+    UINT8                    pattern;     /* [in]  - packet data pattern          */
+    int                      size;        /* [in]  - packet size of each transfer */
+    int                      number;      /* [in]  - how many times to send/recv  */
+    DG_LOOP_TEST_STATISTIC_T result;      /* [out] - test result                  */
+    /* private sector */
+    pthread_t send_thread; /* [pri] - send thread                  */
+    pthread_t recv_thread; /* [pri] - thread                       */
+    BOOL      b_run;       /* [pri] - thread run control           */
 } DG_LOOP_TEST_T;
 
 /*==================================================================================================

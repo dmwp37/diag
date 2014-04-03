@@ -594,7 +594,7 @@ BOOL dg_client_comm_read_fd(int fd, void* buff, int len)
                indicates client closed its connection */
             if (current_bytes_read != 0)
             {
-                DG_DBG_ERROR("Read failed, current_bytes_read = %d, errno = %d",
+                DG_DBG_ERROR("Read failed, current_bytes_read = %d, errno=%d(%m)",
                              current_bytes_read, errno);
             }
 

@@ -202,11 +202,20 @@ BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
 
     DG_DBG_TRACE("port1=0x%02x port2=0x%02x connected", port1, port2);
     /* Save the sockets */
-    dg_loop_port_fd[index1].tx_fd = sockets[0];
-    dg_loop_port_fd[index2].rx_fd = sockets[1];
+    if (port1 == port2)
+    {
+        dg_loop_port_fd[index1].tx_fd = sockets[0];
+        dg_loop_port_fd[index1].rx_fd = sockets[1];
+    }
+    else
+    {
+        dg_loop_port_fd[index1].tx_fd = sockets[0];
+        dg_loop_port_fd[index2].rx_fd = sockets[1];
 
-    dg_loop_port_fd[index2].tx_fd = sockets[0];
-    dg_loop_port_fd[index1].rx_fd = sockets[1];
+        dg_loop_port_fd[index2].tx_fd = sockets[1];
+        dg_loop_port_fd[index1].rx_fd = sockets[0];
+    }
+
 
     return TRUE;
 }
@@ -466,7 +475,6 @@ BOOL dg_loop_read_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_read, UINT8* data)
     BOOL is_success         = TRUE;
     int  total_bytes_read   = 0;
     int  current_bytes_read = 0;
-    int  try_count          = 0;
 
     /* Continue to read until an error occurs or we read the desired number of bytes */
     while (is_success && (total_bytes_read != (int)bytes_to_read))
@@ -486,11 +494,6 @@ BOOL dg_loop_read_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_read, UINT8* data)
             {
                 DG_DBG_ERROR("Read port 0x%02x failed, current_bytes_read=%d, errno=%d(%m)",
                              fd->port, current_bytes_read, errno);
-            }
-
-            if (++try_count == 3)
-            {
-                DG_DBG_ERROR("Read Failed on port 0x%02x, over number of retries.", fd->port);
                 is_success = FALSE;
             }
         }

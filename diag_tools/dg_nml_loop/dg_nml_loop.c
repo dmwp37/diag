@@ -187,7 +187,7 @@ int main(int argc, char** argv)
 
         dg_nml_loop_test[index][1].tx_port = p_cfg->port2;
         dg_nml_loop_test[index][1].rx_port = p_cfg->port1;
-        dg_nml_loop_test[index][1].pattern = p_cfg->pattern;
+        dg_nml_loop_test[index][1].pattern = ~p_cfg->pattern;
         dg_nml_loop_test[index][1].size    = p_cfg->size;
         dg_nml_loop_test[index][1].number  = DG_LOOP_RUN_IFINITE;
 
