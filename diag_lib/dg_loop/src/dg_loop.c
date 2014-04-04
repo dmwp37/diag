@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <pthread.h>
 #include "dg_platform_defs.h"
 #include "dg_dbg.h"
@@ -462,13 +463,36 @@ BOOL dg_loop_write_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_write, UINT8* dat
 *//*==============================================================================================*/
 BOOL dg_loop_read_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_read, UINT8* data)
 {
-    BOOL is_success         = TRUE;
-    int  total_bytes_read   = 0;
-    int  current_bytes_read = 0;
+    BOOL           is_success         = TRUE;
+    int            total_bytes_read   = 0;
+    int            current_bytes_read = 0;
+    struct timeval timeout;
+    fd_set         fd_set;
+    int            select_status;
+
+    timeout.tv_sec  = 0;
+    timeout.tv_usec = 100000;
+
+    /* Wait for data to be available to read */
+    FD_ZERO(&fd_set);
+    FD_SET(fd->rx_fd, &fd_set);
 
     /* Continue to read until an error occurs or we read the desired number of bytes */
     while (is_success && (total_bytes_read != (int)bytes_to_read))
     {
+        select_status = select(fd->rx_fd + 1, &fd_set, NULL, NULL, &timeout);
+
+        if (select_status == 0)
+        {
+            DG_DBG_ERROR("read timeout occurred!");
+            return FALSE;
+        }
+        else if (select_status != 1)
+        {
+            DG_DBG_ERROR("Select failed, select_status=%d. errno=%d(%m)", select_status, errno);
+            return FALSE;
+        }
+
         current_bytes_read = read(fd->rx_fd,
                                   ((UINT8*)data + total_bytes_read),
                                   (bytes_to_read - total_bytes_read));
