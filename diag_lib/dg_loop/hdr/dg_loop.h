@@ -110,7 +110,8 @@ typedef struct
     BOOL            b_run;       /* [pri] - thread run control */
     int             count;       /* [pri] - packet to be recv  */
     pthread_mutex_t mutex;       /* [pri] - count mutex        */
-    pthread_cond_t  cond;        /* [pri] - count condition    */
+    pthread_cond_t  send_cond;   /* [pri] - send condition     */
+    pthread_cond_t  recv_cond;   /* [pri] - recv condition     */
 } DG_LOOP_TEST_T;
 
 /*==================================================================================================

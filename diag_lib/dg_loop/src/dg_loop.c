@@ -37,7 +37,7 @@
 ==================================================================================================*/
 typedef struct
 {
-    DG_LOOP_PORT_T port; /* the stored port  */
+    DG_LOOP_PORT_T port;   /* the stored port  */
 
     int ref;               /* reference count  */
     int tx_fd;             /* the actual tx fd */

@@ -113,6 +113,7 @@ int main(int argc, char** argv)
 {
     int ret   = 0;
     int index = 0;
+    int time  = 0;
 
     /* default argument. */
     DG_NML_LOOP_ARG_T args =
@@ -222,6 +223,7 @@ int main(int argc, char** argv)
             args.time--;
         }
 
+        printf("time frame: %ds\n", time++);
         sleep(1);
         dg_nml_loop_print_result();
     }
@@ -248,6 +250,7 @@ int main(int argc, char** argv)
         p_cfg++;
     }
 
+    printf("final result:\n");
     dg_nml_loop_print_result();
 
     DG_LOOP_disconnect_all();

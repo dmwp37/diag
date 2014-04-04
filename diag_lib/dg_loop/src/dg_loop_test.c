@@ -28,7 +28,8 @@
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_LOOP_CACHE_COUNT_MAX 16
+/* this value can't be too big, or it will lost packets */
+#define DG_LOOP_CACHE_COUNT_MAX 4
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -85,9 +86,15 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
         return FALSE;
     }
 
-    if (pthread_cond_init(&test->cond, NULL) != 0)
+    if (pthread_cond_init(&test->send_cond, NULL) != 0)
     {
-        DG_DBG_set_err_string("can't init condtion, errno=%d(%m)", errno);
+        DG_DBG_set_err_string("can't init send condtion, errno=%d(%m)", errno);
+        return FALSE;
+    }
+
+    if (pthread_cond_init(&test->recv_cond, NULL) != 0)
+    {
+        DG_DBG_set_err_string("can't init recv condtion, errno=%d(%m)", errno);
         return FALSE;
     }
 
@@ -192,7 +199,8 @@ void DG_LOOP_wait_test(DG_LOOP_TEST_T* test)
     }
 
     pthread_mutex_destroy(&test->mutex);
-    pthread_cond_destroy(&test->cond);
+    pthread_cond_destroy(&test->send_cond);
+    pthread_cond_destroy(&test->recv_cond);
 }
 
 /*==================================================================================================
@@ -238,15 +246,18 @@ void* dg_loop_send_thread(void* arg)
     {
         if (test->count > DG_LOOP_CACHE_COUNT_MAX)
         {
-            /* no data to recv */
+            /* no data to send */
             DG_LOOP_MUTEX_LOCK(&test->mutex);
-            if (pthread_cond_wait(&test->cond, &test->mutex) != 0)
+            pthread_cond_signal(&test->recv_cond);
+            if (pthread_cond_wait(&test->send_cond, &test->mutex) != 0)
             {
-                DG_DBG_ERROR("Error waiting on condition, errno=%d(%m)", errno);
+                DG_DBG_ERROR("Error waiting on send condition, errno=%d(%m)", errno);
             }
             DG_LOOP_MUTEX_UNLOCK(&test->mutex);
+
             continue;
         }
+
 
         if (number < 0)
         {
@@ -271,10 +282,7 @@ void* dg_loop_send_thread(void* arg)
             result->total_send++;
             DG_LOOP_MUTEX_LOCK(&test->mutex);
             test->count++;
-            if (test->count == DG_LOOP_CACHE_COUNT_MAX)
-            {
-                pthread_cond_signal(&test->cond);
-            }
+            pthread_cond_signal(&test->recv_cond);
             DG_LOOP_MUTEX_UNLOCK(&test->mutex);
         }
     }
@@ -283,10 +291,6 @@ void* dg_loop_send_thread(void* arg)
 
     DG_LOOP_close(fd);
 
-    /* signal the recv thread to finish */
-    DG_LOOP_MUTEX_LOCK(&test->mutex);
-    pthread_cond_signal(&test->cond);
-    DG_LOOP_MUTEX_UNLOCK(&test->mutex);
 
     DG_DBG_TRACE("leave send thread: %p", (void*)pthread_self());
 
@@ -329,17 +333,24 @@ void* dg_loop_recv_thread(void* arg)
 
     while ((test->count != 0) || test->b_run)
     {
-        if (test->count == 0)
+        if (test->count > 0)
         {
-            /* no data to recv */
+            /* we have data to recv */
+        }
+        else if (test->b_run)
+        {
             DG_LOOP_MUTEX_LOCK(&test->mutex);
-            if (pthread_cond_wait(&test->cond, &test->mutex) != 0)
+            pthread_cond_signal(&test->send_cond);
+            /* no data to recv */
+            if (pthread_cond_wait(&test->recv_cond, &test->mutex) != 0)
             {
-                DG_DBG_ERROR("Error waiting on condition, errno=%d(%m)", errno);
+                DG_DBG_ERROR("Error waiting on recv condition, errno=%d(%m)", errno);
             }
             DG_LOOP_MUTEX_UNLOCK(&test->mutex);
+
             continue;
         }
+
 
         if (number < 0)
         {
@@ -363,16 +374,20 @@ void* dg_loop_recv_thread(void* arg)
         if (!DG_LOOP_recv(fd, recv_buf, size))
         {
             result->fail_recv++;
+
+            /* if read time out we consider there is no data */
+            DG_LOOP_MUTEX_LOCK(&test->mutex);
+            test->count = 0;
+            pthread_cond_signal(&test->send_cond);
+            DG_LOOP_MUTEX_UNLOCK(&test->mutex);
         }
         else
         {
             DG_LOOP_MUTEX_LOCK(&test->mutex);
             test->count--;
-            if (test->count == 0)
-            {
-                pthread_cond_signal(&test->cond);
-            }
+            pthread_cond_signal(&test->send_cond);
             DG_LOOP_MUTEX_UNLOCK(&test->mutex);
+
             /* verify the data */
             if (!dg_loop_check_recv_data(recv_buf, size, test->pattern))
             {
