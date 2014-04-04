@@ -413,19 +413,14 @@ void* dg_loop_recv_thread(void* arg)
 *//*==============================================================================================*/
 BOOL dg_loop_check_recv_data(UINT8* buf, UINT32 size, UINT8 pattern)
 {
-    BOOL   ret = TRUE;
-    UINT32 i;
+    UINT8 v = 0;
 
-    for (i = 0; i < size; i++)
+    while ((size-- > 0) && (v == 0))
     {
-        if (buf[i] != pattern)
-        {
-            ret = FALSE;
-            break;
-        }
+        v = *(buf++) - pattern;
     }
 
-    return ret;
+    return v == 0;
 }
 
 /** @} */
