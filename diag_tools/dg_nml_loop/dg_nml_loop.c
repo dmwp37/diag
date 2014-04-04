@@ -31,7 +31,7 @@ const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
                                            LOCAL MACROS
 ==================================================================================================*/
 #define DG_NML_LOOP_DEFAULT_RUN_TIME -1  /* negtive means run the program for ever */
-#define DG_NML_LOOP_PORT_PAIR_MAX    13  /* the max port pair */
+#define DG_NML_LOOP_PORT_PAIR_MAX    100 /* the max port pair */
 
 #define DG_LOOP_CFG_MAX_BUF_SIZE     256
 
@@ -59,7 +59,7 @@ typedef struct
 static error_t dg_nml_loop_arg_parse(int key, char* arg, struct argp_state* state);
 static BOOL    dg_nml_loop_prepare_args(int argc, char** argv, DG_NML_LOOP_ARG_T* args);
 static BOOL    dg_nml_loop_get_int_arg(const char* arg, long* value);
-static void    dg_nml_loop_print_result();
+static void    dg_nml_loop_print_result(int time);
 static void    dg_nml_loop_exit_handler(int sig);
 static void    dg_nml_loop_dump_config();
 
@@ -97,7 +97,7 @@ static DG_NML_LOOP_CONFIG_T dg_nml_loop_default_cfg[] =
 static DG_NML_LOOP_CONFIG_T* dg_nml_loop_cfg_settings = NULL;
 
 static /* test control blocks */
-DG_LOOP_TEST_T dg_nml_loop_test[DG_NML_LOOP_PORT_PAIR_MAX][2];
+DG_LOOP_TEST_T dg_nml_loop_test[DG_NML_LOOP_PORT_PAIR_MAX];
 
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
@@ -180,32 +180,18 @@ int main(int argc, char** argv)
     index = 0;
     while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
     {
-        dg_nml_loop_test[index][0].tx_port = p_cfg->port1;
-        dg_nml_loop_test[index][0].rx_port = p_cfg->port2;
-        dg_nml_loop_test[index][0].pattern = p_cfg->pattern;
-        dg_nml_loop_test[index][0].size    = p_cfg->size;
-        dg_nml_loop_test[index][0].number  = DG_LOOP_RUN_IFINITE;
+        dg_nml_loop_test[index].tx_port = p_cfg->port1;
+        dg_nml_loop_test[index].rx_port = p_cfg->port2;
+        dg_nml_loop_test[index].pattern = p_cfg->pattern;
+        dg_nml_loop_test[index].size    = p_cfg->size;
+        dg_nml_loop_test[index].number  = DG_LOOP_RUN_IFINITE;
 
-        dg_nml_loop_test[index][1].tx_port = p_cfg->port2;
-        dg_nml_loop_test[index][1].rx_port = p_cfg->port1;
-        dg_nml_loop_test[index][1].pattern = ~p_cfg->pattern;
-        dg_nml_loop_test[index][1].size    = p_cfg->size;
-        dg_nml_loop_test[index][1].number  = DG_LOOP_RUN_IFINITE;
-
-        if (!DG_LOOP_start_test(&dg_nml_loop_test[index][0]))
+        if (!DG_LOOP_start_test(&dg_nml_loop_test[index]))
         {
             printf("failed to start loopback test tx_port=0x%02x rx_port=0x%02x: %s\n",
                    p_cfg->port1, p_cfg->port2, DG_DBG_get_err_string());
             ret = 1;
         }
-
-        if (!DG_LOOP_start_test(&dg_nml_loop_test[index][1]))
-        {
-            printf("failed to start loopback test tx_port=0x%02x rx_port=0x%02x: %s\n",
-                   p_cfg->port2, p_cfg->port1, DG_DBG_get_err_string());
-            ret = 1;
-        }
-
         index++;
         p_cfg++;
     }
@@ -225,7 +211,7 @@ int main(int argc, char** argv)
 
         printf("time frame: %ds\n", time++);
         sleep(1);
-        dg_nml_loop_print_result();
+        dg_nml_loop_print_result(0);
     }
 
     /* stop the thread */
@@ -233,8 +219,7 @@ int main(int argc, char** argv)
     index = 0;
     while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
     {
-        DG_LOOP_stop_test(&dg_nml_loop_test[index][0]);
-        DG_LOOP_stop_test(&dg_nml_loop_test[index][1]);
+        DG_LOOP_stop_test(&dg_nml_loop_test[index]);
         index++;
         p_cfg++;
     }
@@ -244,14 +229,13 @@ int main(int argc, char** argv)
     index = 0;
     while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
     {
-        DG_LOOP_wait_test(&dg_nml_loop_test[index][0]);
-        DG_LOOP_wait_test(&dg_nml_loop_test[index][1]);
+        DG_LOOP_wait_test(&dg_nml_loop_test[index]);
         index++;
         p_cfg++;
     }
 
     printf("final result:\n");
-    dg_nml_loop_print_result();
+    dg_nml_loop_print_result(time);
 
     DG_LOOP_disconnect_all();
 
@@ -398,33 +382,56 @@ BOOL dg_nml_loop_get_int_arg(const char* arg, long* value)
 
     return ret;
 }
+
 /*=============================================================================================*//**
 @brief pint out the statistic result
-
-@param[in] result - loop test result
+@param[in] time - 0 for real time statistic of every second, other for final total statistic
 *//*==============================================================================================*/
-void dg_nml_loop_print_result()
+void dg_nml_loop_print_result(int time)
 {
-    int index = 0;
+    int   index = 0;
+    float pps;
+    float bps;
 
-    DG_NML_LOOP_CONFIG_T* p_cfg = dg_nml_loop_cfg_settings;
+    DG_LOOP_TEST_STATISTIC_T* result;
+    DG_NML_LOOP_CONFIG_T*     p_cfg = dg_nml_loop_cfg_settings;
 
     while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
     {
-        printf("tx_port=0x%02x, rx_port=0x%02x\n", p_cfg->port1, p_cfg->port2);
-        printf("total_send=%d  ", dg_nml_loop_test[index][0].result.total_send);
-        printf("failed_send=%d  ", dg_nml_loop_test[index][0].result.fail_send);
-        printf("total_recv=%d  ", dg_nml_loop_test[index][0].result.total_recv);
-        printf("failed_recv=%d  ", dg_nml_loop_test[index][0].result.fail_recv);
-        printf("wrong_recv=%d\n\n", dg_nml_loop_test[index][0].result.wrong_recv);
+        result = &dg_nml_loop_test[index].result;
+        printf("tx_port=0x%02x, rx_port=0x%02x, ", p_cfg->port1, p_cfg->port2);
+        printf("total send=%6d ", result->total_send);
+        printf("recv=%6d, ", result->total_recv);
 
-        printf("tx_port=0x%02x, rx_port=0x%02x\n", p_cfg->port2, p_cfg->port1);
-        printf("total_send=%d  ", dg_nml_loop_test[index][1].result.total_send);
-        printf("failed_send=%d  ", dg_nml_loop_test[index][1].result.fail_send);
-        printf("total_recv=%d  ", dg_nml_loop_test[index][1].result.total_recv);
-        printf("failed_recv=%d  ", dg_nml_loop_test[index][1].result.fail_recv);
-        printf("wrong_recv=%d\n\n", dg_nml_loop_test[index][1].result.wrong_recv);
+        if (time == 0)
+        {
+            static int last[DG_NML_LOOP_PORT_PAIR_MAX] = { 0 };
 
+            pps = (float)(result->total_recv - last[index]) / 1000;
+            bps = (float)(result->total_recv - last[index]) * dg_nml_loop_test[index].size *
+                  8 / 1000000;
+            last[index] = result->total_recv;
+        }
+        else
+        {
+            pps = (float)result->total_recv / time / 1000;
+            bps = (float)result->total_recv / time * dg_nml_loop_test[index].size * 8 / 1000000;
+        }
+        printf("%5.2f Kpps, %6.2f Mbps. ", pps, bps);
+
+        if (result->fail_send)
+        {
+            printf("failed_send=%d  ", result->fail_send);
+        }
+        if (result->fail_recv)
+        {
+            printf("failed_recv=%d  ", result->fail_recv);
+        }
+        if (result->wrong_recv)
+        {
+            printf("wrong_recv=%d  ", result->wrong_recv);
+        }
+        printf("\n");
         index++;
         p_cfg++;
     }
