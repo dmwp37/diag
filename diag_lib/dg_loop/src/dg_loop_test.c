@@ -244,19 +244,17 @@ void* dg_loop_send_thread(void* arg)
 
     while (test->b_run)
     {
-        if (test->count > DG_LOOP_CACHE_COUNT_MAX)
+        DG_LOOP_MUTEX_LOCK(&test->mutex);
+        if (test->count >= DG_LOOP_CACHE_COUNT_MAX)
         {
             /* no data to send */
-            DG_LOOP_MUTEX_LOCK(&test->mutex);
             pthread_cond_signal(&test->recv_cond);
             if (pthread_cond_wait(&test->send_cond, &test->mutex) != 0)
             {
                 DG_DBG_ERROR("Error waiting on send condition, errno=%d(%m)", errno);
             }
-            DG_LOOP_MUTEX_UNLOCK(&test->mutex);
-
-            continue;
         }
+        DG_LOOP_MUTEX_UNLOCK(&test->mutex);
 
 
         if (number < 0)
@@ -333,23 +331,21 @@ void* dg_loop_recv_thread(void* arg)
 
     while ((test->count != 0) || test->b_run)
     {
+        DG_LOOP_MUTEX_LOCK(&test->mutex);
         if (test->count > 0)
         {
             /* we have data to recv */
         }
         else if (test->b_run)
         {
-            DG_LOOP_MUTEX_LOCK(&test->mutex);
             pthread_cond_signal(&test->send_cond);
             /* no data to recv */
             if (pthread_cond_wait(&test->recv_cond, &test->mutex) != 0)
             {
                 DG_DBG_ERROR("Error waiting on recv condition, errno=%d(%m)", errno);
             }
-            DG_LOOP_MUTEX_UNLOCK(&test->mutex);
-
-            continue;
         }
+        DG_LOOP_MUTEX_UNLOCK(&test->mutex);
 
 
         if (number < 0)
