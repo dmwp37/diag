@@ -38,6 +38,7 @@
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
+static void* dg_loop_thread(void* arg);
 static void* dg_loop_send_thread(void* arg);
 static void* dg_loop_recv_thread(void* arg);
 static BOOL  dg_loop_check_recv_data(UINT8* buf, UINT32 size, UINT8 pattern);
@@ -53,6 +54,51 @@ static BOOL  dg_loop_check_recv_data(UINT8* buf, UINT32 size, UINT8 pattern);
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
 ==================================================================================================*/
+
+/*=============================================================================================*//**
+@brief one send/recv thread version of DG_LOOP_start_test
+*//*==============================================================================================*/
+
+BOOL DG_LOOP_start_test1(DG_LOOP_TEST_T* test)
+{
+    BOOL ret = FALSE;
+
+    if (DG_LOOP_port_to_index(test->tx_port) < 0)
+    {
+        DG_DBG_set_err_string("Invalid tx_port to test, port=0x%02x", test->tx_port);
+        return FALSE;
+    }
+
+    if (DG_LOOP_port_to_index(test->rx_port) < 0)
+    {
+        DG_DBG_set_err_string("Invalid rx_port to test, port=0x%02x", test->rx_port);
+        return FALSE;
+    }
+
+    test->b_run = TRUE;
+
+#if 0
+    if (!dg_loop_thread(test))
+    {
+        printf("failed to run dg_loop_recv_thread, tx_port=0x%02x, rx_port=0x%02x, errno=%d(%m)",
+               test->tx_port, test->rx_port, errno);
+    }
+#else
+    if (pthread_create(&test->send_thread, NULL, dg_loop_thread, test) != 0)
+    {
+        DG_DBG_ERROR("failed to start send/recv thread, rx_port=0x%02x, errno=%d(%m)",
+                     test->rx_port, errno);
+    }
+#endif
+    else
+    {
+        ret = TRUE;
+        DG_DBG_TRACE("Successfully create send/recv thread, tx_port=0x%02x, tx_port=0x%02x",
+                     test->tx_port, test->rx_port);
+    }
+
+    return ret;
+}
 
 /*=============================================================================================*//**
 @brief loopback test between a pair of ports
@@ -208,6 +254,111 @@ void DG_LOOP_wait_test(DG_LOOP_TEST_T* test)
 ==================================================================================================*/
 
 /*=============================================================================================*//**
+@brief send and receive packet thread function
+
+@param[in] arg - the test parameter
+
+@return NULL returned
+*//*==============================================================================================*/
+void* dg_loop_thread(void* arg)
+{
+    DG_LOOP_TEST_T*           test   = (DG_LOOP_TEST_T*)arg;
+    DG_LOOP_TEST_STATISTIC_T* result = &test->result;
+
+    int    tx_fd, rx_fd;
+    int    number       = test->number;
+    int    size         = test->size;
+    UINT8* send_buf     = NULL;
+    UINT8* recv_buf     = NULL;
+    UINT8  init_pattern = ~test->pattern;
+
+    DG_DBG_TRACE("enter into thread: %p", (void*)pthread_self());
+
+    /* open the port for sending data */
+    if ((tx_fd = DG_LOOP_open(test->tx_port)) < 0)
+    {
+        DG_DBG_ERROR("failed to open tx port, tx_port=0x%02x", test->tx_port);
+        return NULL;
+    }
+
+    /* open the port for sending data */
+    if ((rx_fd = DG_LOOP_open(test->rx_port)) < 0)
+    {
+        DG_DBG_ERROR("failed to open rx port, rx_port=0x%02x", test->rx_port);
+        return NULL;
+    }
+
+    /* prepare the data to send and receive */
+    if ((send_buf = malloc(size)) == NULL)
+    {
+        DG_DBG_set_err_string("failed to malloc send buf, size=%d", size);
+        return NULL;
+    }
+
+    if ((recv_buf = malloc(size)) == NULL)
+    {
+        DG_DBG_set_err_string("failed to malloc recv buf, size=%d", size);
+        return NULL;
+    }
+
+    memset(send_buf, test->pattern, size);
+
+    while (test->b_run)
+    {
+        if (number < 0)
+        {
+            /* do nothing to run forever */
+        }
+        else if (number == 0)
+        {
+            DG_DBG_TRACE("send thread %p finished", (void*)pthread_self());
+            break;
+        }
+        else
+        {
+            number--;
+        }
+
+        if (!DG_LOOP_send(tx_fd, send_buf, size))
+        {
+            result->fail_send++;
+        }
+        else
+        {
+            result->total_send++;
+        }
+
+        /* init the buffer with different data first */
+        memset(recv_buf, init_pattern, size);
+
+        if (!DG_LOOP_recv(rx_fd, recv_buf, size))
+        {
+            result->fail_recv++;
+        }
+        else
+        {
+            /* verify the data */
+            if (!dg_loop_check_recv_data(recv_buf, size, test->pattern))
+            {
+                result->wrong_recv++;
+                DG_DBG_set_err_string("receive wrong data");
+            }
+            result->total_recv++;
+        }
+    }
+
+    free(send_buf);
+    free(recv_buf);
+
+    DG_LOOP_close(tx_fd);
+    DG_LOOP_close(rx_fd);
+
+    DG_DBG_TRACE("leave loop thread: %p", (void*)pthread_self());
+
+    return NULL;
+}
+
+/*=============================================================================================*//**
 @brief send packet thread function
 
 @param[in] arg - the test parameter
@@ -322,7 +473,7 @@ void* dg_loop_recv_thread(void* arg)
         return NULL;
     }
 
-    /* prepare the data to send */
+    /* prepare the data to receive */
     if ((recv_buf = malloc(size)) == NULL)
     {
         DG_DBG_set_err_string("failed to malloc recv buf, size=%d", size);
