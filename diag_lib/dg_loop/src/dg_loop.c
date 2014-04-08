@@ -15,7 +15,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/time.h>
 #include <pthread.h>
 #include "dg_platform_defs.h"
 #include "dg_dbg.h"

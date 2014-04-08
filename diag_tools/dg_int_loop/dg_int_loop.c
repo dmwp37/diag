@@ -30,7 +30,6 @@ const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_INT_LOOP_PORT_MAX            DG_LOOP_PORT_10GE_3
 #define DG_INT_LOOP_NODE_MAX            DG_LOOP_NODE_HDR
 #define DG_INT_LOOP_DEFAULT_PORT        0   /* 0 means test for all data ports */
 #define DG_INT_LOOP_DEFAULT_RUN_TIME    -1  /* negtive means run the program for ever */
@@ -132,12 +131,6 @@ int main(int argc, char** argv)
                    args.port, DG_DBG_get_err_string());
             ret = 1;
         }
-        else if (!DG_LOOP_config(args.port, args.node, DG_LOOP_CFG_INTERNAL))
-        {
-            printf("failed to config internal loop back, port=0x%02x, node=%d: %s\n",
-                   args.port, args.node, DG_DBG_get_err_string());
-            ret = 1;
-        }
         else if (!DG_LOOP_start_test(&test))
         {
             printf("failed to start loopback test: %s\n", DG_DBG_get_err_string());
@@ -171,8 +164,6 @@ int main(int argc, char** argv)
             DG_LOOP_wait_test(&test);
             dg_int_loop_print_result(result);
         }
-        /* revert all the configuration */
-        DG_LOOP_config_all_normal();
 
         /* disconnect all ports */
         DG_LOOP_disconnect_all();
@@ -260,9 +251,9 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
         {
             return EINVAL;
         }
-        else if ((value < 0) || (value > DG_INT_LOOP_PORT_MAX))
+        else if (DG_LOOP_port_to_index((DG_LOOP_PORT_T)value) < 0)
         {
-            printf("out range port: %s, max=0x%02x\n", arg, DG_INT_LOOP_PORT_MAX);
+            printf("invalid port: %s\n", arg);
             return EINVAL;
         }
         else
