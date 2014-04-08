@@ -11,6 +11,7 @@
 ==================================================================================================*/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <arpa/inet.h>
 #include <linux/if_packet.h>
@@ -46,7 +47,8 @@ typedef struct
 {
     DG_LOOP_PORT_T  port;  /* the stored port  */
     int             ref;   /* reference count  */
-    int             fd;    /* the actual fd    */
+    int             tx_fd; /* the actual tx fd */
+    int             rx_fd; /* the actual rx fd */
     pthread_mutex_t mutex; /* mutex protection */
 } DG_LOOP_PORT_FD_T;
 
@@ -69,7 +71,7 @@ DG_LOOP_MUTEX_UNLOCK_FUN_T dg_loop_mutex_unlock = (DG_LOOP_MUTEX_UNLOCK_FUN_T)&p
 /** internal real file descriptor array for each ports */
 static DG_LOOP_PORT_FD_T dg_loop_port_fd[DG_LOOP_PORT_NUM] =
 {
-    { DG_LOOP_PORT_LO,    0, -1, PTHREAD_MUTEX_INITIALIZER }
+    { DG_LOOP_PORT_LO, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER }
 };
 
 /*==================================================================================================
@@ -325,64 +327,79 @@ BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len)
 *//*==============================================================================================*/
 BOOL dg_loop_open_impl(DG_LOOP_PORT_FD_T* fd)
 {
-    BOOL               ret;
-    int                sockfd = -1;
-    struct ifreq       if_idx;
+    struct ifreq       ifr;
     struct sockaddr_ll socket_address;
+    struct packet_mreq mr;
+
+    if ((fd->tx_fd = socket(PF_PACKET, SOCK_RAW, 0)) < 0)
+    {
+        DG_DBG_set_err_string("dg_loop_open_impl tx socket create error, port=0x%02x", fd->port);
+        goto on_error;
+    }
 
     /* Open RAW socket to send on */
-    if ((sockfd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_DIAG))) == -1)
+    if ((fd->rx_fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_DIAG))) < 0)
     {
-        DG_DBG_set_err_string("dg_loop_open_impl socket create error");
-    }
-    else
-    {
-        /* Get the index of the interface to receive on */
-        memset(&if_idx, 0, sizeof(struct ifreq));
-        strncpy(if_idx.ifr_name, fd->name, IFNAMSIZ - 1);
-        if (ioctl(sockfd, SIOCGIFINDEX, &if_idx) < 0)
-        {
-            DG_DBG_set_err_string("DG_LOOP_open %s socket get ifindex error", fd->name);
-            close(sockfd);
-        }
-        else
-        {
-            memset(&socket_address, 0, sizeof(socket_address));
-            /* Index of the network device */
-            socket_address.sll_ifindex = if_idx.ifr_ifindex;
-            /* RAW communication */
-            socket_address.sll_family   = AF_PACKET;
-            socket_address.sll_protocol = htons(ETH_P_ALL);
-
-            if (bind(sockfd, (struct sockaddr*)&socket_address, sizeof(socket_address)) == -1)
-            {
-                DG_DBG_set_err_string("DG_LOOP_open %s socket bind error", fd->name);
-                close(sockfd);
-            }
-            else
-            {
-                struct packet_mreq mr;
-
-                memset(&mr, 0, sizeof(mr));
-                mr.mr_ifindex = if_idx.ifr_ifindex;
-                mr.mr_type    = PACKET_MR_PROMISC;
-
-                if (setsockopt(sockfd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr, sizeof(mr)) == -1)
-                {
-                    DG_DBG_set_err_string("DG_LOOP_open %s setsockopt fail errno:%d", fd->name, errno);
-                }
-                else
-                {
-                    fd->fd = sockfd;
-                    /* open the loop device to simulate the port */
-                    DG_DBG_TRACE("open loop port 0x%02x, %s, sockfd %d", fd->port, fd->name, fd->fd);
-                    ret = TRUE;
-                }
-            }
-        }
+        DG_DBG_set_err_string("dg_loop_open_impl rx socket create error, port=0x%02x", fd->port);
+        goto on_error;
     }
 
-    return ret;
+    /* Get the index of the interface to receive on */
+    memset(&ifr, 0, sizeof(struct ifreq));
+    strncpy(ifr.ifr_name, "lo", IFNAMSIZ);
+    if (ioctl(fd->tx_fd, SIOCGIFINDEX, &ifr) < 0)
+    {
+        DG_DBG_set_err_string("get lo ifindex error, port=0x%02x", fd->port);
+        goto on_error;
+    }
+
+    memset(&socket_address, 0, sizeof(socket_address));
+    /* Index of the network device */
+    socket_address.sll_ifindex = ifr.ifr_ifindex;
+    /* RAW communication */
+    socket_address.sll_family = AF_PACKET;
+
+    if (bind(fd->rx_fd, (struct sockaddr*)&socket_address, sizeof(socket_address)) < 0)
+    {
+        DG_DBG_set_err_string("rx socket bind error, port=0x%02x", fd->port);
+        goto on_error;
+    }
+
+    if (bind(fd->tx_fd, (struct sockaddr*)&socket_address, sizeof(socket_address)))
+    {
+        DG_DBG_set_err_string("tx socket bind error, port=0x%02x", fd->port);
+        goto on_error;
+    }
+
+    memset(&mr, 0, sizeof(mr));
+    mr.mr_ifindex = ifr.ifr_ifindex;
+    mr.mr_type    = PACKET_MR_PROMISC;
+
+    if (setsockopt(fd->rx_fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr, sizeof(mr)) < 0)
+    {
+        DG_DBG_set_err_string("set rx socket to PROMISC failed, port=0x%02x. errno=%d(%m)",
+                              fd->port, errno);
+        goto on_error;
+    }
+
+    /* open the loop device to simulate the port */
+    DG_DBG_TRACE("open loop port=0x%02x", fd->port);
+
+    return TRUE;
+
+on_error:
+    if (fd->tx_fd > 0)
+    {
+        close(fd->tx_fd);
+        fd->tx_fd = -1;
+    }
+
+    if (fd->tx_fd > 0)
+    {
+        close(fd->rx_fd);
+        fd->rx_fd = -1;
+    }
+    return FALSE;
 }
 
 /*=============================================================================================*//**
@@ -393,8 +410,18 @@ BOOL dg_loop_open_impl(DG_LOOP_PORT_FD_T* fd)
 void dg_loop_close_impl(DG_LOOP_PORT_FD_T* fd)
 {
     /* close the fd */
-    close(fd->fd);
-    DG_DBG_TRACE("close loop port 0x%02x, %s, fd %d", fd->port, fd->name, fd->fd);
+    if (fd->tx_fd > 0)
+    {
+        close(fd->tx_fd);
+        fd->tx_fd = -1;
+    }
+
+    if (fd->tx_fd > 0)
+    {
+        close(fd->rx_fd);
+        fd->rx_fd = -1;
+    }
+    DG_DBG_TRACE("close loop port=0x%02x", fd->port);
 }
 
 /*=============================================================================================*//**
@@ -411,61 +438,24 @@ void dg_loop_close_impl(DG_LOOP_PORT_FD_T* fd)
 *//*==============================================================================================*/
 BOOL dg_loop_write_impl(DG_LOOP_PORT_FD_T* fd, UINT32 len, UINT8* buf)
 {
-    BOOL                 ret    = FALSE;
-    int                  sockfd = socket(PF_PACKET, SOCK_RAW, 0); /* fd->fd; */
-    struct ifreq         if_idx;
-    struct ether_header* eh = (struct ether_header*)buf;
-    struct sockaddr_ll   socket_address;
+    BOOL                 ret              = FALSE;
+    struct ether_header* eh               = (struct ether_header*)buf;
     unsigned char        mac_broadcast[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
-    int discard = 1;
-    setsockopt(sockfd, SOL_PACKET, PACKET_LOSS, (void*)&discard, sizeof(discard));
+    /* Construct the Ethernet header */
+    memset(buf, 0, ETH_HLEN);
+    memcpy(eh->ether_dhost, mac_broadcast, ETH_ALEN);
+    eh->ether_type = htons(ETH_P_DIAG);
 
-    memset(&if_idx, 0, sizeof(struct ifreq));
-    strncpy(if_idx.ifr_name, fd->name, IFNAMSIZ);
-
-    /* Get the index of the interface to send on */
-    if (ioctl(sockfd, SIOCGIFINDEX, &if_idx) < 0)
+    if (send(fd->tx_fd, buf, len, 0) < 0)
     {
-        DG_DBG_set_err_string("DG_LOOP_send get ifindex from socketfd %d error", sockfd);
+        DG_DBG_set_err_string("DG_LOOP_send send error, port=0x%02x. errno=%d(%m)",
+                              fd->port, errno);
     }
     else
     {
-        memset(&socket_address, 0, sizeof(socket_address));
-        socket_address.sll_ifindex = if_idx.ifr_ifindex;
-        socket_address.sll_family  = AF_PACKET;
-        socket_address.sll_halen   = ETH_ALEN;
-
-        bind(sockfd, (struct sockaddr*)&socket_address, sizeof(socket_address));
-
-        /* Construct the Ethernet header */
-        memset(buf, 0, ETH_HLEN);
-        /* Ethernet header */
-        memcpy(eh->ether_dhost, mac_broadcast, 6);
-        /* Ether type field */
-        eh->ether_type = htons(ETH_P_DIAG);
-
-        memset(&if_idx, 0, sizeof(struct ifreq));
-        strncpy(if_idx.ifr_name, fd->name, IFNAMSIZ);
-
-        ioctl(sockfd, SIOCGIFHWADDR, &if_idx);
-        memcpy(eh->ether_shost, if_idx.ifr_hwaddr.sa_data, 6);
-
-        if (sendto(sockfd, buf, len, 0, (struct sockaddr*)&socket_address,
-                   sizeof(struct sockaddr_ll)) == -1)
-        {
-            DG_DBG_set_err_string("DG_LOOP_send send error");
-        }
-        else
-        {
-            DG_DBG_TRACE("send to port 0x%02x, %s, buf=%p, len=%d", fd->port, fd->name, buf, len);
-            ret = TRUE;
-        }
-
-        sendto(sockfd, NULL, 0, 0, NULL, 0);
+        ret = TRUE;
     }
-
-    close(sockfd);
 
     return ret;
 }
@@ -488,30 +478,29 @@ BOOL dg_loop_read_impl(DG_LOOP_PORT_FD_T* fd, UINT32 len, UINT8* buf)
     int    status;
     BOOL   ret = FALSE;
 
-    struct pollfd pf = { fd->fd, POLLIN | POLLERR | POLLRDNORM, 0 };
+    struct pollfd pf = { fd->rx_fd, POLLIN | POLLERR | POLLRDNORM, 0 };
 
     status = poll(&pf, 1, 500);
 
     if (status < 0)
     {
-        DG_DBG_set_err_string("DG_LOOP_recv %s poll errno:%d", fd->name, errno);
+        DG_DBG_set_err_string("recv poll error, port=0x%02x. errno=%d(%m)",
+                              fd->port, errno);
     }
     else if (status == 0)
     {
-        DG_DBG_set_err_string("DG_LOOP_recv port 0x%02x %s poll timed out!",
-                              fd->port, fd->name);
+        DG_DBG_set_err_string("recv poll timed out! port=0x%02x", fd->port);
     }
     else
     {
-        rx_len = recv(fd->fd, buf, DG_LOOP_ETH_FRAME_LEN, MSG_TRUNC);
+        rx_len = recv(fd->rx_fd, buf, DG_LOOP_ETH_FRAME_LEN, MSG_TRUNC);
         if (len != rx_len)
         {
-            DG_DBG_set_err_string("DG_LOOP_recv %S received %d bytes, should receive %d bytes",
-                                  fd->name, rx_len, len);
+            DG_DBG_set_err_string("port=0x%02x received %d bytes, should receive %d bytes",
+                                  fd->port, rx_len, len);
         }
         else
         {
-            DG_DBG_TRACE("recv from port 0x%02x, %s, buf=%p, len=%d", fd->port, fd->name, buf, len);
             ret = TRUE;
         }
     }

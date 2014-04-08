@@ -13,6 +13,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <errno.h>
+#include <netinet/ether.h>
 #include "dg_platform_defs.h"
 #include "dg_dbg.h"
 #include "dg_loop.h"
@@ -565,6 +566,9 @@ void* dg_loop_recv_thread(void* arg)
 BOOL dg_loop_check_recv_data(UINT8* buf, UINT32 size, UINT8 pattern)
 {
     UINT8 v = 0;
+
+    buf  += ETH_HLEN;
+    size -= ETH_HLEN;
 
     while ((size-- > 0) && (v == 0))
     {
