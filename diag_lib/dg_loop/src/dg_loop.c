@@ -39,9 +39,8 @@ typedef struct
 {
     DG_LOOP_PORT_T port;   /* the stored port  */
 
-    int ref;               /* reference count  */
-    int tx_fd;             /* the actual tx fd */
-    int rx_fd;             /* the actual rx fd */
+    int ref;            /* reference count  */
+    int fd;             /* the actual fd    */
 
     pthread_mutex_t mutex; /* mutex protection */
 } DG_LOOP_PORT_FD_T;
@@ -65,32 +64,7 @@ DG_LOOP_MUTEX_UNLOCK_FUN_T dg_loop_mutex_unlock = (DG_LOOP_MUTEX_UNLOCK_FUN_T)&p
 /** internal real file descriptor array for each ports */
 static DG_LOOP_PORT_FD_T dg_loop_port_fd[DG_LOOP_PORT_NUM] =
 {
-    { DG_LOOP_PORT_MGT,    0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_HA,     0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB0_1, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB0_2, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB1_1, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB1_2, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_0,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_1,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_2,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_3,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_4,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_5,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_6,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_7,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_8,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_9,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_10,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_11,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_0,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_1,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_2,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_3,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_0, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_1, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_2, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_3, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER }
+    { DG_LOOP_PORT_LO,    0, -1, PTHREAD_MUTEX_INITIALIZER }
 };
 
 /*==================================================================================================
@@ -159,54 +133,8 @@ DG_LOOP_PORT_T DG_LOOP_index_to_port(int index)
 *//*==============================================================================================*/
 BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
 {
-    int index1;
-    int index2;
-    int sockets[2];
-
-    if ((index1 = DG_LOOP_port_to_index(port1)) < 0)
-    {
-        DG_DBG_set_err_string("invalid connect: port1=0x%02x", port1);
-        return FALSE;
-    }
-
-    if ((index2 = DG_LOOP_port_to_index(port2)) < 0)
-    {
-        DG_DBG_set_err_string("invalid connect: port2=0x%02x", port2);
-        return FALSE;
-    }
-
-    if ((dg_loop_port_fd[index1].tx_fd > 0) ||
-        (dg_loop_port_fd[index1].rx_fd > 0) ||
-        (dg_loop_port_fd[index2].tx_fd > 0) ||
-        (dg_loop_port_fd[index2].rx_fd > 0))
-    {
-        DG_DBG_set_err_string("already connected. port1=0x%02x port2=0x%02x", port1, port2);
-        return FALSE;
-    }
-
-    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) != 0)
-    {
-        DG_DBG_set_err_string("Failed to create connected sockets, errno=%d(%m)", errno);
-        return FALSE;
-    }
-
-    DG_DBG_TRACE("port1=0x%02x port2=0x%02x connected", port1, port2);
-    /* Save the sockets */
-    if (port1 == port2)
-    {
-        dg_loop_port_fd[index1].tx_fd = sockets[0];
-        dg_loop_port_fd[index1].rx_fd = sockets[1];
-    }
-    else
-    {
-        dg_loop_port_fd[index1].tx_fd = sockets[0];
-        dg_loop_port_fd[index2].rx_fd = sockets[1];
-
-        dg_loop_port_fd[index2].tx_fd = sockets[1];
-        dg_loop_port_fd[index1].rx_fd = sockets[0];
-    }
-
-
+    DG_COMPILE_UNUSED(port1);
+    DG_COMPILE_UNUSED(port2);
     return TRUE;
 }
 
@@ -218,22 +146,6 @@ BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
 *//*==============================================================================================*/
 void DG_LOOP_disconnect_all()
 {
-    int index;
-
-    for (index = 0; index < DG_LOOP_PORT_NUM; index++)
-    {
-        if (dg_loop_port_fd[index].tx_fd > 0)
-        {
-            close(dg_loop_port_fd[index].tx_fd);
-            dg_loop_port_fd[index].tx_fd = -1;
-        }
-
-        if (dg_loop_port_fd[index].rx_fd > 0)
-        {
-            close(dg_loop_port_fd[index].rx_fd);
-            dg_loop_port_fd[index].rx_fd = -1;
-        }
-    }
 }
 
 /*=============================================================================================*//**
@@ -438,14 +350,10 @@ void dg_loop_close_impl(DG_LOOP_PORT_FD_T* fd)
 *//*==============================================================================================*/
 BOOL dg_loop_write_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_write, UINT8* data)
 {
-    BOOL is_success = FALSE;
-
-    if (write(fd->tx_fd, data, bytes_to_write) == (ssize_t)bytes_to_write)
-    {
-        is_success = TRUE;
-    }
-
-    return is_success;
+    DG_COMPILE_UNUSED(fd);
+    DG_COMPILE_UNUSED(bytes_to_write);
+    DG_COMPILE_UNUSED(data);
+    return TRUE;
 }
 
 /*=============================================================================================*//**
@@ -462,57 +370,10 @@ BOOL dg_loop_write_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_write, UINT8* dat
 *//*==============================================================================================*/
 BOOL dg_loop_read_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_read, UINT8* data)
 {
-    BOOL           is_success         = TRUE;
-    int            total_bytes_read   = 0;
-    int            current_bytes_read = 0;
-    struct timeval timeout;
-    fd_set         fd_set;
-    int            select_status;
-
-    timeout.tv_sec  = 0;
-    timeout.tv_usec = 100000;
-
-    /* Wait for data to be available to read */
-    FD_ZERO(&fd_set);
-    FD_SET(fd->rx_fd, &fd_set);
-
-    /* Continue to read until an error occurs or we read the desired number of bytes */
-    while (is_success && (total_bytes_read != (int)bytes_to_read))
-    {
-        select_status = select(fd->rx_fd + 1, &fd_set, NULL, NULL, &timeout);
-
-        if (select_status == 0)
-        {
-            DG_DBG_ERROR("read timeout occurred!");
-            return FALSE;
-        }
-        else if (select_status != 1)
-        {
-            DG_DBG_ERROR("Select failed, select_status=%d. errno=%d(%m)", select_status, errno);
-            return FALSE;
-        }
-
-        current_bytes_read = read(fd->rx_fd,
-                                  ((UINT8*)data + total_bytes_read),
-                                  (bytes_to_read - total_bytes_read));
-        if (current_bytes_read > 0)
-        {
-            total_bytes_read += current_bytes_read;
-        }
-        else
-        {
-            /* Only print errors if the current_bytes_read is NOT 0.  0 bytes most likely
-               indicates client closed its connection */
-            if (current_bytes_read != 0)
-            {
-                DG_DBG_ERROR("Read port 0x%02x failed, current_bytes_read=%d, errno=%d(%m)",
-                             fd->port, current_bytes_read, errno);
-                is_success = FALSE;
-            }
-        }
-    }
-
-    return is_success;
+    DG_COMPILE_UNUSED(fd);
+    DG_COMPILE_UNUSED(bytes_to_read);
+    DG_COMPILE_UNUSED(data);
+    return TRUE;
 }
 
 /** @} */

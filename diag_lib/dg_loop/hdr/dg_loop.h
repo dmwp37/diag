@@ -23,7 +23,7 @@ extern "C" {
 /*==================================================================================================
                                               MACROS
 ==================================================================================================*/
-#define DG_LOOP_PORT_NUM        26
+#define DG_LOOP_PORT_NUM        1
 #define DG_LOOP_PACKET_SIZE_MAX 9000
 #define DG_LOOP_PACKET_SIZE_MIN 80
 #define DG_LOOP_RUN_IFINITE     -1
@@ -35,32 +35,7 @@ extern "C" {
 /** loopback path port definition */
 enum
 {
-    DG_LOOP_PORT_MGT    = 0x01, /** MGT Port           */
-    DG_LOOP_PORT_HA     = 0x02, /** HA Port            */
-    DG_LOOP_PORT_WTB0_1 = 0x03, /** WANPIM 0 Port 1    */
-    DG_LOOP_PORT_WTB0_2 = 0x04, /** WANPIM 0 Port 2    */
-    DG_LOOP_PORT_WTB1_1 = 0x05, /** WANPIM 1 Port 1    */
-    DG_LOOP_PORT_WTB1_2 = 0x06, /** WANPIM 1 Port 2    */
-    DG_LOOP_PORT_GE_0   = 0x10, /** GE_RJ45 Port 0     */
-    DG_LOOP_PORT_GE_1   = 0x11, /** GE_RJ45 Port 1     */
-    DG_LOOP_PORT_GE_2   = 0x12, /** GE_RJ45 Port 2     */
-    DG_LOOP_PORT_GE_3   = 0x13, /** GE_RJ45 Port 3     */
-    DG_LOOP_PORT_GE_4   = 0x14, /** GE_RJ45 Port 4     */
-    DG_LOOP_PORT_GE_5   = 0x15, /** GE_RJ45 Port 5     */
-    DG_LOOP_PORT_GE_6   = 0x16, /** GE_RJ45 Port 6     */
-    DG_LOOP_PORT_GE_7   = 0x17, /** GE_RJ45 Port 7     */
-    DG_LOOP_PORT_GE_8   = 0x20, /** GE_RJ45 Port 8     */
-    DG_LOOP_PORT_GE_9   = 0x21, /** GE_RJ45 Port 9     */
-    DG_LOOP_PORT_GE_10  = 0x22, /** GE_RJ45 Port 10    */
-    DG_LOOP_PORT_GE_11  = 0x23, /** GE_RJ45 Port 11    */
-    DG_LOOP_PORT_SFP_0  = 0x24, /** GE_SFP  Port 0     */
-    DG_LOOP_PORT_SFP_1  = 0x25, /** GE_SFP  Port 1     */
-    DG_LOOP_PORT_SFP_2  = 0x26, /** GE_SFP  Port 2     */
-    DG_LOOP_PORT_SFP_3  = 0x27, /** GE_SFP  Port 3     */
-    DG_LOOP_PORT_10GE_0 = 0x30, /** 10GE_SFP+ Port0    */
-    DG_LOOP_PORT_10GE_1 = 0x31, /** 10GE_SFP+ Port1    */
-    DG_LOOP_PORT_10GE_2 = 0x32, /** 10GE_SFP+ Port2    */
-    DG_LOOP_PORT_10GE_3 = 0x33, /** 10GE_SFP+ Port3    */
+    DG_LOOP_PORT_LO = 0x01, /** linux lo port */
 };
 typedef UINT8 DG_LOOP_PORT_T;
 

@@ -32,7 +32,6 @@ LOCAL_STATIC_LIBRARIES := libdg_dbg
 
 LOCAL_SRC_FILES := \
   src/dg_loop.c \
-  src/dg_loop_cfg.c \
   src/dg_loop_test.c
 
 include $(BUILD_STATIC_LIBRARY)
