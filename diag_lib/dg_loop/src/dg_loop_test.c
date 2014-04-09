@@ -151,8 +151,8 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
         return FALSE;
     }
 
-    test->b_run = TRUE;
-
+    test->b_run  = TRUE;
+    test->b_recv = TRUE; /* let the recv thread run, controlled by send thread */
 
     if (pthread_create(&test->recv_thread, NULL, dg_loop_recv_thread, test) != 0)
     {
@@ -171,11 +171,19 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
                      test->tx_port, test->rx_port);
     }
 
+    /* let the send/recv thread run first */
+    sched_yield();
+    if (!test->b_run)
+    {
+        ret = FALSE;
+    }
+
     /* clean up */
     if (!ret)
     {
         /* tell the thread to stop */
-        test->b_run = FALSE;
+        test->b_run  = FALSE;
+        test->b_recv = FALSE;
 
         /* wait the thread to finish */
         if (test->send_thread != 0)
@@ -382,20 +390,21 @@ void* dg_loop_send_thread(void* arg)
     if ((fd = DG_LOOP_open(test->tx_port)) < 0)
     {
         DG_DBG_ERROR("failed to open send port, tx_port=0x%02x", test->tx_port);
-        return NULL;
+        goto send_finish;
     }
 
     /* prepare the data to send */
     if ((send_buf = malloc(size)) == NULL)
     {
         DG_DBG_set_err_string("failed to malloc send buf, size=%d", size);
-        return NULL;
+        goto send_finish;
     }
 
     memset(send_buf, test->pattern, size);
 
     while (test->b_run)
     {
+        BOOL b_send = TRUE;
         DG_LOOP_MUTEX_LOCK(&test->mutex);
         if (test->count >= DG_LOOP_CACHE_COUNT_MAX)
         {
@@ -404,10 +413,15 @@ void* dg_loop_send_thread(void* arg)
             if (pthread_cond_wait(&test->send_cond, &test->mutex) != 0)
             {
                 DG_DBG_ERROR("Error waiting on send condition, errno=%d(%m)", errno);
+                b_send = FALSE;
             }
         }
         DG_LOOP_MUTEX_UNLOCK(&test->mutex);
 
+        if (!b_send)
+        {
+            continue;
+        }
 
         if (number < 0)
         {
@@ -416,6 +430,8 @@ void* dg_loop_send_thread(void* arg)
         else if (number == 0)
         {
             DG_DBG_TRACE("send thread %p finished", (void*)pthread_self());
+            /* tell the receive thread to stop */
+            test->b_recv = FALSE;
             break;
         }
         else
@@ -437,10 +453,17 @@ void* dg_loop_send_thread(void* arg)
         }
     }
 
+send_finish:
     free(send_buf);
 
-    DG_LOOP_close(fd);
+    if (fd >= 0)
+    {
+        DG_LOOP_close(fd);
+    }
 
+    test->b_run = FALSE;
+    /* tell the receive thread to stop */
+    test->b_recv = FALSE;
 
     DG_DBG_TRACE("leave send thread: %p", (void*)pthread_self());
 
@@ -467,38 +490,48 @@ void* dg_loop_recv_thread(void* arg)
 
     DG_DBG_TRACE("enter into recv thread: %p", (void*)pthread_self());
 
-    /* open the port for sending data */
+    /* open the port for receiving data */
     if ((fd = DG_LOOP_open(test->rx_port)) < 0)
     {
-        DG_DBG_ERROR("failed to open send port, tx_port=0x%02x", test->tx_port);
-        return NULL;
+        DG_DBG_ERROR("failed to open recv port, rx_port=0x%02x", test->rx_port);
+        goto recv_finish;
     }
 
     /* prepare the data to receive */
     if ((recv_buf = malloc(size)) == NULL)
     {
         DG_DBG_set_err_string("failed to malloc recv buf, size=%d", size);
-        return NULL;
+        goto recv_finish;
     }
 
-    while ((test->count != 0) || test->b_run)
+    while ((test->count != 0) || test->b_recv)
     {
+        BOOL b_recv = TRUE;
         DG_LOOP_MUTEX_LOCK(&test->mutex);
         if (test->count > 0)
         {
             /* we have data to recv */
         }
-        else if (test->b_run)
+        else if (test->b_recv)
         {
             pthread_cond_signal(&test->send_cond);
             /* no data to recv */
             if (pthread_cond_wait(&test->recv_cond, &test->mutex) != 0)
             {
                 DG_DBG_ERROR("Error waiting on recv condition, errno=%d(%m)", errno);
+                b_recv = FALSE;
             }
+        }
+        else
+        {
+            b_recv = FALSE;
         }
         DG_LOOP_MUTEX_UNLOCK(&test->mutex);
 
+        if (!b_recv)
+        {
+            continue;
+        }
 
         if (number < 0)
         {
@@ -507,8 +540,6 @@ void* dg_loop_recv_thread(void* arg)
         else if (number == 0)
         {
             DG_DBG_TRACE("recv thread %p finished", (void*)pthread_self());
-            /* only let the recv thread update the control */
-            test->b_run = FALSE;
             break;
         }
         else
@@ -546,9 +577,16 @@ void* dg_loop_recv_thread(void* arg)
         }
     }
 
+recv_finish:
     free(recv_buf);
 
-    DG_LOOP_close(fd);
+    if (fd >= 0)
+    {
+        DG_LOOP_close(fd);
+    }
+
+    test->b_run  = FALSE;
+    test->b_recv = FALSE;
 
     DG_DBG_TRACE("leave recv thread: %p", (void*)pthread_self());
     return NULL;
