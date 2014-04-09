@@ -185,6 +185,7 @@ void dg_dbg_init_err_string()
     }
     else
     {
+        pthread_setspecific(dg_dbg_error_string_key, NULL);
         b_init = 1;
     }
 }
@@ -215,7 +216,10 @@ void dg_dbg_create_error_string_key()
 void dg_dbg_free_error_string(void* err_str)
 {
     DG_DBG_TRACE("Free error string for thread %p", pthread_self());
-    free(err_str);
+    if (err_str != NULL)
+    {
+        free(err_str);
+    }
 }
 
 

@@ -60,32 +60,10 @@ static DG_LOOP_CONFIG_FUNC_T dg_loop_cfg_normal_func[DG_LOOP_PORT_NUM][DG_LOOP_N
     /*===========================================node=============================================
       FPGA,          MAC,           PHY,           HDR                 Port
       ============================================================================================*/
-    { NULL,          cfg_mgt_mac,   cfg_mgt_phy,   cfg_mgt_hdr  }, /* DG_LOOP_PORT_MGT    */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_HA     */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_WTB0_1 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_WTB0_2 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_WTB1_1 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_WTB1_2 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_0   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_1   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_2   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_3   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_4   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_5   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_6   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_7   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_8   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_9   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_10  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_11  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_SFP_0  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_SFP_1  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_SFP_2  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_SFP_3  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_10GE_0 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_10GE_1 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_10GE_2 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_10GE_3 */
+    { NULL,          cfg_mgt_mac,   cfg_mgt_phy,   cfg_mgt_hdr  }, /** Intel 347 Port0 for stargo */
+    { NULL,          NULL,          NULL,          NULL         }, /** Intel 347 Port1 for stargo */
+    { NULL,          NULL,          NULL,          NULL         }, /** Intel 347 Port2 for stargo */
+    { NULL,          NULL,          NULL,          NULL         }, /** Intel 347 Port3 for stargo */
 };
 
 /** normal node configuration */
@@ -94,32 +72,10 @@ static DG_LOOP_CONFIG_FUNC_T dg_loop_cfg_internal_func[DG_LOOP_PORT_NUM][DG_LOOP
     /*===========================================node=============================================
       FPGA,          MAC,           PHY,           HDR                 Port
       ============================================================================================*/
-    { NULL,          cfg_mgt_mac,   cfg_mgt_phy,   cfg_mgt_hdr  }, /* DG_LOOP_PORT_MGT    */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_HA     */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_WTB0_1 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_WTB0_2 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_WTB1_1 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_WTB1_2 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_0   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_1   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_2   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_3   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_4   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_5   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_6   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_7   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_8   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_9   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_10  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_11  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_SFP_0  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_SFP_1  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_SFP_2  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_SFP_3  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_10GE_0 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_10GE_1 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_10GE_2 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_10GE_3 */
+    { NULL,          cfg_mgt_mac,   cfg_mgt_phy,   cfg_mgt_hdr  }, /** Intel 347 Port0 for stargo */
+    { NULL,          NULL,          NULL,          NULL         }, /** Intel 347 Port1 for stargo */
+    { NULL,          NULL,          NULL,          NULL         }, /** Intel 347 Port2 for stargo */
+    { NULL,          NULL,          NULL,          NULL         }, /** Intel 347 Port3 for stargo */
 };
 
 /** normal node configuration */
@@ -128,32 +84,10 @@ static DG_LOOP_CONFIG_FUNC_T dg_loop_cfg_external_func[DG_LOOP_PORT_NUM][DG_LOOP
     /*===========================================node=============================================
       FPGA,          MAC,           PHY,           HDR                 Port
       ============================================================================================*/
-    { NULL,          cfg_mgt_mac,   cfg_mgt_phy,   cfg_mgt_hdr  }, /* DG_LOOP_PORT_MGT    */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_HA     */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_WTB0_1 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_WTB0_2 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_WTB1_1 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_WTB1_2 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_0   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_1   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_2   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_3   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_4   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_5   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_6   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_7   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_8   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_9   */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_10  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_GE_11  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_SFP_0  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_SFP_1  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_SFP_2  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_SFP_3  */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_10GE_0 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_10GE_1 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_10GE_2 */
-    { NULL,          NULL,          NULL,          NULL         }, /* DG_LOOP_PORT_10GE_3 */
+    { NULL,          cfg_mgt_mac,   cfg_mgt_phy,   cfg_mgt_hdr  }, /** Intel 347 Port0 for stargo */
+    { NULL,          NULL,          NULL,          NULL         }, /** Intel 347 Port1 for stargo */
+    { NULL,          NULL,          NULL,          NULL         }, /** Intel 347 Port2 for stargo */
+    { NULL,          NULL,          NULL,          NULL         }, /** Intel 347 Port3 for stargo */
 };
 
 /*==================================================================================================

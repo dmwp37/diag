@@ -11,7 +11,14 @@
 ==================================================================================================*/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
+#include <arpa/inet.h>
+#include <linux/if_packet.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <netinet/ether.h>
+#include <poll.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -31,18 +38,18 @@
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
+#define DG_LOOP_ETH_FRAME_LEN 9230
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
 ==================================================================================================*/
 typedef struct
 {
-    DG_LOOP_PORT_T port;   /* the stored port  */
-
-    int ref;               /* reference count  */
-    int tx_fd;             /* the actual tx fd */
-    int rx_fd;             /* the actual rx fd */
-
+    DG_LOOP_PORT_T  port;  /* the stored port  */
+    int             ref;   /* reference count  */
+    int             tx_fd; /* the actual tx fd */
+    int             rx_fd; /* the actual rx fd */
+    char*           name;  /* the if name      */
     pthread_mutex_t mutex; /* mutex protection */
 } DG_LOOP_PORT_FD_T;
 
@@ -65,32 +72,10 @@ DG_LOOP_MUTEX_UNLOCK_FUN_T dg_loop_mutex_unlock = (DG_LOOP_MUTEX_UNLOCK_FUN_T)&p
 /** internal real file descriptor array for each ports */
 static DG_LOOP_PORT_FD_T dg_loop_port_fd[DG_LOOP_PORT_NUM] =
 {
-    { DG_LOOP_PORT_MGT,    0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_HA,     0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB0_1, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB0_2, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB1_1, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB1_2, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_0,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_1,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_2,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_3,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_4,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_5,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_6,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_7,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_8,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_9,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_10,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_11,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_0,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_1,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_2,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_3,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_0, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_1, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_2, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_3, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER }
+    { DG_LOOP_PORT_I347_0, 0, -1, -1, "eth3", PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_I347_1, 0, -1, -1, "eth2", PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_I347_2, 0, -1, -1, "eth5", PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_I347_3, 0, -1, -1, "eth4", PTHREAD_MUTEX_INITIALIZER },
 };
 
 /*==================================================================================================
@@ -159,54 +144,8 @@ DG_LOOP_PORT_T DG_LOOP_index_to_port(int index)
 *//*==============================================================================================*/
 BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
 {
-    int index1;
-    int index2;
-    int sockets[2];
-
-    if ((index1 = DG_LOOP_port_to_index(port1)) < 0)
-    {
-        DG_DBG_set_err_string("invalid connect: port1=0x%02x", port1);
-        return FALSE;
-    }
-
-    if ((index2 = DG_LOOP_port_to_index(port2)) < 0)
-    {
-        DG_DBG_set_err_string("invalid connect: port2=0x%02x", port2);
-        return FALSE;
-    }
-
-    if ((dg_loop_port_fd[index1].tx_fd > 0) ||
-        (dg_loop_port_fd[index1].rx_fd > 0) ||
-        (dg_loop_port_fd[index2].tx_fd > 0) ||
-        (dg_loop_port_fd[index2].rx_fd > 0))
-    {
-        DG_DBG_set_err_string("already connected. port1=0x%02x port2=0x%02x", port1, port2);
-        return FALSE;
-    }
-
-    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) != 0)
-    {
-        DG_DBG_set_err_string("Failed to create connected sockets, errno=%d(%m)", errno);
-        return FALSE;
-    }
-
-    DG_DBG_TRACE("port1=0x%02x port2=0x%02x connected", port1, port2);
-    /* Save the sockets */
-    if (port1 == port2)
-    {
-        dg_loop_port_fd[index1].tx_fd = sockets[0];
-        dg_loop_port_fd[index1].rx_fd = sockets[1];
-    }
-    else
-    {
-        dg_loop_port_fd[index1].tx_fd = sockets[0];
-        dg_loop_port_fd[index2].rx_fd = sockets[1];
-
-        dg_loop_port_fd[index2].tx_fd = sockets[1];
-        dg_loop_port_fd[index1].rx_fd = sockets[0];
-    }
-
-
+    DG_COMPILE_UNUSED(port1);
+    DG_COMPILE_UNUSED(port2);
     return TRUE;
 }
 
@@ -218,22 +157,6 @@ BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
 *//*==============================================================================================*/
 void DG_LOOP_disconnect_all()
 {
-    int index;
-
-    for (index = 0; index < DG_LOOP_PORT_NUM; index++)
-    {
-        if (dg_loop_port_fd[index].tx_fd > 0)
-        {
-            close(dg_loop_port_fd[index].tx_fd);
-            dg_loop_port_fd[index].tx_fd = -1;
-        }
-
-        if (dg_loop_port_fd[index].rx_fd > 0)
-        {
-            close(dg_loop_port_fd[index].rx_fd);
-            dg_loop_port_fd[index].rx_fd = -1;
-        }
-    }
 }
 
 /*=============================================================================================*//**
@@ -408,9 +331,79 @@ BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len)
 *//*==============================================================================================*/
 BOOL dg_loop_open_impl(DG_LOOP_PORT_FD_T* fd)
 {
-    /* we already opened in the connect simulation, do nothing */
-    DG_COMPILE_UNUSED(fd);
+    struct ifreq       ifr;
+    struct sockaddr_ll socket_address;
+    struct packet_mreq mr;
+
+    if ((fd->tx_fd = socket(PF_PACKET, SOCK_RAW, 0)) < 0)
+    {
+        DG_DBG_set_err_string("dg_loop_open_impl tx socket create error, port=0x%02x", fd->port);
+        goto on_error;
+    }
+
+    /* Open RAW socket to send on */
+    if ((fd->rx_fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_DIAG))) < 0)
+    {
+        DG_DBG_set_err_string("dg_loop_open_impl rx socket create error, port=0x%02x", fd->port);
+        goto on_error;
+    }
+
+    /* Get the index of the interface to receive on */
+    memset(&ifr, 0, sizeof(struct ifreq));
+    strncpy(ifr.ifr_name, fd->name, IFNAMSIZ);
+    if (ioctl(fd->tx_fd, SIOCGIFINDEX, &ifr) < 0)
+    {
+        DG_DBG_set_err_string("get if index error, port=0x%02x", fd->port);
+        goto on_error;
+    }
+
+    memset(&socket_address, 0, sizeof(socket_address));
+    /* Index of the network device */
+    socket_address.sll_ifindex = ifr.ifr_ifindex;
+    /* RAW communication */
+    socket_address.sll_family = AF_PACKET;
+
+    if (bind(fd->rx_fd, (struct sockaddr*)&socket_address, sizeof(socket_address)) < 0)
+    {
+        DG_DBG_set_err_string("rx socket bind error, port=0x%02x", fd->port);
+        goto on_error;
+    }
+
+    if (bind(fd->tx_fd, (struct sockaddr*)&socket_address, sizeof(socket_address)))
+    {
+        DG_DBG_set_err_string("tx socket bind error, port=0x%02x", fd->port);
+        goto on_error;
+    }
+
+    memset(&mr, 0, sizeof(mr));
+    mr.mr_ifindex = ifr.ifr_ifindex;
+    mr.mr_type    = PACKET_MR_PROMISC;
+
+    if (setsockopt(fd->rx_fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr, sizeof(mr)) < 0)
+    {
+        DG_DBG_set_err_string("set rx socket to PROMISC failed, port=0x%02x. errno=%d(%m)",
+                              fd->port, errno);
+        goto on_error;
+    }
+
+    /* open the loop device to simulate the port */
+    DG_DBG_TRACE("open loop port=0x%02x", fd->port);
+
     return TRUE;
+
+on_error:
+    if (fd->tx_fd > 0)
+    {
+        close(fd->tx_fd);
+        fd->tx_fd = -1;
+    }
+
+    if (fd->tx_fd > 0)
+    {
+        close(fd->rx_fd);
+        fd->rx_fd = -1;
+    }
+    return FALSE;
 }
 
 /*=============================================================================================*//**
@@ -420,8 +413,19 @@ BOOL dg_loop_open_impl(DG_LOOP_PORT_FD_T* fd)
 *//*==============================================================================================*/
 void dg_loop_close_impl(DG_LOOP_PORT_FD_T* fd)
 {
-    /* we close in the connect simulation, do nothing */
-    DG_COMPILE_UNUSED(fd);
+    /* close the fd */
+    if (fd->tx_fd > 0)
+    {
+        close(fd->tx_fd);
+        fd->tx_fd = -1;
+    }
+
+    if (fd->tx_fd > 0)
+    {
+        close(fd->rx_fd);
+        fd->rx_fd = -1;
+    }
+    DG_DBG_TRACE("close loop port=0x%02x", fd->port);
 }
 
 /*=============================================================================================*//**
@@ -436,16 +440,28 @@ void dg_loop_close_impl(DG_LOOP_PORT_FD_T* fd)
 @note
  - The write is synchronous, the function will block until the requested number of bytes are written
 *//*==============================================================================================*/
-BOOL dg_loop_write_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_write, UINT8* data)
+BOOL dg_loop_write_impl(DG_LOOP_PORT_FD_T* fd, UINT32 len, UINT8* buf)
 {
-    BOOL is_success = FALSE;
+    BOOL                 ret              = FALSE;
+    struct ether_header* eh               = (struct ether_header*)buf;
+    unsigned char        mac_broadcast[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
-    if (write(fd->tx_fd, data, bytes_to_write) == (ssize_t)bytes_to_write)
+    /* Construct the Ethernet header */
+    memset(buf, 0, ETH_HLEN);
+    memcpy(eh->ether_dhost, mac_broadcast, ETH_ALEN);
+    eh->ether_type = htons(ETH_P_DIAG);
+
+    if (send(fd->tx_fd, buf, len, 0) < 0)
     {
-        is_success = TRUE;
+        DG_DBG_set_err_string("DG_LOOP_send send error, port=0x%02x. errno=%d(%m)",
+                              fd->port, errno);
+    }
+    else
+    {
+        ret = TRUE;
     }
 
-    return is_success;
+    return ret;
 }
 
 /*=============================================================================================*//**
@@ -460,59 +476,40 @@ BOOL dg_loop_write_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_write, UINT8* dat
 @note
  - The read is synchronous, use select/port before read
 *//*==============================================================================================*/
-BOOL dg_loop_read_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_read, UINT8* data)
+BOOL dg_loop_read_impl(DG_LOOP_PORT_FD_T* fd, UINT32 len, UINT8* buf)
 {
-    BOOL           is_success         = TRUE;
-    int            total_bytes_read   = 0;
-    int            current_bytes_read = 0;
-    struct timeval timeout;
-    fd_set         fd_set;
-    int            select_status;
+    UINT32 rx_len;
+    int    status;
+    BOOL   ret = FALSE;
 
-    timeout.tv_sec  = 0;
-    timeout.tv_usec = 100000;
+    struct pollfd pf = { fd->rx_fd, POLLIN | POLLERR | POLLRDNORM, 0 };
 
-    /* Wait for data to be available to read */
-    FD_ZERO(&fd_set);
-    FD_SET(fd->rx_fd, &fd_set);
+    status = poll(&pf, 1, 500);
 
-    /* Continue to read until an error occurs or we read the desired number of bytes */
-    while (is_success && (total_bytes_read != (int)bytes_to_read))
+    if (status < 0)
     {
-        select_status = select(fd->rx_fd + 1, &fd_set, NULL, NULL, &timeout);
-
-        if (select_status == 0)
+        DG_DBG_set_err_string("recv poll error, port=0x%02x. errno=%d(%m)",
+                              fd->port, errno);
+    }
+    else if (status == 0)
+    {
+        DG_DBG_set_err_string("recv poll timed out! port=0x%02x", fd->port);
+    }
+    else
+    {
+        rx_len = recv(fd->rx_fd, buf, DG_LOOP_ETH_FRAME_LEN, MSG_TRUNC);
+        if (len != rx_len)
         {
-            DG_DBG_ERROR("read timeout occurred!");
-            return FALSE;
-        }
-        else if (select_status != 1)
-        {
-            DG_DBG_ERROR("Select failed, select_status=%d. errno=%d(%m)", select_status, errno);
-            return FALSE;
-        }
-
-        current_bytes_read = read(fd->rx_fd,
-                                  ((UINT8*)data + total_bytes_read),
-                                  (bytes_to_read - total_bytes_read));
-        if (current_bytes_read > 0)
-        {
-            total_bytes_read += current_bytes_read;
+            DG_DBG_set_err_string("port=0x%02x received %d bytes, should receive %d bytes",
+                                  fd->port, rx_len, len);
         }
         else
         {
-            /* Only print errors if the current_bytes_read is NOT 0.  0 bytes most likely
-               indicates client closed its connection */
-            if (current_bytes_read != 0)
-            {
-                DG_DBG_ERROR("Read port 0x%02x failed, current_bytes_read=%d, errno=%d(%m)",
-                             fd->port, current_bytes_read, errno);
-                is_success = FALSE;
-            }
+            ret = TRUE;
         }
     }
 
-    return is_success;
+    return ret;
 }
 
 /** @} */

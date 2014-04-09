@@ -78,19 +78,8 @@ static DG_NML_LOOP_CONFIG_T dg_nml_loop_cfg_end = { 0, 0, 0, 0 };
 
 static DG_NML_LOOP_CONFIG_T dg_nml_loop_default_cfg[] =
 {
-    { DG_LOOP_PORT_MGT,    DG_LOOP_PORT_HA,     1024, 0x5A },
-    { DG_LOOP_PORT_WTB0_1, DG_LOOP_PORT_WTB0_2, 1024, 0x5A },
-    { DG_LOOP_PORT_WTB1_1, DG_LOOP_PORT_WTB1_2, 1024, 0x5A },
-    { DG_LOOP_PORT_GE_0,   DG_LOOP_PORT_GE_1,   1024, 0x5A },
-    { DG_LOOP_PORT_GE_2,   DG_LOOP_PORT_GE_3,   1024, 0x5A },
-    { DG_LOOP_PORT_GE_4,   DG_LOOP_PORT_GE_5,   1024, 0x5A },
-    { DG_LOOP_PORT_GE_6,   DG_LOOP_PORT_GE_7,   1024, 0x5A },
-    { DG_LOOP_PORT_GE_8,   DG_LOOP_PORT_GE_9,   1024, 0x5A },
-    { DG_LOOP_PORT_GE_10,  DG_LOOP_PORT_GE_11,  1024, 0x5A },
-    { DG_LOOP_PORT_SFP_0,  DG_LOOP_PORT_SFP_1,  1024, 0x5A },
-    { DG_LOOP_PORT_SFP_2,  DG_LOOP_PORT_SFP_3,  1024, 0x5A },
-    { DG_LOOP_PORT_10GE_0, DG_LOOP_PORT_10GE_1, 1024, 0x5A },
-    { DG_LOOP_PORT_10GE_2, DG_LOOP_PORT_10GE_3, 1024, 0x5A },
+    { DG_LOOP_PORT_I347_0, DG_LOOP_PORT_I347_2, 1024, 0x5A },
+    { DG_LOOP_PORT_I347_1, DG_LOOP_PORT_I347_3, 1024, 0x5A },
     { 0, 0, 0, 0 }
 };
 
@@ -186,18 +175,18 @@ int main(int argc, char** argv)
         dg_nml_loop_test[index][0].size    = p_cfg->size;
         dg_nml_loop_test[index][0].number  = DG_LOOP_RUN_IFINITE;
 
-        dg_nml_loop_test[index][1].tx_port = p_cfg->port2;
-        dg_nml_loop_test[index][1].rx_port = p_cfg->port1;
-        dg_nml_loop_test[index][1].pattern = ~p_cfg->pattern;
-        dg_nml_loop_test[index][1].size    = p_cfg->size;
-        dg_nml_loop_test[index][1].number  = DG_LOOP_RUN_IFINITE;
-
-        if (!DG_LOOP_start_test(&dg_nml_loop_test[index][0]))
+        if (!DG_LOOP_start_test1(&dg_nml_loop_test[index][0]))
         {
             printf("failed to start loopback test tx_port=0x%02x rx_port=0x%02x: %s\n",
                    p_cfg->port1, p_cfg->port2, DG_DBG_get_err_string());
             ret = 1;
         }
+#if 0
+        dg_nml_loop_test[index][1].tx_port = p_cfg->port2;
+        dg_nml_loop_test[index][1].rx_port = p_cfg->port1;
+        dg_nml_loop_test[index][1].pattern = ~p_cfg->pattern;
+        dg_nml_loop_test[index][1].size    = p_cfg->size;
+        dg_nml_loop_test[index][1].number  = DG_LOOP_RUN_IFINITE;
 
         if (!DG_LOOP_start_test(&dg_nml_loop_test[index][1]))
         {
@@ -205,7 +194,7 @@ int main(int argc, char** argv)
                    p_cfg->port2, p_cfg->port1, DG_DBG_get_err_string());
             ret = 1;
         }
-
+#endif
         index++;
         p_cfg++;
     }
@@ -417,14 +406,14 @@ void dg_nml_loop_print_result()
         printf("total_recv=%d  ", dg_nml_loop_test[index][0].result.total_recv);
         printf("failed_recv=%d  ", dg_nml_loop_test[index][0].result.fail_recv);
         printf("wrong_recv=%d\n\n", dg_nml_loop_test[index][0].result.wrong_recv);
-
+#if 0
         printf("tx_port=0x%02x, rx_port=0x%02x\n", p_cfg->port2, p_cfg->port1);
         printf("total_send=%d  ", dg_nml_loop_test[index][1].result.total_send);
         printf("failed_send=%d  ", dg_nml_loop_test[index][1].result.fail_send);
         printf("total_recv=%d  ", dg_nml_loop_test[index][1].result.total_recv);
         printf("failed_recv=%d  ", dg_nml_loop_test[index][1].result.fail_recv);
         printf("wrong_recv=%d\n\n", dg_nml_loop_test[index][1].result.wrong_recv);
-
+#endif
         index++;
         p_cfg++;
     }
