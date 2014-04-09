@@ -30,8 +30,7 @@ const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_INT_LOOP_PORT_MAX            DG_LOOP_PORT_10GE_3
-#define DG_INT_LOOP_NODE_MAX            DG_LOOP_NODE_PORT
+#define DG_INT_LOOP_NODE_MAX            DG_LOOP_NODE_HDR
 #define DG_INT_LOOP_DEFAULT_PORT        0   /* 0 means test for all data ports */
 #define DG_INT_LOOP_DEFAULT_RUN_TIME    -1  /* negtive means run the program for ever */
 #define DG_INT_LOOP_DEFAULT_PACKET_SIZE 1024
@@ -85,7 +84,7 @@ int main(int argc, char** argv)
     {              /* Default values. */
         .pattern = DG_INT_LOOP_DEFAULT_PATTERN,
         .port    = 1,
-        .node    = DG_LOOP_NODE_PORT,
+        .node    = DG_LOOP_NODE_HDR,
         .size    = DG_INT_LOOP_DEFAULT_PACKET_SIZE,
         .time    = DG_INT_LOOP_DEFAULT_RUN_TIME
     };
@@ -126,18 +125,15 @@ int main(int argc, char** argv)
     if (args.port != 0)
     {
         DG_LOOP_TEST_STATISTIC_T* result = &test.result;
-
-        if (!DG_LOOP_config(args.port, args.node, DG_LOOP_CFG_INTERNAL))
+        if (!DG_LOOP_connect(args.port, args.port))
         {
-            printf("failed to config internal loop back, port=0x%02x, node=%d: ",
-                   args.port, args.node);
-            DG_LOOP_print_err_string();
+            printf("failed to connect internal loop back, port=0x%02x%s\n",
+                   args.port, DG_DBG_get_err_string());
             ret = 1;
         }
         else if (!DG_LOOP_start_test(&test))
         {
-            printf("failed to start loopback test: ");
-            DG_LOOP_print_err_string();
+            printf("failed to start loopback test: %s\n", DG_DBG_get_err_string());
             ret = 1;
         }
         else
@@ -165,10 +161,15 @@ int main(int argc, char** argv)
             }
 
             DG_DBG_TRACE("test finished");
-            DG_LOOP_stop_test(&test);
+            DG_LOOP_wait_test(&test);
             dg_int_loop_print_result(result);
         }
+
+        /* disconnect all ports */
+        DG_LOOP_disconnect_all();
     }
+
+    printf("internal loop test finished\n");
 
     return ret;
 }
@@ -250,9 +251,9 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
         {
             return EINVAL;
         }
-        else if ((value < 0) || (value > DG_INT_LOOP_PORT_MAX))
+        else if (DG_LOOP_port_to_index((DG_LOOP_PORT_T)value) < 0)
         {
-            printf("out range port: %s, max=0x%02x\n", arg, DG_INT_LOOP_PORT_MAX);
+            printf("invalid port: %s\n", arg);
             return EINVAL;
         }
         else
@@ -399,3 +400,4 @@ void dg_int_loop_exit_handler(int sig)
     dg_int_loop_run = FALSE;
     DG_DBG_TRACE("got signaled: sig = %d", sig);
 }
+

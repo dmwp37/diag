@@ -54,20 +54,20 @@ static void* dg_pal_aux_engine_aux_thread(void*);
 /** the aux simulator thread handler */
 static pthread_t dg_pal_aux_engine_thread_hndl[DG_CFG_AUX_NUM] = { 0 };
 /** the aux simulator thread control flag */
-static BOOL      dg_pal_aux_engine_run_ctrl[DG_CFG_AUX_NUM]    = { FALSE };
+static BOOL dg_pal_aux_engine_run_ctrl[DG_CFG_AUX_NUM] = { FALSE };
 /** Socket the aux simulator thread uses */
-static int       dg_pal_aux_engine_socket_aux[DG_CFG_AUX_NUM]  = { DG_PAL_AUX_ENGINE_FD_NOT_INIT };
+static int dg_pal_aux_engine_socket_aux[DG_CFG_AUX_NUM] = { DG_PAL_AUX_ENGINE_FD_NOT_INIT };
 /** Socket the DIAG engine uses */
-static int       dg_pal_aux_engine_socket_diag[DG_CFG_AUX_NUM] = { DG_PAL_AUX_ENGINE_FD_NOT_INIT };
+static int dg_pal_aux_engine_socket_diag[DG_CFG_AUX_NUM] = { DG_PAL_AUX_ENGINE_FD_NOT_INIT };
 #else
 /** the aux simulator thread handler */
 static pthread_t dg_pal_aux_engine_thread_hndl[DG_CFG_AUX_NUM];
 /** the aux simulator thread control flag */
-static BOOL      dg_pal_aux_engine_run_ctrl[DG_CFG_AUX_NUM];
+static BOOL dg_pal_aux_engine_run_ctrl[DG_CFG_AUX_NUM];
 /** Socket the aux simulator thread uses */
-static int       dg_pal_aux_engine_socket_aux[DG_CFG_AUX_NUM];
+static int dg_pal_aux_engine_socket_aux[DG_CFG_AUX_NUM];
 /** Socket the DIAG engine uses */
-static int       dg_pal_aux_engine_socket_diag[DG_CFG_AUX_NUM];
+static int dg_pal_aux_engine_socket_diag[DG_CFG_AUX_NUM];
 #endif
 
 /*==================================================================================================
@@ -117,7 +117,7 @@ DG_PAL_AUX_ENGINE_INIT_T DG_PAL_AUX_ENGINE_init(int aux_id)
         dg_pal_aux_engine_socket_diag[aux_id] = sockets[1];
 
         /* set the aux simulate thread run flag */
-        dg_pal_aux_engine_run_ctrl[aux_id]    = TRUE;
+        dg_pal_aux_engine_run_ctrl[aux_id] = TRUE;
 
         /* Spawn a thread to simulate an aux engine */
         if ((thread_status = pthread_create(&dg_pal_aux_engine_thread_hndl[aux_id], NULL,
@@ -209,7 +209,7 @@ BOOL DG_PAL_AUX_ENGINE_read(int aux_id, UINT32 bytes_to_read, UINT8* data)
         DG_DBG_ERROR("Aux engine device is not open, aux_id = %d!", aux_id);
         return FALSE;
     }
-    
+
     /* Continue to read until an error occurs or we read the desired number of bytes */
     while (is_success && (total_bytes_read != (int)bytes_to_read))
     {
@@ -226,7 +226,7 @@ BOOL DG_PAL_AUX_ENGINE_read(int aux_id, UINT32 bytes_to_read, UINT8* data)
                indicates client closed its connection */
             if (current_bytes_read != 0)
             {
-                DG_DBG_ERROR("Read AUX[%d]failed, current_bytes_read = %d, errno = %d",
+                DG_DBG_ERROR("Read AUX[%d]failed, current_bytes_read = %d, errno=%d(%m)",
                              aux_id, current_bytes_read, errno);
             }
 
@@ -295,10 +295,10 @@ static void* dg_pal_aux_engine_aux_thread(void* id)
     DG_DEFS_DIAG_REQ_HDR_T req_hdr;
     DG_DEFS_DIAG_REQ_HDR_T n_req_hdr;
 
-    UINT8*                 payload = NULL;
-    int                    read_size;
-    int                    write_size;
-    int                    aux_id  = *(int*)(&id);
+    UINT8* payload = NULL;
+    int    read_size;
+    int    write_size;
+    int    aux_id = *(int*)(&id);
 
     DG_DBG_TRACE("AUX SIM[%d] Starting aux thread", aux_id);
 
@@ -347,10 +347,10 @@ static void* dg_pal_aux_engine_aux_thread(void* id)
             {
                 /* Set the DIAG response header */
                 memset(&rsp_hdr, 0, sizeof(rsp_hdr));
-                rsp_hdr.seq_tag      = req_hdr.seq_tag;
-                rsp_hdr.opcode       = req_hdr.opcode;
-                rsp_hdr.rsp_code     = DG_RSP_CODE_CMD_RSP_GENERIC;
-                rsp_hdr.length       = req_hdr.length + 1; /* +1 for the aux id added in response data */
+                rsp_hdr.seq_tag  = req_hdr.seq_tag;
+                rsp_hdr.opcode   = req_hdr.opcode;
+                rsp_hdr.rsp_code = DG_RSP_CODE_CMD_RSP_GENERIC;
+                rsp_hdr.length   = req_hdr.length + 1; /* +1 for the aux id added in response data */
 
                 /* Endian swap the header */
                 DG_ENGINE_UTIL_hdr_rsp_hton(&rsp_hdr, &n_rsp_hdr);

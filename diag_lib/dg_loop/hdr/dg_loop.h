@@ -11,6 +11,7 @@
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
+#include <pthread.h>
 
 /** @addtogroup libdg_loop
 @{
@@ -22,6 +23,7 @@ extern "C" {
 /*==================================================================================================
                                               MACROS
 ==================================================================================================*/
+#define DG_LOOP_PORT_NUM        26
 #define DG_LOOP_PACKET_SIZE_MAX 9000
 #define DG_LOOP_PACKET_SIZE_MIN 80
 #define DG_LOOP_RUN_IFINITE     -1
@@ -68,7 +70,7 @@ enum
     DG_LOOP_NODE_FPGA = 0x00,
     DG_LOOP_NODE_MAC  = 0x01,
     DG_LOOP_NODE_PHY  = 0x02,
-    DG_LOOP_NODE_PORT = 0x03, /** External loopback cable/SFP/SFP+ */
+    DG_LOOP_NODE_HDR  = 0x03, /** External loopback cable/SFP/SFP+ */
 };
 typedef UINT8 DG_LOOP_NODE_T;
 
@@ -95,14 +97,22 @@ typedef struct
 
 typedef struct
 {
-    void* control; /* the internal control block */
-
-    DG_LOOP_PORT_T           tx_port; /* [in]  - the port that will send data */
-    DG_LOOP_PORT_T           rx_port; /* [in]  - the port that will recv data */
-    UINT8                    pattern; /* [in]  - packet data pattern          */
-    int                      size;    /* [in]  - packet size of each transfer */
-    int                      number;  /* [in]  - how many times to send/recv  */
-    DG_LOOP_TEST_STATISTIC_T result;  /* [out] - test result */
+    /* public sector */
+    DG_LOOP_PORT_T           tx_port;     /* [in]  - the port that will send data */
+    DG_LOOP_PORT_T           rx_port;     /* [in]  - the port that will recv data */
+    UINT8                    pattern;     /* [in]  - packet data pattern          */
+    int                      size;        /* [in]  - packet size of each transfer */
+    int                      number;      /* [in]  - how many times to send/recv  */
+    DG_LOOP_TEST_STATISTIC_T result;      /* [out] - test result                  */
+    /* private sector */
+    pthread_t       send_thread; /* [pri] - send thread        */
+    pthread_t       recv_thread; /* [pri] - recv thread        */
+    BOOL            b_run;       /* [pri] - thread run control */
+    BOOL            b_recv;      /* [pri] - recv run control   */
+    int             count;       /* [pri] - packet to be recv  */
+    pthread_mutex_t mutex;       /* [pri] - count mutex        */
+    pthread_cond_t  send_cond;   /* [pri] - send condition     */
+    pthread_cond_t  recv_cond;   /* [pri] - recv condition     */
 } DG_LOOP_TEST_T;
 
 /*==================================================================================================
@@ -112,6 +122,50 @@ typedef struct
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
+/*=============================================================================================*//**
+@brief map the port id to index
+
+@param[in]  port - the port number according to definition
+
+@return the port index, -1 if invalid.
+
+@note
+- index is 0, 1 ... DG_LOOP_PORT_NUM-1
+- use this function to check if the port is valid
+*//*==============================================================================================*/
+int DG_LOOP_port_to_index(DG_LOOP_PORT_T port);
+
+/*=============================================================================================*//**
+@brief map the index to port
+
+@param[in]  port - the port number according to definition
+
+@return the port index, 0xFF if invalid index.
+
+@note
+- index is 0, 1 ... DG_LOOP_PORT_NUM-1
+*//*==============================================================================================*/
+DG_LOOP_PORT_T DG_LOOP_index_to_port(int index);
+
+/*=============================================================================================*//**
+@brief connect two ports
+
+@param[in] port1 - the path to open on which port
+
+@return TRUE if success
+
+@note
+- this function is only for simulation
+*//*==============================================================================================*/
+BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2);
+
+/*=============================================================================================*//**
+@brief disconnect all the ports
+
+@note
+- this function is only for simulation
+*//*==============================================================================================*/
+void DG_LOOP_disconnect_all();
 
 /*=============================================================================================*//**
 @brief open port for send/recv data
@@ -121,7 +175,7 @@ typedef struct
 @return the file descriptor, -1 if error happened
 
 @note
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 int DG_LOOP_open(DG_LOOP_PORT_T port);
 
@@ -142,7 +196,7 @@ void DG_LOOP_close(int fd);
 @return the file descriptor, -1 if error happened
 
 @note
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len);
 
@@ -156,7 +210,7 @@ BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len);
 @return the file descriptor, -1 if error happened
 
 @note
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len);
 
@@ -171,24 +225,19 @@ BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len);
 
 @note
 - if the port doesn't contains the node or doesn't support the configuration, FALSE will be returned
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg);
 
 /*=============================================================================================*//**
-@brief get that last error string
+@brief configurate all the port node to normal mode
 
-@return the error string, or NULL
+@return TRUE if success
 
 @note
-- caller must free the error string
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
-char* DG_LOOP_get_err_string();
-
-/*=============================================================================================*//**
-@brief print the last error string
-*//*==============================================================================================*/
-void DG_LOOP_print_err_string();
+BOOL DG_LOOP_config_all_normal();
 
 /*=============================================================================================*//**
 @brief loopback test between a pair of ports
@@ -204,7 +253,7 @@ void DG_LOOP_print_err_string();
 - the statistic result is stored in test->result
 - user can READ it any time to print out the result
 - user can all DG_LOOP_stop_test() to stop the test
-- if error happened, call DG_LOOP_get_err_string() to get the last error
+- if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
 BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test);
 
@@ -215,6 +264,7 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test);
 
 @note
 - this function would stop the two threads in the background that start by DG_LOOP_start_test()
+- the function would return immediately
 *//*==============================================================================================*/
 void DG_LOOP_stop_test(DG_LOOP_TEST_T* test);
 
@@ -226,6 +276,17 @@ void DG_LOOP_stop_test(DG_LOOP_TEST_T* test);
 @return TRUE if the background send/recv thread is still running
 *//*==============================================================================================*/
 BOOL DG_LOOP_query_test(DG_LOOP_TEST_T* test);
+
+/*=============================================================================================*//**
+@brief wait the loopback test finished
+
+@param[in]  test - which test to wait
+
+@note
+- this function would wait the two threads in the background that started by DG_LOOP_start_test()
+- it should be used after DG_LOOP_stop_test(), and block until all the thread released
+*//*==============================================================================================*/
+void DG_LOOP_wait_test(DG_LOOP_TEST_T* test);
 
 #ifdef __cplusplus
 }

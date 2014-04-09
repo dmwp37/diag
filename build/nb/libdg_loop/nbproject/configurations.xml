@@ -6,6 +6,9 @@
     </logicalFolder>
     <logicalFolder name="SourceFiles" displayName="src" projectFiles="true">
       <itemPath>../../../diag_lib/dg_loop/src/dg_loop.c</itemPath>
+      <itemPath>../../../diag_lib/dg_loop/src/dg_loop_cfg.c</itemPath>
+      <itemPath>../../../diag_lib/dg_loop/src/dg_loop_priv.h</itemPath>
+      <itemPath>../../../diag_lib/dg_loop/src/dg_loop_test.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -35,6 +38,7 @@
             <pElem>../../../diag_lib/dg_loop/hdr</pElem>
           </incDir>
           <commandLine>-pipe -Wall -Wextra</commandLine>
+          <warningLevel>3</warningLevel>
         </cTool>
         <archiverTool>
         </archiverTool>
@@ -45,6 +49,21 @@
             flavor2="0">
       </item>
       <item path="../../../diag_lib/dg_loop/src/dg_loop.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diag_lib/dg_loop/src/dg_loop_cfg.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diag_lib/dg_loop/src/dg_loop_priv.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diag_lib/dg_loop/src/dg_loop_test.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -78,6 +97,21 @@
             flavor2="0">
       </item>
       <item path="../../../diag_lib/dg_loop/src/dg_loop.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diag_lib/dg_loop/src/dg_loop_cfg.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../../diag_lib/dg_loop/src/dg_loop_priv.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../diag_lib/dg_loop/src/dg_loop_test.c"
             ex="false"
             tool="0"
             flavor2="0">

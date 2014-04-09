@@ -52,6 +52,30 @@ enum
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
+
+/*=============================================================================================*//**
+@brief Sets an error string for the current thread
+
+@param[in] format - printf style format string for error message
+@param[in] ...    - Variable argument, used to populated format string
+
+@note
+- If err_string already has a string, the old one will be freed
+*//*==============================================================================================*/
+void DG_DBG_set_err_string(const char* format, ...);
+
+/*=============================================================================================*//**
+@brief Gets an error string for the current thread
+
+@return - the current thread error string
+
+@note
+- get error string from thread specific data
+- If no error string was set, will return NULL
+- caller should NOT free the string
+*//*==============================================================================================*/
+char* DG_DBG_get_err_string();
+
 /*=============================================================================================*//**
 @brief Set debug level
 
