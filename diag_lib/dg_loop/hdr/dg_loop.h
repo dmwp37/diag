@@ -108,6 +108,7 @@ typedef struct
     pthread_t       send_thread; /* [pri] - send thread        */
     pthread_t       recv_thread; /* [pri] - recv thread        */
     BOOL            b_run;       /* [pri] - thread run control */
+    BOOL            b_recv;      /* [pri] - recv run control   */
     int             count;       /* [pri] - packet to be recv  */
     pthread_mutex_t mutex;       /* [pri] - count mutex        */
     pthread_cond_t  send_cond;   /* [pri] - send condition     */
