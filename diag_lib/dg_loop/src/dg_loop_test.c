@@ -124,6 +124,13 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
                      test->tx_port, test->rx_port);
     }
 
+    /* let the send/recv thread run first */
+    sched_yield();
+    if (!test->b_run)
+    {
+        ret = FALSE;
+    }
+
     /* clean up */
     if (!ret)
     {
@@ -231,14 +238,14 @@ void* dg_loop_send_thread(void* arg)
     if ((fd = DG_LOOP_open(test->tx_port)) < 0)
     {
         DG_DBG_ERROR("failed to open send port, tx_port=0x%02x", test->tx_port);
-        return NULL;
+        goto send_finish;
     }
 
     /* prepare the data to send */
     if ((send_buf = malloc(size)) == NULL)
     {
         DG_DBG_set_err_string("failed to malloc send buf, size=%d", size);
-        return NULL;
+        goto send_finish;
     }
 
     memset(send_buf, test->pattern, size);
@@ -294,10 +301,15 @@ void* dg_loop_send_thread(void* arg)
         }
     }
 
+send_finish:
     free(send_buf);
 
-    DG_LOOP_close(fd);
+    if (fd >= 0)
+    {
+        DG_LOOP_close(fd);
+    }
 
+    test->b_run = FALSE;
     /* tell the receive thread to stop */
     test->b_recv = FALSE;
 
@@ -326,18 +338,18 @@ void* dg_loop_recv_thread(void* arg)
 
     DG_DBG_TRACE("enter into recv thread: %p", (void*)pthread_self());
 
-    /* open the port for sending data */
+    /* open the port for receiving data */
     if ((fd = DG_LOOP_open(test->rx_port)) < 0)
     {
-        DG_DBG_ERROR("failed to open send port, tx_port=0x%02x", test->tx_port);
-        return NULL;
+        DG_DBG_ERROR("failed to open recv port, rx_port=0x%02x", test->rx_port);
+        goto recv_finish;
     }
 
     /* prepare the data to send */
     if ((recv_buf = malloc(size)) == NULL)
     {
         DG_DBG_set_err_string("failed to malloc recv buf, size=%d", size);
-        return NULL;
+        goto recv_finish;
     }
 
     while ((test->count != 0) || test->b_recv)
@@ -413,9 +425,16 @@ void* dg_loop_recv_thread(void* arg)
         }
     }
 
+recv_finish:
     free(recv_buf);
 
-    DG_LOOP_close(fd);
+    if (fd >= 0)
+    {
+        DG_LOOP_close(fd);
+    }
+
+    test->b_run  = FALSE;
+    test->b_recv = FALSE;
 
     DG_DBG_TRACE("leave recv thread: %p", (void*)pthread_self());
     return NULL;

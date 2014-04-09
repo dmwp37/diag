@@ -24,7 +24,7 @@ extern "C" {
 ==================================================================================================*/
 #define DG_LOOP_MUTEX_LOCK(x) \
     pthread_cleanup_push(dg_loop_mutex_unlock, (x)); \
-    pthread_mutex_lock((x))
+    pthread_mutex_lock(x)
 
 #define DG_LOOP_MUTEX_UNLOCK(x) \
     pthread_mutex_unlock(x); \
