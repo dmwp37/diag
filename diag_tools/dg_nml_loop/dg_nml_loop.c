@@ -130,6 +130,12 @@ int main(int argc, char** argv)
     {
         return 1;
     }
+    
+    if (getuid() != 0)
+    {
+         printf("You must run this tool as ROOT user!\n");
+         return 1;
+    }
 
     /* signal setup */
     memset(&actions, 0, sizeof(actions));
