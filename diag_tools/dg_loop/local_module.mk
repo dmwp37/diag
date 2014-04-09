@@ -12,7 +12,7 @@ LOCAL_PATH := $(call my-dir)
 #===================================================
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := dg_nml_loop
+LOCAL_MODULE := dg_loop
 
 LOCAL_CFLAGS :=
 
@@ -25,7 +25,7 @@ LOCAL_LDLIBS +=
 
 LOCAL_REQUIRED_MODULES :=
 
-LOCAL_SRC_FILES := dg_nml_loop.c
+LOCAL_SRC_FILES := dg_loop.c
 
 include $(BUILD_EXECUTABLE)
 

@@ -31,7 +31,7 @@ LOCAL_EXPORT_C_INCLUDE_DIRS :=  $(addprefix $(LOCAL_PATH)/, $(DG_LOOP_EXPORT_INC
 LOCAL_STATIC_LIBRARIES := libdg_dbg
 
 LOCAL_SRC_FILES := \
-  src/dg_loop.c \
+  src/dg_loop_api.c \
   src/dg_loop_cfg.c \
   src/dg_loop_test.c
 

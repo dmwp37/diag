@@ -23,7 +23,7 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
     </logicalFolder>
-    <itemPath>../../../diag_tools/dg_nml_loop/dg_nml_loop.c</itemPath>
+    <itemPath>../../../diag_tools/dg_loop/dg_loop.c</itemPath>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -78,7 +78,7 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="../../../diag_tools/dg_nml_loop/dg_nml_loop.c"
+      <item path="../../../diag_tools/dg_loop/dg_loop.c"
             ex="false"
             tool="0"
             flavor2="0">
@@ -104,7 +104,7 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="../../../diag_tools/dg_nml_loop/dg_nml_loop.c"
+      <item path="../../../diag_tools/dg_loop/dg_loop.c"
             ex="false"
             tool="0"
             flavor2="0">

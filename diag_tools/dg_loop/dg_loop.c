@@ -1,8 +1,8 @@
 /*==================================================================================================
 
-    Module Name:  dg_nml_loop.c
+    Module Name:  dg_loop.c
 
-    General Description: Implements the diag normal loopback test
+    General Description: Implements the diag loopback test
 
 ====================================================================================================
 
@@ -30,10 +30,10 @@ const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_NML_LOOP_DEFAULT_RUN_TIME -1  /* negtive means run the program for ever */
-#define DG_NML_LOOP_PORT_PAIR_MAX    100 /* the max port pair */
+#define DG_LOOP_DEFAULT_RUN_TIME -1  /* negtive means run the program for ever */
+#define DG_LOOP_PORT_PAIR_MAX    100 /* the max port pair */
 
-#define DG_LOOP_CFG_MAX_BUF_SIZE     256
+#define DG_LOOP_CFG_MAX_BUF_SIZE 256
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -43,7 +43,7 @@ typedef struct
 {
     char* cfg_file; /* the config file */
     int   time;
-} DG_NML_LOOP_ARG_T;
+} DG_LOOP_ARG_T;
 
 typedef struct
 {
@@ -51,19 +51,19 @@ typedef struct
     DG_LOOP_PORT_T port2;
     int            size;
     UINT8          pattern;
-} DG_NML_LOOP_CONFIG_T;
+} DG_LOOP_CONFIG_T;
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
-static error_t dg_nml_loop_arg_parse(int key, char* arg, struct argp_state* state);
-static BOOL    dg_nml_loop_prepare_args(int argc, char** argv, DG_NML_LOOP_ARG_T* args);
-static BOOL    dg_nml_loop_get_int_arg(const char* arg, long* value);
-static void    dg_nml_loop_print_result(int time);
-static void    dg_nml_loop_exit_handler(int sig);
-static void    dg_nml_loop_dump_config();
+static error_t dg_loop_arg_parse(int key, char* arg, struct argp_state* state);
+static BOOL    dg_loop_prepare_args(int argc, char** argv, DG_LOOP_ARG_T* args);
+static BOOL    dg_loop_get_int_arg(const char* arg, long* value);
+static void    dg_loop_print_result(int time);
+static void    dg_loop_exit_handler(int sig);
+static void    dg_loop_dump_config();
 
-static DG_NML_LOOP_CONFIG_T* dg_nml_loop_read_config(const char* file);
+static DG_LOOP_CONFIG_T* dg_loop_read_config(const char* file);
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -72,11 +72,11 @@ static DG_NML_LOOP_CONFIG_T* dg_nml_loop_read_config(const char* file);
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
-static BOOL dg_nml_loop_run = TRUE;
+static BOOL dg_loop_run = TRUE;
 
-static DG_NML_LOOP_CONFIG_T dg_nml_loop_cfg_end = { 0, 0, 0, 0 };
+static DG_LOOP_CONFIG_T dg_loop_cfg_end = { 0, 0, 0, 0 };
 
-static DG_NML_LOOP_CONFIG_T dg_nml_loop_default_cfg[] =
+static DG_LOOP_CONFIG_T dg_loop_default_cfg[] =
 {
     { DG_LOOP_PORT_MGT,    DG_LOOP_PORT_HA,     1024, 0x5A },
     { DG_LOOP_PORT_WTB0_1, DG_LOOP_PORT_WTB0_2, 1024, 0x5A },
@@ -94,17 +94,17 @@ static DG_NML_LOOP_CONFIG_T dg_nml_loop_default_cfg[] =
     { 0, 0, 0, 0 }
 };
 
-static DG_NML_LOOP_CONFIG_T* dg_nml_loop_cfg_settings = NULL;
+static DG_LOOP_CONFIG_T* dg_loop_cfg_settings = NULL;
 
 static /* test control blocks */
-DG_LOOP_TEST_T dg_nml_loop_test[DG_NML_LOOP_PORT_PAIR_MAX];
+DG_LOOP_TEST_T dg_loop_test[DG_LOOP_PORT_PAIR_MAX];
 
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief Main function for dg_nml_loop application
+@brief Main function for dg_loop application
 
 @param[in] argc - Number of arguments
 @param[in] argv - Array of each argument passed
@@ -116,17 +116,17 @@ int main(int argc, char** argv)
     int time  = 0;
 
     /* default argument. */
-    DG_NML_LOOP_ARG_T args =
+    DG_LOOP_ARG_T args =
     {
         .cfg_file = NULL,
-        .time     = DG_NML_LOOP_DEFAULT_RUN_TIME
+        .time     = DG_LOOP_DEFAULT_RUN_TIME
     };
 
     struct sigaction actions;
 
-    DG_NML_LOOP_CONFIG_T* p_cfg;
+    DG_LOOP_CONFIG_T* p_cfg;
 
-    if (!dg_nml_loop_prepare_args(argc, argv, &args))
+    if (!dg_loop_prepare_args(argc, argv, &args))
     {
         return 1;
     }
@@ -135,7 +135,7 @@ int main(int argc, char** argv)
     memset(&actions, 0, sizeof(actions));
     sigemptyset(&actions.sa_mask);
     actions.sa_flags   = 0;
-    actions.sa_handler = dg_nml_loop_exit_handler;
+    actions.sa_handler = dg_loop_exit_handler;
     sigaction(SIGINT, &actions, NULL);
     signal(SIGPIPE, SIG_IGN);
 
@@ -145,25 +145,25 @@ int main(int argc, char** argv)
 
     if (args.cfg_file != NULL)
     {
-        if ((dg_nml_loop_cfg_settings = dg_nml_loop_read_config(args.cfg_file)) == NULL)
+        if ((dg_loop_cfg_settings = dg_loop_read_config(args.cfg_file)) == NULL)
         {
             exit(1);
         }
     }
     else
     {
-        dg_nml_loop_cfg_settings = dg_nml_loop_default_cfg;
+        dg_loop_cfg_settings = dg_loop_default_cfg;
     }
 
 
 
     /* init the test blocks */
-    memset(dg_nml_loop_test, 0, sizeof(dg_nml_loop_test));
+    memset(dg_loop_test, 0, sizeof(dg_loop_test));
 
     /* prepare connections */
-    p_cfg = dg_nml_loop_cfg_settings;
+    p_cfg = dg_loop_cfg_settings;
     index = 0;
-    while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
+    while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
         if (!DG_LOOP_connect(p_cfg->port1, p_cfg->port2))
         {
@@ -176,17 +176,17 @@ int main(int argc, char** argv)
     }
 
     /* start all the test thread */
-    p_cfg = dg_nml_loop_cfg_settings;
+    p_cfg = dg_loop_cfg_settings;
     index = 0;
-    while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
+    while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
-        dg_nml_loop_test[index].tx_port = p_cfg->port1;
-        dg_nml_loop_test[index].rx_port = p_cfg->port2;
-        dg_nml_loop_test[index].pattern = p_cfg->pattern;
-        dg_nml_loop_test[index].size    = p_cfg->size;
-        dg_nml_loop_test[index].number  = DG_LOOP_RUN_IFINITE;
+        dg_loop_test[index].tx_port = p_cfg->port1;
+        dg_loop_test[index].rx_port = p_cfg->port2;
+        dg_loop_test[index].pattern = p_cfg->pattern;
+        dg_loop_test[index].size    = p_cfg->size;
+        dg_loop_test[index].number  = DG_LOOP_RUN_IFINITE;
 
-        if (!DG_LOOP_start_test(&dg_nml_loop_test[index]))
+        if (!DG_LOOP_start_test(&dg_loop_test[index]))
         {
             printf("failed to start loopback test tx_port=0x%02x rx_port=0x%02x: %s\n",
                    p_cfg->port1, p_cfg->port2, DG_DBG_get_err_string());
@@ -197,7 +197,7 @@ int main(int argc, char** argv)
     }
 
     /* print out thread statistics */
-    while (dg_nml_loop_run)
+    while (dg_loop_run)
     {
         if (args.time == 0)
         {
@@ -211,31 +211,31 @@ int main(int argc, char** argv)
 
         printf("time frame: %ds\n", time++);
         sleep(1);
-        dg_nml_loop_print_result(0);
+        dg_loop_print_result(0);
     }
 
     /* stop the thread */
-    p_cfg = dg_nml_loop_cfg_settings;
+    p_cfg = dg_loop_cfg_settings;
     index = 0;
-    while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
+    while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
-        DG_LOOP_stop_test(&dg_nml_loop_test[index]);
+        DG_LOOP_stop_test(&dg_loop_test[index]);
         index++;
         p_cfg++;
     }
 
     /* clean up thread */
-    p_cfg = dg_nml_loop_cfg_settings;
+    p_cfg = dg_loop_cfg_settings;
     index = 0;
-    while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
+    while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
-        DG_LOOP_wait_test(&dg_nml_loop_test[index]);
+        DG_LOOP_wait_test(&dg_loop_test[index]);
         index++;
         p_cfg++;
     }
 
     printf("final result:\n");
-    dg_nml_loop_print_result(time);
+    dg_loop_print_result(time);
 
     DG_LOOP_disconnect_all();
 
@@ -253,11 +253,11 @@ int main(int argc, char** argv)
 
 @param[in]  argc - Number of arguments
 @param[in]  argv - Array of each argument passed
-@param[out] args - dg_nml_loop own argument
+@param[out] args - dg_loop own argument
 
 @return TRUE if no error
 *//*==============================================================================================*/
-BOOL dg_nml_loop_prepare_args(int argc, char** argv, DG_NML_LOOP_ARG_T* args)
+BOOL dg_loop_prepare_args(int argc, char** argv, DG_LOOP_ARG_T* args)
 {
     /* Program documentation. */
     char tool_doc[] =
@@ -278,7 +278,7 @@ BOOL dg_nml_loop_prepare_args(int argc, char** argv, DG_NML_LOOP_ARG_T* args)
 
     struct argp dg_argp =
     {
-        dg_options, dg_nml_loop_arg_parse, NULL, tool_doc, NULL, NULL, NULL
+        dg_options, dg_loop_arg_parse, NULL, tool_doc, NULL, NULL, NULL
     };
 
     if (argp_parse(&dg_argp, argc, argv, 0, 0, args) != 0)
@@ -294,11 +294,11 @@ BOOL dg_nml_loop_prepare_args(int argc, char** argv, DG_NML_LOOP_ARG_T* args)
 @brief argp parser function
 
 *//*==============================================================================================*/
-error_t dg_nml_loop_arg_parse(int key, char* arg, struct argp_state* state)
+error_t dg_loop_arg_parse(int key, char* arg, struct argp_state* state)
 {
     /* Get the input argument from argp_parse, which we
        know is a pointer to our arguments structure. */
-    DG_NML_LOOP_ARG_T* dg_arg = state->input;
+    DG_LOOP_ARG_T* dg_arg = state->input;
 
     long value;
 
@@ -317,12 +317,12 @@ error_t dg_nml_loop_arg_parse(int key, char* arg, struct argp_state* state)
         break;
 
     case 'd':
-        dg_nml_loop_dump_config();
+        dg_loop_dump_config();
         exit(0);
         break;
 
     case 't':
-        if (!dg_nml_loop_get_int_arg(arg, &value))
+        if (!dg_loop_get_int_arg(arg, &value))
         {
             return EINVAL;
         }
@@ -357,7 +357,7 @@ error_t dg_nml_loop_arg_parse(int key, char* arg, struct argp_state* state)
 
 @return TRUE if success
 *//*==============================================================================================*/
-BOOL dg_nml_loop_get_int_arg(const char* arg, long* value)
+BOOL dg_loop_get_int_arg(const char* arg, long* value)
 {
     BOOL  ret = FALSE;
     char* p_ch;
@@ -387,35 +387,35 @@ BOOL dg_nml_loop_get_int_arg(const char* arg, long* value)
 @brief pint out the statistic result
 @param[in] time - 0 for real time statistic of every second, other for final total statistic
 *//*==============================================================================================*/
-void dg_nml_loop_print_result(int time)
+void dg_loop_print_result(int time)
 {
     int   index = 0;
     float pps;
     float bps;
 
     DG_LOOP_TEST_STATISTIC_T* result;
-    DG_NML_LOOP_CONFIG_T*     p_cfg = dg_nml_loop_cfg_settings;
+    DG_LOOP_CONFIG_T*         p_cfg = dg_loop_cfg_settings;
 
-    while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
+    while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
-        result = &dg_nml_loop_test[index].result;
+        result = &dg_loop_test[index].result;
         printf("tx_port=0x%02x, rx_port=0x%02x, ", p_cfg->port1, p_cfg->port2);
         printf("total send=%6d ", result->total_send);
         printf("recv=%6d, ", result->total_recv);
 
         if (time == 0)
         {
-            static int last[DG_NML_LOOP_PORT_PAIR_MAX] = { 0 };
+            static int last[DG_LOOP_PORT_PAIR_MAX] = { 0 };
 
             pps = (float)(result->total_recv - last[index]) / 1000;
-            bps = (float)(result->total_recv - last[index]) * dg_nml_loop_test[index].size *
+            bps = (float)(result->total_recv - last[index]) * dg_loop_test[index].size *
                   8 / 1000000;
             last[index] = result->total_recv;
         }
         else
         {
             pps = (float)result->total_recv / time / 1000;
-            bps = (float)result->total_recv / time * dg_nml_loop_test[index].size * 8 / 1000000;
+            bps = (float)result->total_recv / time * dg_loop_test[index].size * 8 / 1000000;
         }
         printf("%5.2f Kpps, %6.2f Mbps. ", pps, bps);
 
@@ -443,20 +443,20 @@ void dg_nml_loop_print_result(int time)
 @param[in] sig - The signal
 
 @note
-  - This function is a way to exit the dg_nml_loop
+  - This function is a way to exit the dg_loop
 *//*==============================================================================================*/
-void dg_nml_loop_exit_handler(int sig)
+void dg_loop_exit_handler(int sig)
 {
-    dg_nml_loop_run = FALSE;
+    dg_loop_run = FALSE;
     DG_DBG_TRACE("got signaled: sig = %d", sig);
 }
 
 /*=============================================================================================*//**
 @brief print out the default configuration
 *//*==============================================================================================*/
-void dg_nml_loop_dump_config()
+void dg_loop_dump_config()
 {
-    DG_NML_LOOP_CONFIG_T* p_cfg = dg_nml_loop_default_cfg;
+    DG_LOOP_CONFIG_T* p_cfg = dg_loop_default_cfg;
 
     printf("#    default normal loop test configuration\n"
            "# for the port definition please ref diag loop spec\n"
@@ -464,7 +464,7 @@ void dg_nml_loop_dump_config()
            "#  port1    port2    packet_size    pattern\n"
            "#===============================================\n");
 
-    while (memcmp(p_cfg, &dg_nml_loop_cfg_end, sizeof(dg_nml_loop_cfg_end)) != 0)
+    while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
         printf("   0x%02x     0x%02x     %4d           0x%02x\n",
                p_cfg->port1, p_cfg->port2, p_cfg->size, p_cfg->pattern);
@@ -482,11 +482,11 @@ void dg_nml_loop_dump_config()
 
 @return the configuration buffer, NULL if error happened
 *//*==============================================================================================*/
-DG_NML_LOOP_CONFIG_T* dg_nml_loop_read_config(const char* file)
+DG_LOOP_CONFIG_T* dg_loop_read_config(const char* file)
 {
-    static DG_NML_LOOP_CONFIG_T dg_nml_loop_default_cfg[DG_NML_LOOP_PORT_PAIR_MAX + 1];
+    static DG_LOOP_CONFIG_T dg_loop_default_cfg[DG_LOOP_PORT_PAIR_MAX + 1];
 
-    DG_NML_LOOP_CONFIG_T* ret = dg_nml_loop_default_cfg;
+    DG_LOOP_CONFIG_T* ret = dg_loop_default_cfg;
 
     FILE* fp = NULL;
     char  buf[DG_LOOP_CFG_MAX_BUF_SIZE];
@@ -497,7 +497,7 @@ DG_NML_LOOP_CONFIG_T* dg_nml_loop_read_config(const char* file)
     int   size;
     int   pattern;
 
-    memset(dg_nml_loop_default_cfg, 0, sizeof(dg_nml_loop_default_cfg));
+    memset(dg_loop_default_cfg, 0, sizeof(dg_loop_default_cfg));
 
     if (access(file, F_OK) != 0)
     {
@@ -541,14 +541,14 @@ DG_NML_LOOP_CONFIG_T* dg_nml_loop_read_config(const char* file)
                 break;
             }
 
-            dg_nml_loop_default_cfg[index].port1   = (DG_LOOP_PORT_T)port1;
-            dg_nml_loop_default_cfg[index].port2   = (DG_LOOP_PORT_T)port2;
-            dg_nml_loop_default_cfg[index].size    = size;
-            dg_nml_loop_default_cfg[index].pattern = (UINT8)pattern;
+            dg_loop_default_cfg[index].port1   = (DG_LOOP_PORT_T)port1;
+            dg_loop_default_cfg[index].port2   = (DG_LOOP_PORT_T)port2;
+            dg_loop_default_cfg[index].size    = size;
+            dg_loop_default_cfg[index].pattern = (UINT8)pattern;
 
             index++;
 
-            if (index >= DG_NML_LOOP_PORT_PAIR_MAX)
+            if (index >= DG_LOOP_PORT_PAIR_MAX)
             {
                 break;
             }

@@ -1,6 +1,6 @@
 /*==================================================================================================
 
-    Module Name:  dg_loop.c
+    Module Name:  dg_loop_api.c
 
     General Description: Implements the dg_loop library
 
@@ -205,7 +205,6 @@ BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
         dg_loop_port_fd[index2].tx_fd = sockets[1];
         dg_loop_port_fd[index1].rx_fd = sockets[0];
     }
-
 
     return TRUE;
 }
