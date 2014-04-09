@@ -1,8 +1,8 @@
 /*==================================================================================================
 
-    Module Name:  dg_int_loop.c
+    Module Name:  dg_port_cfg.c
 
-    General Description: Implements the diag internal loopback test
+    General Description: Implements the diag port config tool
 
 ====================================================================================================
 
@@ -30,11 +30,11 @@ const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_INT_LOOP_NODE_MAX            DG_LOOP_NODE_HDR
-#define DG_INT_LOOP_DEFAULT_PORT        0   /* 0 means test for all data ports */
-#define DG_INT_LOOP_DEFAULT_RUN_TIME    -1  /* negtive means run the program for ever */
-#define DG_INT_LOOP_DEFAULT_PACKET_SIZE 1024
-#define DG_INT_LOOP_DEFAULT_PATTERN     0x5A
+#define DG_PORT_CFG_NODE_MAX            DG_LOOP_NODE_HDR
+#define DG_PORT_CFG_DEFAULT_PORT        0   /* 0 means test for all data ports */
+#define DG_PORT_CFG_DEFAULT_RUN_TIME    -1  /* negtive means run the program for ever */
+#define DG_PORT_CFG_DEFAULT_PACKET_SIZE 1024
+#define DG_PORT_CFG_DEFAULT_PATTERN     0x5A
 
 
 /*==================================================================================================
@@ -48,16 +48,16 @@ typedef struct
     UINT8 port;
     int   size;
     int   time;
-} DG_INT_LOOP_ARG_T;
+} DG_PORT_CFG_ARG_T;
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
-static error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state);
-static BOOL    dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T* args);
-static BOOL    dg_int_loop_get_int_arg(const char* arg, long* value);
-static void    dg_int_loop_print_result(DG_LOOP_TEST_STATISTIC_T* result);
-static void    dg_int_loop_exit_handler(int sig);
+static error_t dg_port_cfg_arg_parse(int key, char* arg, struct argp_state* state);
+static BOOL    dg_port_cfg_prepare_args(int argc, char** argv, DG_PORT_CFG_ARG_T* args);
+static BOOL    dg_port_cfg_get_int_arg(const char* arg, long* value);
+static void    dg_port_cfg_print_result(DG_LOOP_TEST_STATISTIC_T* result);
+static void    dg_port_cfg_exit_handler(int sig);
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -66,27 +66,27 @@ static void    dg_int_loop_exit_handler(int sig);
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
-static BOOL dg_int_loop_run = TRUE;
+static BOOL dg_port_cfg_run = TRUE;
 
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief Main function for dg_int_loop application
+@brief Main function for dg_port_cfg application
 
 @param[in] argc - Number of arguments
 @param[in] argv - Array of each argument passed
 *//*==============================================================================================*/
 int main(int argc, char** argv)
 {
-    DG_INT_LOOP_ARG_T args =
+    DG_PORT_CFG_ARG_T args =
     {              /* Default values. */
-        .pattern = DG_INT_LOOP_DEFAULT_PATTERN,
+        .pattern = DG_PORT_CFG_DEFAULT_PATTERN,
         .port    = 1,
         .node    = DG_LOOP_NODE_HDR,
-        .size    = DG_INT_LOOP_DEFAULT_PACKET_SIZE,
-        .time    = DG_INT_LOOP_DEFAULT_RUN_TIME
+        .size    = DG_PORT_CFG_DEFAULT_PACKET_SIZE,
+        .time    = DG_PORT_CFG_DEFAULT_RUN_TIME
     };
 
     int            ret = 0;
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 
     struct sigaction actions;
 
-    if (!dg_int_loop_prepare_args(argc, argv, &args))
+    if (!dg_port_cfg_prepare_args(argc, argv, &args))
     {
         return 1;
     }
@@ -103,7 +103,7 @@ int main(int argc, char** argv)
     memset(&actions, 0, sizeof(actions));
     sigemptyset(&actions.sa_mask);
     actions.sa_flags   = 0;
-    actions.sa_handler = dg_int_loop_exit_handler;
+    actions.sa_handler = dg_port_cfg_exit_handler;
     sigaction(SIGINT, &actions, NULL);
     signal(SIGPIPE, SIG_IGN);
 
@@ -138,7 +138,7 @@ int main(int argc, char** argv)
         }
         else
         {
-            while (dg_int_loop_run)
+            while (dg_port_cfg_run)
             {
                 if (args.time == 0)
                 {
@@ -151,7 +151,7 @@ int main(int argc, char** argv)
                 }
 
                 sleep(1);
-                dg_int_loop_print_result(result);
+                dg_port_cfg_print_result(result);
 
                 if (!DG_LOOP_query_test(&test))
                 {
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
 
             DG_DBG_TRACE("test finished");
             DG_LOOP_wait_test(&test);
-            dg_int_loop_print_result(result);
+            dg_port_cfg_print_result(result);
         }
 
         /* disconnect all ports */
@@ -183,11 +183,11 @@ int main(int argc, char** argv)
 
 @param[in]  argc - Number of arguments
 @param[in]  argv - Array of each argument passed
-@param[out] args - dg_int_loop own argument
+@param[out] args - dg_port_cfg own argument
 
 @return TRUE if no error
 *//*==============================================================================================*/
-BOOL dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T* args)
+BOOL dg_port_cfg_prepare_args(int argc, char** argv, DG_PORT_CFG_ARG_T* args)
 {
     /* Program documentation. */
     char tool_doc[] =
@@ -212,7 +212,7 @@ BOOL dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T* args)
 
     struct argp dg_argp =
     {
-        dg_options, dg_int_loop_arg_parse, args_doc, tool_doc, 0, 0, 0
+        dg_options, dg_port_cfg_arg_parse, args_doc, tool_doc, 0, 0, 0
     };
 
     if (argp_parse(&dg_argp, argc, argv, 0, 0, args) != 0)
@@ -228,11 +228,11 @@ BOOL dg_int_loop_prepare_args(int argc, char** argv, DG_INT_LOOP_ARG_T* args)
 @brief argp parser function
 
 *//*==============================================================================================*/
-error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
+error_t dg_port_cfg_arg_parse(int key, char* arg, struct argp_state* state)
 {
     /* Get the input argument from argp_parse, which we
        know is a pointer to our arguments structure. */
-    DG_INT_LOOP_ARG_T* dg_arg = state->input;
+    DG_PORT_CFG_ARG_T* dg_arg = state->input;
 
     long value;
 
@@ -247,7 +247,7 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
         break;
 
     case 'p':
-        if (!dg_int_loop_get_int_arg(arg, &value))
+        if (!dg_port_cfg_get_int_arg(arg, &value))
         {
             return EINVAL;
         }
@@ -263,13 +263,13 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
         break;
 
     case 'n':
-        if (!dg_int_loop_get_int_arg(arg, &value))
+        if (!dg_port_cfg_get_int_arg(arg, &value))
         {
             return EINVAL;
         }
-        else if ((value < 0) || (value > DG_INT_LOOP_NODE_MAX))
+        else if ((value < 0) || (value > DG_PORT_CFG_NODE_MAX))
         {
-            printf("out range node: %s, max=%d\n", arg, DG_INT_LOOP_NODE_MAX);
+            printf("out range node: %s, max=%d\n", arg, DG_PORT_CFG_NODE_MAX);
             return EINVAL;
         }
         else
@@ -279,7 +279,7 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
         break;
 
     case 's':
-        if (!dg_int_loop_get_int_arg(arg, &value))
+        if (!dg_port_cfg_get_int_arg(arg, &value))
         {
             return EINVAL;
         }
@@ -296,7 +296,7 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
         break;
 
     case 't':
-        if (!dg_int_loop_get_int_arg(arg, &value))
+        if (!dg_port_cfg_get_int_arg(arg, &value))
         {
             return EINVAL;
         }
@@ -318,7 +318,7 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
             argp_usage(state);
         }
 
-        if (!dg_int_loop_get_int_arg(arg, &value))
+        if (!dg_port_cfg_get_int_arg(arg, &value))
         {
             return EINVAL;
         }
@@ -348,7 +348,7 @@ error_t dg_int_loop_arg_parse(int key, char* arg, struct argp_state* state)
 
 @return TRUE if success
 *//*==============================================================================================*/
-BOOL dg_int_loop_get_int_arg(const char* arg, long* value)
+BOOL dg_port_cfg_get_int_arg(const char* arg, long* value)
 {
     BOOL  ret = FALSE;
     char* p_ch;
@@ -378,7 +378,7 @@ BOOL dg_int_loop_get_int_arg(const char* arg, long* value)
 
 @param[in] result - loop test result
 *//*==============================================================================================*/
-void dg_int_loop_print_result(DG_LOOP_TEST_STATISTIC_T* result)
+void dg_port_cfg_print_result(DG_LOOP_TEST_STATISTIC_T* result)
 {
     printf("total_send=%d  ", result->total_send);
     printf("failed_send=%d\n", result->fail_send);
@@ -393,11 +393,11 @@ void dg_int_loop_print_result(DG_LOOP_TEST_STATISTIC_T* result)
 @param[in] sig - The signal
 
 @note
-  - This function is a way to exit the dg_int_loop
+  - This function is a way to exit the dg_port_cfg
 *//*==============================================================================================*/
-void dg_int_loop_exit_handler(int sig)
+void dg_port_cfg_exit_handler(int sig)
 {
-    dg_int_loop_run = FALSE;
+    dg_port_cfg_run = FALSE;
     DG_DBG_TRACE("got signaled: sig = %d", sig);
 }
 
