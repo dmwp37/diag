@@ -13,9 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <argp.h>
-#include <unistd.h>
-#include <errno.h>
-#include <signal.h>
 #include "dg_platform_defs.h"
 #include "dg_loop.h"
 #include "dg_dbg.h"
@@ -30,12 +27,7 @@ const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
-#define DG_PORT_CFG_NODE_MAX            DG_LOOP_NODE_HDR
-#define DG_PORT_CFG_DEFAULT_PORT        0   /* 0 means test for all data ports */
-#define DG_PORT_CFG_DEFAULT_RUN_TIME    -1  /* negtive means run the program for ever */
-#define DG_PORT_CFG_DEFAULT_PACKET_SIZE 1024
-#define DG_PORT_CFG_DEFAULT_PATTERN     0x5A
-
+#define DG_PORT_CFG_DEFAULT_PORT 0xff  /* all the data port */
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -43,11 +35,9 @@ const char* argp_program_bug_address = "<SSD-SBU-JDiagDev@juniper.net>";
 /* Used by main to communicate with parse_opt. */
 typedef struct
 {
-    UINT8 pattern;  /* data pattern from argument*/
-    UINT8 node;
-    UINT8 port;
-    int   size;
-    int   time;
+    DG_LOOP_PORT_T port;
+    DG_LOOP_NODE_T node;
+    DG_LOOP_CFG_T  mode;
 } DG_PORT_CFG_ARG_T;
 
 /*==================================================================================================
@@ -56,8 +46,9 @@ typedef struct
 static error_t dg_port_cfg_arg_parse(int key, char* arg, struct argp_state* state);
 static BOOL    dg_port_cfg_prepare_args(int argc, char** argv, DG_PORT_CFG_ARG_T* args);
 static BOOL    dg_port_cfg_get_int_arg(const char* arg, long* value);
-static void    dg_port_cfg_print_result(DG_LOOP_TEST_STATISTIC_T* result);
-static void    dg_port_cfg_exit_handler(int sig);
+static void    dg_port_cfg_dump();
+static int     dg_port_cfg_str_to_index(const char** str_table, int size, const char* str);
+static BOOL    dg_port_cfg_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T mode);
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -66,7 +57,44 @@ static void    dg_port_cfg_exit_handler(int sig);
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
-static BOOL dg_port_cfg_run = TRUE;
+static const char* dg_port_cfg_node_name[] =
+{
+    [DG_LOOP_NODE_FPGA] = "FPGA",
+    [DG_LOOP_NODE_MAC]  = "MAC",
+    [DG_LOOP_NODE_PHY]  = "PHY",
+    [DG_LOOP_NODE_HDR]  = "HDR"
+};
+
+static const char* dg_port_cfg_mode_name[] =
+{
+    [DG_LOOP_CFG_NORMAL]   = "normal",
+    [DG_LOOP_CFG_INTERNAL] = "internal",
+    [DG_LOOP_CFG_EXTERNAL] = "external"
+};
+
+static DG_LOOP_PORT_T dg_port_cfg_data_ports[] =
+{
+    DG_LOOP_PORT_GE_0,
+    DG_LOOP_PORT_GE_1,
+    DG_LOOP_PORT_GE_2,
+    DG_LOOP_PORT_GE_3,
+    DG_LOOP_PORT_GE_4,
+    DG_LOOP_PORT_GE_5,
+    DG_LOOP_PORT_GE_6,
+    DG_LOOP_PORT_GE_7,
+    DG_LOOP_PORT_GE_8,
+    DG_LOOP_PORT_GE_9,
+    DG_LOOP_PORT_GE_10,
+    DG_LOOP_PORT_GE_11,
+    DG_LOOP_PORT_SFP_0,
+    DG_LOOP_PORT_SFP_1,
+    DG_LOOP_PORT_SFP_2,
+    DG_LOOP_PORT_SFP_3,
+    DG_LOOP_PORT_10GE_0,
+    DG_LOOP_PORT_10GE_1,
+    DG_LOOP_PORT_10GE_2,
+    DG_LOOP_PORT_10GE_3
+};
 
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
@@ -80,96 +108,38 @@ static BOOL dg_port_cfg_run = TRUE;
 *//*==============================================================================================*/
 int main(int argc, char** argv)
 {
+    int ret = 0;
+
     DG_PORT_CFG_ARG_T args =
-    {              /* Default values. */
-        .pattern = DG_PORT_CFG_DEFAULT_PATTERN,
-        .port    = 1,
-        .node    = DG_LOOP_NODE_HDR,
-        .size    = DG_PORT_CFG_DEFAULT_PACKET_SIZE,
-        .time    = DG_PORT_CFG_DEFAULT_RUN_TIME
+    {               /* Default values. */
+        .port = DG_PORT_CFG_DEFAULT_PORT,
+        .node = DG_LOOP_NODE_PHY,
+        .mode = DG_LOOP_CFG_NORMAL,
     };
-
-    int            ret = 0;
-    DG_LOOP_TEST_T test;
-
-    struct sigaction actions;
 
     if (!dg_port_cfg_prepare_args(argc, argv, &args))
     {
-        return 1;
+        exit(1);
     }
 
-    /* signal setup */
-    memset(&actions, 0, sizeof(actions));
-    sigemptyset(&actions.sa_mask);
-    actions.sa_flags   = 0;
-    actions.sa_handler = dg_port_cfg_exit_handler;
-    sigaction(SIGINT, &actions, NULL);
-    signal(SIGPIPE, SIG_IGN);
-
-    printf("PATTERN     = 0x%02x\n"
-           "RUN TIME    = %ds\n"
-           "PACKET SIZE = %d bytes\n"
-           "PORT        = 0x%02x\n"
-           "NODE        = %d\n",
-           args.pattern, args.time, args.size, args.port, args.node);
-
-    /* init the test struct */
-    memset(&test, 0, sizeof(test));
-    test.tx_port = args.port;
-    test.rx_port = args.port;
-    test.pattern = args.pattern;
-    test.size    = args.size;
-    test.number  = DG_LOOP_RUN_IFINITE;
-
-    if (args.port != 0)
+    if (args.port == DG_PORT_CFG_DEFAULT_PORT)
     {
-        DG_LOOP_TEST_STATISTIC_T* result = &test.result;
-        if (!DG_LOOP_connect(args.port, args.port))
+        UINT8 i;
+        for (i = 0; i < DG_ARRAY_SIZE(dg_port_cfg_data_ports); i++)
         {
-            printf("failed to connect internal loop back, port=0x%02x%s\n",
-                   args.port, DG_DBG_get_err_string());
-            ret = 1;
-        }
-        else if (!DG_LOOP_start_test(&test))
-        {
-            printf("failed to start loopback test: %s\n", DG_DBG_get_err_string());
-            ret = 1;
-        }
-        else
-        {
-            while (dg_port_cfg_run)
+            if (!dg_port_cfg_config(dg_port_cfg_data_ports[i], args.node, args.mode))
             {
-                if (args.time == 0)
-                {
-                    break;
-                }
-
-                if (args.time > 0)
-                {
-                    args.time--;
-                }
-
-                sleep(1);
-                dg_port_cfg_print_result(result);
-
-                if (!DG_LOOP_query_test(&test))
-                {
-                    DG_DBG_TRACE("test has been finished!");
-                    break;
-                }
+                ret = 1;
             }
-
-            DG_DBG_TRACE("test finished");
-            DG_LOOP_wait_test(&test);
-            dg_port_cfg_print_result(result);
         }
-
-        /* disconnect all ports */
-        DG_LOOP_disconnect_all();
     }
-
-    printf("internal loop test finished\n");
+    else
+    {
+        if (!dg_port_cfg_config(args.port, args.node, args.mode))
+        {
+            ret = 1;
+        }
+    }
 
     return ret;
 }
@@ -191,28 +161,29 @@ BOOL dg_port_cfg_prepare_args(int argc, char** argv, DG_PORT_CFG_ARG_T* args)
 {
     /* Program documentation. */
     char tool_doc[] =
-        "\nthis tool is used for diag internal loopback test\n"
-        "by default it will test all the data port, with packtet size of 1024 bytes\n"
-        "if not time argument specified, the program will run for ever";
+        "\nthis tool is used for diag port configuration\n"
+        "by default it will config all the data path port\n"
+        "if no node specified, PHY is used as default\n"
+        "valid MODE are: normal/internal/external\n"
+        "valid NODE are: fpga/mac/phy/header";
 
     /* A description of the arguments we accept. */
-    char args_doc[] = "[PATTERN] (in form of hex byte, default is 0x5A)";
+    char args_doc[] = "MODE";
 
     /* The options we understand. */
     struct argp_option dg_options[] =
     {
-        { "verbose", 'v', 0,      0, "Produce verbose output",                        0 },
-        { "quiet",   'q', 0,      0, "Don't produce any output",                      0 },
-        { "port",    'p', "PORT", 0, "Select on which port to do internal loop test", 0 },
-        { "node",    'n', "NODE", 0, "Select on which node to config internal loop",  0 },
-        { "size",    's', "SIZE", 0, "Set the packet size for each frame",            0 },
-        { "time",    't', "TIME", 0, "How long the program would run",                0 },
-        { NULL,      0,   NULL,   0, NULL,                                            0 }
+        { "dump",    'd', 0,      0, "Dump the current configuration",        0 },
+        { "port",    'p', "PORT", 0, "Select the port to config",             0 },
+        { "node",    'n', "NODE", 0, "Select the node to config",             1 },
+        { "verbose", 'v', 0,      0, "Produce verbose output",               -2 },
+        { "quiet",   'q', 0,      0, "Don't produce any output",             -2 },
+        { NULL,      0,   NULL,   0, NULL,                                    0 }
     };
 
     struct argp dg_argp =
     {
-        dg_options, dg_port_cfg_arg_parse, args_doc, tool_doc, 0, 0, 0
+        dg_options, dg_port_cfg_arg_parse, args_doc, tool_doc, NULL, NULL, NULL
     };
 
     if (argp_parse(&dg_argp, argc, argv, 0, 0, args) != 0)
@@ -246,6 +217,11 @@ error_t dg_port_cfg_arg_parse(int key, char* arg, struct argp_state* state)
         DG_DBG_set_dbg_level(DG_DBG_LVL_VERBOSE);
         break;
 
+    case 'd':
+        dg_port_cfg_dump();
+        exit(0);
+        break;
+
     case 'p':
         if (!dg_port_cfg_get_int_arg(arg, &value))
         {
@@ -263,51 +239,17 @@ error_t dg_port_cfg_arg_parse(int key, char* arg, struct argp_state* state)
         break;
 
     case 'n':
-        if (!dg_port_cfg_get_int_arg(arg, &value))
+        value = dg_port_cfg_str_to_index(dg_port_cfg_node_name,
+                                         DG_ARRAY_SIZE(dg_port_cfg_node_name),
+                                         arg);
+        if (value < 0)
         {
-            return EINVAL;
-        }
-        else if ((value < 0) || (value > DG_PORT_CFG_NODE_MAX))
-        {
-            printf("out range node: %s, max=%d\n", arg, DG_PORT_CFG_NODE_MAX);
-            return EINVAL;
-        }
-        else
-        {
-            dg_arg->node = (UINT8)value;
-        }
-        break;
-
-    case 's':
-        if (!dg_port_cfg_get_int_arg(arg, &value))
-        {
-            return EINVAL;
-        }
-        else if ((value < DG_LOOP_PACKET_SIZE_MIN) || (value > DG_LOOP_PACKET_SIZE_MAX))
-        {
-            printf("out range packet size: %s, min=%d, max=%d\n",
-                   arg, DG_LOOP_PACKET_SIZE_MIN, DG_LOOP_PACKET_SIZE_MAX);
+            printf("invalid node: %s\n", arg);
             return EINVAL;
         }
         else
         {
-            dg_arg->size = value;
-        }
-        break;
-
-    case 't':
-        if (!dg_port_cfg_get_int_arg(arg, &value))
-        {
-            return EINVAL;
-        }
-        else if (value < 0)
-        {
-            printf("invalid time: %s\n", arg);
-            return EINVAL;
-        }
-        else
-        {
-            dg_arg->time = value;
+            dg_arg->node = value;
         }
         break;
 
@@ -318,19 +260,22 @@ error_t dg_port_cfg_arg_parse(int key, char* arg, struct argp_state* state)
             argp_usage(state);
         }
 
-        if (!dg_port_cfg_get_int_arg(arg, &value))
+        value = dg_port_cfg_str_to_index(dg_port_cfg_mode_name,
+                                         DG_ARRAY_SIZE(dg_port_cfg_mode_name),
+                                         arg);
+        if (value < 0)
         {
-            return EINVAL;
-        }
-        else if ((value < 0) || (value > 0xFF))
-        {
-            printf("invalid pattern: %s\n", arg);
+            printf("invalid mode: %s\n", arg);
             return EINVAL;
         }
         else
         {
-            dg_arg->pattern = (UINT8)value;
+            dg_arg->mode = value;
         }
+        break;
+
+    case ARGP_KEY_NO_ARGS:
+        argp_usage(state);
         break;
 
     default:
@@ -373,31 +318,78 @@ BOOL dg_port_cfg_get_int_arg(const char* arg, long* value)
 
     return ret;
 }
-/*=============================================================================================*//**
-@brief pint out the statistic result
 
-@param[in] result - loop test result
+/*=============================================================================================*//**
+@brief print out the current configuration
 *//*==============================================================================================*/
-void dg_port_cfg_print_result(DG_LOOP_TEST_STATISTIC_T* result)
+void dg_port_cfg_dump()
 {
-    printf("total_send=%d  ", result->total_send);
-    printf("failed_send=%d\n", result->fail_send);
-    printf("total_recv=%d  ", result->total_recv);
-    printf("failed_recv=%d  ", result->fail_recv);
-    printf("wrong_recv=%d\n\n", result->wrong_recv);
+    printf("#    current port configuration\n"
+           "# for the port definition please ref diag loop spec\n"
+           "#===============================================\n"
+           "#  port     node     mode\n"
+           "#===============================================\n"
+           "   0x01     N/A     normal\n"
+           "   0x02     N/A     normal\n"
+           "   0x03     FPGA    external\n"
+           "   0x04     HDR     internal\n"
+           "   0x10     MAC     internal\n"
+           "   0x13     PHY     external\n");
+
+    printf("\n");
 }
 
 /*=============================================================================================*//**
-@brief This function handle the SIGINT signal
+@brief convert string to the index in the lookup table
 
-@param[in] sig - The signal
+@param[in] str_table - the string lookup table
+@param[in] size      - size of the string table
+@param[in] str       - the string to lookup
 
-@note
-  - This function is a way to exit the dg_port_cfg
+@return the index of the string in the table, -1 if failed to match
 *//*==============================================================================================*/
-void dg_port_cfg_exit_handler(int sig)
+int dg_port_cfg_str_to_index(const char** str_table, int size, const char* str)
 {
-    dg_port_cfg_run = FALSE;
-    DG_DBG_TRACE("got signaled: sig = %d", sig);
+    int index = -1;
+    int i;
+
+    for (i = 0; i < size; i++)
+    {
+        if (strcasecmp(str, str_table[i]) == 0)
+        {
+            index = i;
+            break;
+        }
+    }
+
+    return index;
+}
+
+/*=============================================================================================*//**
+@brief port configuration
+
+@param[in]  port - the path to config on which port
+@param[in]  node - where to loopback packet
+@param[in]  mode - configuration mode
+
+@return TRUE if success
+*//*==============================================================================================*/
+BOOL dg_port_cfg_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T mode)
+{
+    BOOL ret = TRUE;
+    if (!DG_LOOP_config(port, node, mode))
+    {
+        ret = FALSE;
+        printf("config port=0x%02x  node=%s  mode=%s failed!\n",
+               port, dg_port_cfg_node_name[node], dg_port_cfg_mode_name[mode]);
+
+    }
+    else
+    {
+        printf("config port=0x%02x  node=%s  mode=%s\n",
+               port, dg_port_cfg_node_name[node], dg_port_cfg_mode_name[mode]);
+    }
+
+    return ret;
 }
 
