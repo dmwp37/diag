@@ -234,7 +234,7 @@ error_t dg_port_cfg_arg_parse(int key, char* arg, struct argp_state* state)
         }
         else
         {
-            dg_arg->port = (UINT8)value;
+            dg_arg->port = (DG_LOOP_PORT_T)value;
         }
         break;
 

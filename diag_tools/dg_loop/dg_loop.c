@@ -43,6 +43,12 @@ typedef struct
 {
     char* cfg_file; /* the config file */
     int   time;
+
+    /* pair port args */
+    int   tx_port;
+    int   rx_port;
+    int   size;
+    UINT8 pattern;
 } DG_LOOP_ARG_T;
 
 typedef struct
@@ -57,6 +63,7 @@ typedef struct
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
 static error_t dg_loop_arg_parse(int key, char* arg, struct argp_state* state);
+static error_t dg_loop_child_arg_parse(int key, char* arg, struct argp_state* state);
 static BOOL    dg_loop_prepare_args(int argc, char** argv, DG_LOOP_ARG_T* args);
 static BOOL    dg_loop_get_int_arg(const char* arg, long* value);
 static void    dg_loop_print_result(int time);
@@ -119,7 +126,11 @@ int main(int argc, char** argv)
     DG_LOOP_ARG_T args =
     {
         .cfg_file = NULL,
-        .time     = DG_LOOP_DEFAULT_RUN_TIME
+        .time     = DG_LOOP_DEFAULT_RUN_TIME,
+        .tx_port  = -1,
+        .rx_port  = -1,
+        .size     = 1024,
+        .pattern  = 0x5A,
     };
 
     struct sigaction actions;
@@ -139,23 +150,54 @@ int main(int argc, char** argv)
     sigaction(SIGINT, &actions, NULL);
     signal(SIGPIPE, SIG_IGN);
 
-    printf("RUN TIME = %ds\n"
-           "CFG FILE = %s\n",
-           args.time, args.cfg_file);
+    printf("RUN TIME = %ds\n", args.time);
 
     if (args.cfg_file != NULL)
     {
+        printf("CFG FILE = %s\n\n", args.cfg_file);
+
         if ((dg_loop_cfg_settings = dg_loop_read_config(args.cfg_file)) == NULL)
         {
             exit(1);
         }
     }
+    else if (args.tx_port > 0 || args.rx_port > 0)
+    {
+        if (args.tx_port < 0)
+        {
+            printf("you need to specify a tx_port\n");
+            exit(1);
+        }
+        if (args.rx_port < 0)
+        {
+            printf("you need to specify a rx_port\n");
+            exit(1);
+        }
+
+        printf("TX_PORT  = 0x%02x\n"
+               "RX_PORT  = 0x%02x\n"
+               "PK_SIZE  = %d\n"
+               "PATTERN  = 0x%02x\n\n",
+               args.tx_port, args.rx_port, args.size, args.pattern);
+
+        memset(dg_loop_default_cfg, 0, sizeof(dg_loop_default_cfg));
+        dg_loop_default_cfg[0].port1   = args.tx_port;
+        dg_loop_default_cfg[0].port2   = args.rx_port;
+        dg_loop_default_cfg[0].size    = args.size;
+        dg_loop_default_cfg[0].pattern = args.pattern;
+
+        dg_loop_cfg_settings = dg_loop_default_cfg;
+    }
     else
     {
+        printf("Use default settings\n\n");
         dg_loop_cfg_settings = dg_loop_default_cfg;
     }
 
-
+    if (args.time == 0)
+    {
+        exit(0);
+    }
 
     /* init the test blocks */
     memset(dg_loop_test, 0, sizeof(dg_loop_test));
@@ -262,8 +304,8 @@ BOOL dg_loop_prepare_args(int argc, char** argv, DG_LOOP_ARG_T* args)
     /* Program documentation. */
     char tool_doc[] =
         "\nthis tool is used for diag normal loopback test\n"
-        "if no config file set, it will use internal default settings\n"
-        "if not time argument specified, the program will run for ever";
+        "if no config file set, it will use the detected settings\n"
+        "if no time argument specified, the program will run for ever";
 
     /* The options we understand. */
     struct argp_option dg_options[] =
@@ -271,14 +313,34 @@ BOOL dg_loop_prepare_args(int argc, char** argv, DG_LOOP_ARG_T* args)
         { "verbose", 'v', 0,      0, "Produce verbose output",                   0 },
         { "quiet",   'q', 0,      0, "Don't produce any output",                 0 },
         { "config",  'f', "FILE", 0, "Set config file for the normal loop test", 0 },
-        { "dump",    'd', 0,      0, "Dump the default settings",                0 },
+        { "dump",    'd', 0,      0, "Dump the detected settings",               0 },
         { "time",    't', "TIME", 0, "How long the program would run",           0 },
         { NULL,      0,   NULL,   0, NULL,                                       0 }
     };
 
+    struct argp_option dg_child_options[] =
+    {
+        { "tx",      'x', "PORT",    0, "Set the tx port",         1 },
+        { "rx",      'r', "PORT",    0, "Set the rx port",         1 },
+        { "size",    's', "SIZE",    0, "Set packet size",         2 },
+        { "pattern", 'p', "PATTERN", 0, "Set packet data pattern", 2 },
+        { NULL,      0,   NULL,      0, NULL,                      0 }
+    };
+
+    struct argp dg_child_argp =
+    {
+        dg_child_options, dg_loop_child_arg_parse, NULL, NULL, NULL, NULL, NULL
+    };
+
+    struct argp_child dg_child[] =
+    {
+        { &dg_child_argp, 0, "pair port test", 0 },
+        { NULL, 0, NULL, 0 }
+    };
+
     struct argp dg_argp =
     {
-        dg_options, dg_loop_arg_parse, NULL, tool_doc, NULL, NULL, NULL
+        dg_options, dg_loop_arg_parse, NULL, tool_doc, dg_child, NULL, NULL
     };
 
     if (argp_parse(&dg_argp, argc, argv, 0, 0, args) != 0)
@@ -334,6 +396,99 @@ error_t dg_loop_arg_parse(int key, char* arg, struct argp_state* state)
         else
         {
             dg_arg->time = value;
+        }
+        break;
+
+    case ARGP_KEY_INIT:
+        /* init the child input */
+        state->child_inputs[0] = dg_arg;
+        break;
+
+    case ARGP_KEY_ARG:
+        printf("Too many arguments\n");
+        argp_usage(state);
+        break;
+
+    default:
+        return ARGP_ERR_UNKNOWN;
+    }
+
+    return 0;
+}
+
+/*=============================================================================================*//**
+@brief argp parser function
+
+*//*==============================================================================================*/
+error_t dg_loop_child_arg_parse(int key, char* arg, struct argp_state* state)
+{
+    DG_LOOP_ARG_T* dg_arg = state->input;
+    long           value;
+
+    switch (key)
+    {
+    case 'x':
+        if (!dg_loop_get_int_arg(arg, &value))
+        {
+            return EINVAL;
+        }
+        else if (DG_LOOP_port_to_index((DG_LOOP_PORT_T)value) < 0)
+        {
+            printf("invalid tx_port: %s\n", arg);
+            return EINVAL;
+        }
+        else
+        {
+            dg_arg->tx_port = (DG_LOOP_PORT_T)value;
+        }
+        break;
+
+    case 'r':
+        if (!dg_loop_get_int_arg(arg, &value))
+        {
+            return EINVAL;
+        }
+        else if (DG_LOOP_port_to_index((DG_LOOP_PORT_T)value) < 0)
+        {
+            printf("invalid rx_port: %s\n", arg);
+            return EINVAL;
+        }
+        else
+        {
+            dg_arg->rx_port = (DG_LOOP_PORT_T)value;
+        }
+        break;
+
+    case 's':
+        if (!dg_loop_get_int_arg(arg, &value))
+        {
+            return EINVAL;
+        }
+        else if ((value < DG_LOOP_PACKET_SIZE_MIN) || (value > DG_LOOP_PACKET_SIZE_MAX))
+        {
+            printf("out range packet size: %s, min=%d, max=%d\n",
+                   arg, DG_LOOP_PACKET_SIZE_MIN, DG_LOOP_PACKET_SIZE_MAX);
+            return EINVAL;
+        }
+        else
+        {
+            dg_arg->size = value;
+        }
+        break;
+
+    case 'p':
+        if (!dg_loop_get_int_arg(arg, &value))
+        {
+            return EINVAL;
+        }
+        else if ((value < 0) || (value > 0xFF))
+        {
+            printf("invalid pattern: %s\n", arg);
+            return EINVAL;
+        }
+        else
+        {
+            dg_arg->pattern = (UINT8)value;
         }
         break;
 
