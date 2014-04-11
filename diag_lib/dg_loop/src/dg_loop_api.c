@@ -180,8 +180,8 @@ BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
         (dg_loop_port_fd[index2].tx_fd > 0) ||
         (dg_loop_port_fd[index2].rx_fd > 0))
     {
-        DG_DBG_set_err_string("already connected. port1=0x%02x port2=0x%02x", port1, port2);
-        return FALSE;
+        DG_DBG_TRACE("already connected. port1=0x%02x port2=0x%02x", port1, port2);
+        return TRUE;
     }
 
     if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) != 0)

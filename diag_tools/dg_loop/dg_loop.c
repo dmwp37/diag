@@ -53,8 +53,8 @@ typedef struct
 
 typedef struct
 {
-    DG_LOOP_PORT_T port1;
-    DG_LOOP_PORT_T port2;
+    DG_LOOP_PORT_T tx_port;
+    DG_LOOP_PORT_T rx_port;
     int            size;
     UINT8          pattern;
 } DG_LOOP_CONFIG_T;
@@ -83,21 +83,34 @@ static BOOL dg_loop_run = TRUE;
 
 static DG_LOOP_CONFIG_T dg_loop_cfg_end = { 0, 0, 0, 0 };
 
-static DG_LOOP_CONFIG_T dg_loop_default_cfg[] =
+static DG_LOOP_CONFIG_T dg_loop_cfg[DG_LOOP_PORT_PAIR_MAX + 1] =
 {
     { DG_LOOP_PORT_MGT,    DG_LOOP_PORT_HA,     1024, 0x5A },
+    { DG_LOOP_PORT_HA,     DG_LOOP_PORT_MGT,    1024, 0xA5 },
     { DG_LOOP_PORT_WTB0_1, DG_LOOP_PORT_WTB0_2, 1024, 0x5A },
+    { DG_LOOP_PORT_WTB0_2, DG_LOOP_PORT_WTB0_1, 1024, 0xA5 },
     { DG_LOOP_PORT_WTB1_1, DG_LOOP_PORT_WTB1_2, 1024, 0x5A },
+    { DG_LOOP_PORT_WTB1_2, DG_LOOP_PORT_WTB1_1, 1024, 0xA5 },
     { DG_LOOP_PORT_GE_0,   DG_LOOP_PORT_GE_1,   1024, 0x5A },
+    { DG_LOOP_PORT_GE_1,   DG_LOOP_PORT_GE_0,   1024, 0xA5 },
     { DG_LOOP_PORT_GE_2,   DG_LOOP_PORT_GE_3,   1024, 0x5A },
+    { DG_LOOP_PORT_GE_3,   DG_LOOP_PORT_GE_2,   1024, 0xA5 },
     { DG_LOOP_PORT_GE_4,   DG_LOOP_PORT_GE_5,   1024, 0x5A },
+    { DG_LOOP_PORT_GE_5,   DG_LOOP_PORT_GE_4,   1024, 0xA5 },
     { DG_LOOP_PORT_GE_6,   DG_LOOP_PORT_GE_7,   1024, 0x5A },
+    { DG_LOOP_PORT_GE_7,   DG_LOOP_PORT_GE_6,   1024, 0xA5 },
     { DG_LOOP_PORT_GE_8,   DG_LOOP_PORT_GE_9,   1024, 0x5A },
+    { DG_LOOP_PORT_GE_9,   DG_LOOP_PORT_GE_8,   1024, 0xA5 },
     { DG_LOOP_PORT_GE_10,  DG_LOOP_PORT_GE_11,  1024, 0x5A },
+    { DG_LOOP_PORT_GE_11,  DG_LOOP_PORT_GE_10,  1024, 0xA5 },
     { DG_LOOP_PORT_SFP_0,  DG_LOOP_PORT_SFP_1,  1024, 0x5A },
+    { DG_LOOP_PORT_SFP_1,  DG_LOOP_PORT_SFP_0,  1024, 0xA5 },
     { DG_LOOP_PORT_SFP_2,  DG_LOOP_PORT_SFP_3,  1024, 0x5A },
+    { DG_LOOP_PORT_SFP_3,  DG_LOOP_PORT_SFP_2,  1024, 0xA5 },
     { DG_LOOP_PORT_10GE_0, DG_LOOP_PORT_10GE_1, 1024, 0x5A },
+    { DG_LOOP_PORT_10GE_1, DG_LOOP_PORT_10GE_0, 1024, 0xA5 },
     { DG_LOOP_PORT_10GE_2, DG_LOOP_PORT_10GE_3, 1024, 0x5A },
+    { DG_LOOP_PORT_10GE_3, DG_LOOP_PORT_10GE_2, 1024, 0xA5 },
     { 0, 0, 0, 0 }
 };
 
@@ -180,18 +193,18 @@ int main(int argc, char** argv)
                "PATTERN  = 0x%02x\n\n",
                args.tx_port, args.rx_port, args.size, args.pattern);
 
-        memset(dg_loop_default_cfg, 0, sizeof(dg_loop_default_cfg));
-        dg_loop_default_cfg[0].port1   = args.tx_port;
-        dg_loop_default_cfg[0].port2   = args.rx_port;
-        dg_loop_default_cfg[0].size    = args.size;
-        dg_loop_default_cfg[0].pattern = args.pattern;
+        memset(dg_loop_cfg, 0, sizeof(dg_loop_cfg));
+        dg_loop_cfg[0].tx_port = args.tx_port;
+        dg_loop_cfg[0].rx_port = args.rx_port;
+        dg_loop_cfg[0].size    = args.size;
+        dg_loop_cfg[0].pattern = args.pattern;
 
-        dg_loop_cfg_settings = dg_loop_default_cfg;
+        dg_loop_cfg_settings = dg_loop_cfg;
     }
     else
     {
         printf("Use default settings\n\n");
-        dg_loop_cfg_settings = dg_loop_default_cfg;
+        dg_loop_cfg_settings = dg_loop_cfg;
     }
 
     if (args.time == 0)
@@ -207,10 +220,10 @@ int main(int argc, char** argv)
     index = 0;
     while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
-        if (!DG_LOOP_connect(p_cfg->port1, p_cfg->port2))
+        if (!DG_LOOP_connect(p_cfg->tx_port, p_cfg->rx_port))
         {
             printf("failed to connect port1=0x%02x port2=0x%02x: %s\n",
-                   p_cfg->port1, p_cfg->port2, DG_DBG_get_err_string());
+                   p_cfg->tx_port, p_cfg->rx_port, DG_DBG_get_err_string());
             exit(1);
         }
         index++;
@@ -222,8 +235,8 @@ int main(int argc, char** argv)
     index = 0;
     while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
-        dg_loop_test[index].tx_port = p_cfg->port1;
-        dg_loop_test[index].rx_port = p_cfg->port2;
+        dg_loop_test[index].tx_port = p_cfg->tx_port;
+        dg_loop_test[index].rx_port = p_cfg->rx_port;
         dg_loop_test[index].pattern = p_cfg->pattern;
         dg_loop_test[index].size    = p_cfg->size;
         dg_loop_test[index].number  = DG_LOOP_RUN_IFINITE;
@@ -231,7 +244,7 @@ int main(int argc, char** argv)
         if (!DG_LOOP_start_test(&dg_loop_test[index]))
         {
             printf("failed to start loopback test tx_port=0x%02x rx_port=0x%02x: %s\n",
-                   p_cfg->port1, p_cfg->port2, DG_DBG_get_err_string());
+                   p_cfg->tx_port, p_cfg->rx_port, DG_DBG_get_err_string());
             ret = 1;
         }
         index++;
@@ -251,7 +264,7 @@ int main(int argc, char** argv)
             args.time--;
         }
 
-        printf("time frame: %ds\n", time++);
+        printf("\ntime frame: %ds\n", time++);
         sleep(1);
         dg_loop_print_result(0);
     }
@@ -554,7 +567,7 @@ void dg_loop_print_result(int time)
     while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
         result = &dg_loop_test[index].result;
-        printf("tx_port=0x%02x, rx_port=0x%02x, ", p_cfg->port1, p_cfg->port2);
+        printf("tx_port=0x%02x, rx_port=0x%02x, ", p_cfg->tx_port, p_cfg->rx_port);
         printf("total send=%6d ", result->total_send);
         printf("recv=%6d, ", result->total_recv);
 
@@ -611,18 +624,18 @@ void dg_loop_exit_handler(int sig)
 *//*==============================================================================================*/
 void dg_loop_dump_config()
 {
-    DG_LOOP_CONFIG_T* p_cfg = dg_loop_default_cfg;
+    DG_LOOP_CONFIG_T* p_cfg = dg_loop_cfg;
 
     printf("#    default normal loop test configuration\n"
            "# for the port definition please ref diag loop spec\n"
            "#===============================================\n"
-           "#  port1    port2    packet_size    pattern\n"
+           "#  tx_port  rx_port  packet_size    pattern\n"
            "#===============================================\n");
 
     while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
         printf("   0x%02x     0x%02x     %4d           0x%02x\n",
-               p_cfg->port1, p_cfg->port2, p_cfg->size, p_cfg->pattern);
+               p_cfg->tx_port, p_cfg->rx_port, p_cfg->size, p_cfg->pattern);
 
         p_cfg++;
     }
@@ -639,20 +652,18 @@ void dg_loop_dump_config()
 *//*==============================================================================================*/
 DG_LOOP_CONFIG_T* dg_loop_read_config(const char* file)
 {
-    static DG_LOOP_CONFIG_T dg_loop_default_cfg[DG_LOOP_PORT_PAIR_MAX + 1];
-
-    DG_LOOP_CONFIG_T* ret = dg_loop_default_cfg;
+    DG_LOOP_CONFIG_T* ret = dg_loop_cfg;
 
     FILE* fp = NULL;
     char  buf[DG_LOOP_CFG_MAX_BUF_SIZE];
     int   line  = 1;
     int   index = 0;
-    int   port1;
-    int   port2;
+    int   tx_port;
+    int   rx_port;
     int   size;
     int   pattern;
 
-    memset(dg_loop_default_cfg, 0, sizeof(dg_loop_default_cfg));
+    memset(dg_loop_cfg, 0, sizeof(dg_loop_cfg));
 
     if (access(file, F_OK) != 0)
     {
@@ -669,19 +680,19 @@ DG_LOOP_CONFIG_T* dg_loop_read_config(const char* file)
 
     while (fgets(buf, DG_LOOP_CFG_MAX_BUF_SIZE, fp) != NULL)
     {
-        if (sscanf(buf, "%x%x%d%x", &port1, &port2, &size, &pattern) == 4)
+        if (sscanf(buf, "%x%x%d%x", &tx_port, &rx_port, &size, &pattern) == 4)
         {
             DG_DBG_TRACE("got %d cfg:   port1=0x%02x port2=0x%02x size=%4d pattern=0x%02x\n",
-                         index, port1, port1, size, pattern);
+                         index, tx_port, tx_port, size, pattern);
 
-            if (DG_LOOP_port_to_index(port1) < 0)
+            if (DG_LOOP_port_to_index(tx_port) < 0)
             {
                 printf("line %d: port1 invalid\n", line);
                 ret = NULL;
                 break;
             }
 
-            if (DG_LOOP_port_to_index(port2) < 0)
+            if (DG_LOOP_port_to_index(rx_port) < 0)
             {
                 printf("line %d: port2 invalid\n", line);
                 ret = NULL;
@@ -696,10 +707,10 @@ DG_LOOP_CONFIG_T* dg_loop_read_config(const char* file)
                 break;
             }
 
-            dg_loop_default_cfg[index].port1   = (DG_LOOP_PORT_T)port1;
-            dg_loop_default_cfg[index].port2   = (DG_LOOP_PORT_T)port2;
-            dg_loop_default_cfg[index].size    = size;
-            dg_loop_default_cfg[index].pattern = (UINT8)pattern;
+            dg_loop_cfg[index].tx_port = (DG_LOOP_PORT_T)tx_port;
+            dg_loop_cfg[index].rx_port = (DG_LOOP_PORT_T)rx_port;
+            dg_loop_cfg[index].size    = size;
+            dg_loop_cfg[index].pattern = (UINT8)pattern;
 
             index++;
 
