@@ -227,7 +227,7 @@ error_t dg_port_cfg_arg_parse(int key, char* arg, struct argp_state* state)
         {
             return EINVAL;
         }
-        else if (DG_LOOP_port_to_index((DG_LOOP_PORT_T)value) < 0)
+        else if (DG_LOOP_check_port((DG_LOOP_PORT_T)value) < 0)
         {
             printf("invalid port: %s\n", arg);
             return EINVAL;

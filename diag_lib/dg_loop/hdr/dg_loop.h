@@ -122,30 +122,19 @@ typedef struct
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
+
 /*=============================================================================================*//**
-@brief map the port id to index
+@brief check the validation of the port
 
 @param[in]  port - the port number according to definition
 
-@return the port index, -1 if invalid.
+@return -1 if invalid, otherwise the internal index start from 0
 
 @note
 - index is 0, 1 ... DG_LOOP_PORT_NUM-1
 - use this function to check if the port is valid
 *//*==============================================================================================*/
-int DG_LOOP_port_to_index(DG_LOOP_PORT_T port);
-
-/*=============================================================================================*//**
-@brief map the index to port
-
-@param[in]  port - the port number according to definition
-
-@return the port index, 0xFF if invalid index.
-
-@note
-- index is 0, 1 ... DG_LOOP_PORT_NUM-1
-*//*==============================================================================================*/
-DG_LOOP_PORT_T DG_LOOP_index_to_port(int index);
+int DG_LOOP_check_port(DG_LOOP_PORT_T port);
 
 /*=============================================================================================*//**
 @brief connect two ports

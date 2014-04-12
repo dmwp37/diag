@@ -13,6 +13,7 @@
 #include "dg_platform_defs.h"
 #include "dg_dbg.h"
 #include "dg_loop.h"
+#include "dg_loop_priv.h"
 
 /** @addtogroup libdg_loop
 @{
@@ -38,7 +39,6 @@ typedef BOOL (* DG_LOOP_CONFIG_FUNC_T) (DG_LOOP_PORT_T port, DG_LOOP_NODE_T node
 static BOOL cfg_mgt_mac(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg);
 static BOOL cfg_mgt_phy(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg);
 static BOOL cfg_mgt_hdr(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg);
-
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -179,7 +179,7 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
 
     DG_LOOP_CONFIG_FUNC_T cfg_f = NULL;
     /* convert port id to index */
-    int index = DG_LOOP_port_to_index(port);
+    int index = DG_LOOP_check_port(port);
 
     if (index < 0)
     {
@@ -254,7 +254,7 @@ BOOL DG_LOOP_config_all_normal()
         {
             if (dg_loop_port_cfg[index][node] != DG_LOOP_CFG_NORMAL)
             {
-                port = DG_LOOP_index_to_port(index);
+                port = dg_loop_index_to_port(index);
                 /* revert back to normal */
                 if (!DG_LOOP_config(port, node, DG_LOOP_CFG_NORMAL))
                 {

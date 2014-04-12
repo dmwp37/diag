@@ -74,13 +74,13 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
 {
     BOOL ret = FALSE;
 
-    if (DG_LOOP_port_to_index(test->tx_port) < 0)
+    if (DG_LOOP_check_port(test->tx_port) < 0)
     {
         DG_DBG_set_err_string("Invalid tx_port to test, port=0x%02x", test->tx_port);
         return FALSE;
     }
 
-    if (DG_LOOP_port_to_index(test->rx_port) < 0)
+    if (DG_LOOP_check_port(test->rx_port) < 0)
     {
         DG_DBG_set_err_string("Invalid rx_port to test, port=0x%02x", test->rx_port);
         return FALSE;
@@ -374,7 +374,7 @@ void* dg_loop_recv_thread(void* arg)
                 b_recv = FALSE;
             }
 
-            if(test->count == 0)
+            if (test->count == 0)
             {
                 b_recv = FALSE;
             }

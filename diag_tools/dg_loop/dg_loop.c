@@ -445,7 +445,7 @@ error_t dg_loop_child_arg_parse(int key, char* arg, struct argp_state* state)
         {
             return EINVAL;
         }
-        else if (DG_LOOP_port_to_index((DG_LOOP_PORT_T)value) < 0)
+        else if (DG_LOOP_check_port((DG_LOOP_PORT_T)value) < 0)
         {
             printf("invalid tx_port: %s\n", arg);
             return EINVAL;
@@ -461,7 +461,7 @@ error_t dg_loop_child_arg_parse(int key, char* arg, struct argp_state* state)
         {
             return EINVAL;
         }
-        else if (DG_LOOP_port_to_index((DG_LOOP_PORT_T)value) < 0)
+        else if (DG_LOOP_check_port((DG_LOOP_PORT_T)value) < 0)
         {
             printf("invalid rx_port: %s\n", arg);
             return EINVAL;
@@ -685,14 +685,14 @@ DG_LOOP_CONFIG_T* dg_loop_read_config(const char* file)
             DG_DBG_TRACE("got %d cfg:   port1=0x%02x port2=0x%02x size=%4d pattern=0x%02x\n",
                          index, tx_port, tx_port, size, pattern);
 
-            if (DG_LOOP_port_to_index(tx_port) < 0)
+            if (DG_LOOP_check_port(tx_port) < 0)
             {
                 printf("line %d: port1 invalid\n", line);
                 ret = NULL;
                 break;
             }
 
-            if (DG_LOOP_port_to_index(rx_port) < 0)
+            if (DG_LOOP_check_port(rx_port) < 0)
             {
                 printf("line %d: port2 invalid\n", line);
                 ret = NULL;
