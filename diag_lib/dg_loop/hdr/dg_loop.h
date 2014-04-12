@@ -86,6 +86,13 @@ typedef UINT8 DG_LOOP_CFG_T;
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
+/** the detected port pair */
+typedef struct
+{
+    const DG_LOOP_PORT_T tx_port;
+    DG_LOOP_PORT_T       rx_port;
+} DG_LOOP_PORT_PAIR_T;
+
 typedef struct
 {
     int fail_send;  /* failed send packets number     */
@@ -276,6 +283,14 @@ BOOL DG_LOOP_query_test(DG_LOOP_TEST_T* test);
 - it should be used after DG_LOOP_stop_test(), and block until all the thread released
 *//*==============================================================================================*/
 void DG_LOOP_wait_test(DG_LOOP_TEST_T* test);
+
+/*=============================================================================================*//**
+@brief auto detect the loop connection and fill the port pair
+
+@return the port pair array, NULL if failed
+
+*//*==============================================================================================*/
+DG_LOOP_PORT_PAIR_T* DG_LOOP_auto_detect();
 
 #ifdef __cplusplus
 }

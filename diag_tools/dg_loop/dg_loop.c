@@ -71,6 +71,7 @@ static void    dg_loop_exit_handler(int sig);
 static void    dg_loop_dump_config();
 
 static DG_LOOP_CONFIG_T* dg_loop_read_config(const char* file);
+static DG_LOOP_CONFIG_T* dg_loop_detect_config();
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -115,9 +116,19 @@ static DG_LOOP_CONFIG_T dg_loop_cfg[DG_LOOP_PORT_PAIR_MAX + 1] =
 };
 
 static DG_LOOP_CONFIG_T* dg_loop_cfg_settings = NULL;
+/* test control blocks */
+static DG_LOOP_TEST_T dg_loop_test[DG_LOOP_PORT_PAIR_MAX];
 
-static /* test control blocks */
-DG_LOOP_TEST_T dg_loop_test[DG_LOOP_PORT_PAIR_MAX];
+/* default argument. */
+static DG_LOOP_ARG_T dg_loop_args =
+{
+    .cfg_file = NULL,
+    .time     = DG_LOOP_DEFAULT_RUN_TIME,
+    .tx_port  = -1,
+    .rx_port  = -1,
+    .size     = 1024,
+    .pattern  = 0x5A,
+};
 
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
@@ -135,88 +146,12 @@ int main(int argc, char** argv)
     int index = 0;
     int time  = 0;
 
-    /* default argument. */
-    DG_LOOP_ARG_T args =
-    {
-        .cfg_file = NULL,
-        .time     = DG_LOOP_DEFAULT_RUN_TIME,
-        .tx_port  = -1,
-        .rx_port  = -1,
-        .size     = 1024,
-        .pattern  = 0x5A,
-    };
-
     struct sigaction actions;
 
     DG_LOOP_CONFIG_T* p_cfg;
 
-    if (!dg_loop_prepare_args(argc, argv, &args))
-    {
-        return 1;
-    }
-
-    /* signal setup */
-    memset(&actions, 0, sizeof(actions));
-    sigemptyset(&actions.sa_mask);
-    actions.sa_flags   = 0;
-    actions.sa_handler = dg_loop_exit_handler;
-    sigaction(SIGINT, &actions, NULL);
-    signal(SIGPIPE, SIG_IGN);
-
-    printf("RUN TIME = %ds\n", args.time);
-
-    if (args.cfg_file != NULL)
-    {
-        printf("CFG FILE = %s\n\n", args.cfg_file);
-
-        if ((dg_loop_cfg_settings = dg_loop_read_config(args.cfg_file)) == NULL)
-        {
-            exit(1);
-        }
-    }
-    else if (args.tx_port > 0 || args.rx_port > 0)
-    {
-        if (args.tx_port < 0)
-        {
-            printf("you need to specify a tx_port\n");
-            exit(1);
-        }
-        if (args.rx_port < 0)
-        {
-            printf("you need to specify a rx_port\n");
-            exit(1);
-        }
-
-        printf("TX_PORT  = 0x%02x\n"
-               "RX_PORT  = 0x%02x\n"
-               "PK_SIZE  = %d\n"
-               "PATTERN  = 0x%02x\n\n",
-               args.tx_port, args.rx_port, args.size, args.pattern);
-
-        memset(dg_loop_cfg, 0, sizeof(dg_loop_cfg));
-        dg_loop_cfg[0].tx_port = args.tx_port;
-        dg_loop_cfg[0].rx_port = args.rx_port;
-        dg_loop_cfg[0].size    = args.size;
-        dg_loop_cfg[0].pattern = args.pattern;
-
-        dg_loop_cfg_settings = dg_loop_cfg;
-    }
-    else
-    {
-        printf("Use default settings\n\n");
-        dg_loop_cfg_settings = dg_loop_cfg;
-    }
-
-    if (args.time == 0)
-    {
-        exit(0);
-    }
-
-    /* init the test blocks */
-    memset(dg_loop_test, 0, sizeof(dg_loop_test));
-
     /* prepare connections */
-    p_cfg = dg_loop_cfg_settings;
+    p_cfg = dg_loop_cfg;
     index = 0;
     while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
@@ -229,6 +164,74 @@ int main(int argc, char** argv)
         index++;
         p_cfg++;
     }
+
+    if (!dg_loop_prepare_args(argc, argv, &dg_loop_args))
+    {
+        return 1;
+    }
+
+    /* signal setup */
+    memset(&actions, 0, sizeof(actions));
+    sigemptyset(&actions.sa_mask);
+    actions.sa_flags   = 0;
+    actions.sa_handler = dg_loop_exit_handler;
+    sigaction(SIGINT, &actions, NULL);
+    signal(SIGPIPE, SIG_IGN);
+
+    printf("RUN TIME = %ds\n", dg_loop_args.time);
+
+    if (dg_loop_args.cfg_file != NULL)
+    {
+        printf("CFG FILE = %s\n\n", dg_loop_args.cfg_file);
+
+        if ((dg_loop_cfg_settings = dg_loop_read_config(dg_loop_args.cfg_file)) == NULL)
+        {
+            exit(1);
+        }
+    }
+    else if (dg_loop_args.tx_port > 0 || dg_loop_args.rx_port > 0)
+    {
+        if (dg_loop_args.tx_port < 0)
+        {
+            printf("you need to specify a tx_port\n");
+            exit(1);
+        }
+        if (dg_loop_args.rx_port < 0)
+        {
+            printf("you need to specify a rx_port\n");
+            exit(1);
+        }
+
+        printf("TX_PORT  = 0x%02x\n"
+               "RX_PORT  = 0x%02x\n"
+               "PK_SIZE  = %d\n"
+               "PATTERN  = 0x%02x\n\n",
+               dg_loop_args.tx_port, dg_loop_args.rx_port, dg_loop_args.size, dg_loop_args.pattern);
+
+        memset(dg_loop_cfg, 0, sizeof(dg_loop_cfg));
+        dg_loop_cfg[0].tx_port = dg_loop_args.tx_port;
+        dg_loop_cfg[0].rx_port = dg_loop_args.rx_port;
+        dg_loop_cfg[0].size    = dg_loop_args.size;
+        dg_loop_cfg[0].pattern = dg_loop_args.pattern;
+
+        dg_loop_cfg_settings = dg_loop_cfg;
+    }
+    else
+    {
+        printf("Use detected settings\n\n");
+        if ((dg_loop_cfg_settings = dg_loop_detect_config()) == NULL)
+        {
+            exit(1);
+        }
+    }
+
+    if (dg_loop_args.time == 0)
+    {
+        exit(0);
+    }
+
+    /* init the test blocks */
+    memset(dg_loop_test, 0, sizeof(dg_loop_test));
 
     /* start all the test thread */
     p_cfg = dg_loop_cfg_settings;
@@ -254,14 +257,14 @@ int main(int argc, char** argv)
     /* print out thread statistics */
     while (dg_loop_run)
     {
-        if (args.time == 0)
+        if (dg_loop_args.time == 0)
         {
             break;
         }
 
-        if (args.time > 0)
+        if (dg_loop_args.time > 0)
         {
-            args.time--;
+            dg_loop_args.time--;
         }
 
         printf("\ntime frame: %ds\n", time++);
@@ -620,11 +623,16 @@ void dg_loop_exit_handler(int sig)
 }
 
 /*=============================================================================================*//**
-@brief print out the default configuration
+@brief print out the detected configuration
 *//*==============================================================================================*/
 void dg_loop_dump_config()
 {
-    DG_LOOP_CONFIG_T* p_cfg = dg_loop_cfg;
+    DG_LOOP_CONFIG_T* p_cfg = dg_loop_detect_config();
+
+    if (p_cfg == NULL)
+    {
+        return;
+    }
 
     printf("#    default normal loop test configuration\n"
            "# for the port definition please ref diag loop spec\n"
@@ -730,5 +738,41 @@ DG_LOOP_CONFIG_T* dg_loop_read_config(const char* file)
     }
 
     return ret;
+}
+
+/*=============================================================================================*//**
+@brief detect the configuration
+
+@return the configuration buffer, NULL if error happened
+*//*==============================================================================================*/
+DG_LOOP_CONFIG_T* dg_loop_detect_config()
+{
+    DG_LOOP_CONFIG_T*    p_cfg = dg_loop_cfg;
+    DG_LOOP_PORT_PAIR_T* p_pair;
+    int                  index = 0;
+
+    memset(dg_loop_cfg, 0, sizeof(dg_loop_cfg));
+
+    /* detect the connection */
+    if ((p_pair = DG_LOOP_auto_detect()) == NULL)
+    {
+        printf("can't detect connections\n");
+        return NULL;
+    }
+
+    for (index = 0; index < DG_LOOP_PORT_NUM; index++)
+    {
+        if (p_pair[index].rx_port != 0xFF)
+        {
+            p_cfg->tx_port = p_pair[index].tx_port;
+            p_cfg->rx_port = p_pair[index].rx_port;
+            p_cfg->size    = dg_loop_args.size;
+            p_cfg->pattern = dg_loop_args.pattern;
+
+            p_cfg++;
+        }
+    }
+
+    return dg_loop_cfg;
 }
 

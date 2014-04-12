@@ -77,6 +77,16 @@ void DG_DBG_set_dbg_level(int debug_level)
 }
 
 /*=============================================================================================*//**
+@brief Get debug level
+
+@return current debug level
+*//*==============================================================================================*/
+int DG_DBG_get_dbg_level()
+{
+    return dg_dbg_level;
+}
+
+/*=============================================================================================*//**
 @brief Log out the debug message according to the debug level
 
 @param[in]   debug_level
