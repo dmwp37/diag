@@ -86,6 +86,13 @@ typedef UINT8 DG_LOOP_CFG_T;
 /*==================================================================================================
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
+/** the detected port pair */
+typedef struct
+{
+    const DG_LOOP_PORT_T tx_port;
+    DG_LOOP_PORT_T       rx_port;
+} DG_LOOP_PORT_PAIR_T;
+
 typedef struct
 {
     int fail_send;  /* failed send packets number     */
@@ -122,30 +129,19 @@ typedef struct
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
+
 /*=============================================================================================*//**
-@brief map the port id to index
+@brief check the validation of the port
 
 @param[in]  port - the port number according to definition
 
-@return the port index, -1 if invalid.
+@return -1 if invalid, otherwise the internal index start from 0
 
 @note
 - index is 0, 1 ... DG_LOOP_PORT_NUM-1
 - use this function to check if the port is valid
 *//*==============================================================================================*/
-int DG_LOOP_port_to_index(DG_LOOP_PORT_T port);
-
-/*=============================================================================================*//**
-@brief map the index to port
-
-@param[in]  port - the port number according to definition
-
-@return the port index, 0xFF if invalid index.
-
-@note
-- index is 0, 1 ... DG_LOOP_PORT_NUM-1
-*//*==============================================================================================*/
-DG_LOOP_PORT_T DG_LOOP_index_to_port(int index);
+int DG_LOOP_check_port(DG_LOOP_PORT_T port);
 
 /*=============================================================================================*//**
 @brief connect two ports
@@ -287,6 +283,14 @@ BOOL DG_LOOP_query_test(DG_LOOP_TEST_T* test);
 - it should be used after DG_LOOP_stop_test(), and block until all the thread released
 *//*==============================================================================================*/
 void DG_LOOP_wait_test(DG_LOOP_TEST_T* test);
+
+/*=============================================================================================*//**
+@brief auto detect the loop connection and fill the port pair
+
+@return the port pair array, NULL if failed
+
+*//*==============================================================================================*/
+DG_LOOP_PORT_PAIR_T* DG_LOOP_auto_detect();
 
 #ifdef __cplusplus
 }

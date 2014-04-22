@@ -1,6 +1,6 @@
 /*==================================================================================================
 
-    Module Name:  dg_loop.c
+    Module Name:  dg_loop_api.c
 
     General Description: Implements the dg_loop library
 
@@ -98,53 +98,61 @@ static DG_LOOP_PORT_FD_T dg_loop_port_fd[DG_LOOP_PORT_NUM] =
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief map the port id to index
+@brief check the validation of the port
 
 @param[in]  port - the port number according to definition
 
-@return the port index, -1 if invalid.
+@return -1 if invalid, otherwise the internal index start from 0
 
 @note
 - index is 0, 1 ... DG_LOOP_PORT_NUM-1
 - use this function to check if the port is valid
 *//*==============================================================================================*/
-int DG_LOOP_port_to_index(DG_LOOP_PORT_T port)
+int DG_LOOP_check_port(DG_LOOP_PORT_T port)
 {
-    int ret = -1;
-    int index;
+    const UINT8 base = __COUNTER__ + 1;
 
-    for (index = 0; index < DG_LOOP_PORT_NUM; index++)
+    static UINT8 port_index_map[] =
     {
-        if (dg_loop_port_fd[index].port == port)
+        [DG_LOOP_PORT_MGT]    = __COUNTER__,
+        [DG_LOOP_PORT_HA]     = __COUNTER__,
+        [DG_LOOP_PORT_WTB0_1] = __COUNTER__,
+        [DG_LOOP_PORT_WTB0_2] = __COUNTER__,
+        [DG_LOOP_PORT_WTB1_1] = __COUNTER__,
+        [DG_LOOP_PORT_WTB1_2] = __COUNTER__,
+        [DG_LOOP_PORT_GE_0]   = __COUNTER__,
+        [DG_LOOP_PORT_GE_1]   = __COUNTER__,
+        [DG_LOOP_PORT_GE_2]   = __COUNTER__,
+        [DG_LOOP_PORT_GE_3]   = __COUNTER__,
+        [DG_LOOP_PORT_GE_4]   = __COUNTER__,
+        [DG_LOOP_PORT_GE_5]   = __COUNTER__,
+        [DG_LOOP_PORT_GE_6]   = __COUNTER__,
+        [DG_LOOP_PORT_GE_7]   = __COUNTER__,
+        [DG_LOOP_PORT_GE_8]   = __COUNTER__,
+        [DG_LOOP_PORT_GE_9]   = __COUNTER__,
+        [DG_LOOP_PORT_GE_10]  = __COUNTER__,
+        [DG_LOOP_PORT_GE_11]  = __COUNTER__,
+        [DG_LOOP_PORT_SFP_0]  = __COUNTER__,
+        [DG_LOOP_PORT_SFP_1]  = __COUNTER__,
+        [DG_LOOP_PORT_SFP_2]  = __COUNTER__,
+        [DG_LOOP_PORT_SFP_3]  = __COUNTER__,
+        [DG_LOOP_PORT_10GE_0] = __COUNTER__,
+        [DG_LOOP_PORT_10GE_1] = __COUNTER__,
+        [DG_LOOP_PORT_10GE_2] = __COUNTER__,
+        [DG_LOOP_PORT_10GE_3] = __COUNTER__,
+    };
+
+    if (port < DG_ARRAY_SIZE(port_index_map))
+    {
+        int index = port_index_map[port];
+
+        if (index > 0)
         {
-            ret = index;
-            break;
+            return index - base;
         }
     }
 
-    return ret;
-}
-
-/*=============================================================================================*//**
-@brief map the index to port
-
-@param[in]  port - the port number according to definition
-
-@return the port index, 0xFF if invalid index.
-
-@note
-- index is 0, 1 ... DG_LOOP_PORT_NUM-1
-*//*==============================================================================================*/
-DG_LOOP_PORT_T DG_LOOP_index_to_port(int index)
-{
-    DG_LOOP_PORT_T port = 0xFF;
-
-    if ((index >= 0) && (index < DG_LOOP_PORT_NUM))
-    {
-        port = dg_loop_port_fd[index].port;
-    }
-
-    return port;
+    return -1;
 }
 
 /*=============================================================================================*//**
@@ -163,13 +171,13 @@ BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
     int index2;
     int sockets[2];
 
-    if ((index1 = DG_LOOP_port_to_index(port1)) < 0)
+    if ((index1 = DG_LOOP_check_port(port1)) < 0)
     {
         DG_DBG_set_err_string("invalid connect: port1=0x%02x", port1);
         return FALSE;
     }
 
-    if ((index2 = DG_LOOP_port_to_index(port2)) < 0)
+    if ((index2 = DG_LOOP_check_port(port2)) < 0)
     {
         DG_DBG_set_err_string("invalid connect: port2=0x%02x", port2);
         return FALSE;
@@ -180,8 +188,8 @@ BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
         (dg_loop_port_fd[index2].tx_fd > 0) ||
         (dg_loop_port_fd[index2].rx_fd > 0))
     {
-        DG_DBG_set_err_string("already connected. port1=0x%02x port2=0x%02x", port1, port2);
-        return FALSE;
+        DG_DBG_TRACE("already connected. port1=0x%02x port2=0x%02x", port1, port2);
+        return TRUE;
     }
 
     if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) != 0)
@@ -205,7 +213,6 @@ BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
         dg_loop_port_fd[index2].tx_fd = sockets[1];
         dg_loop_port_fd[index1].rx_fd = sockets[0];
     }
-
 
     return TRUE;
 }
@@ -252,7 +259,7 @@ int DG_LOOP_open(DG_LOOP_PORT_T port)
 
     pthread_mutex_t* mutex;
 
-    if ((index = DG_LOOP_port_to_index(port)) < 0)
+    if ((index = DG_LOOP_check_port(port)) < 0)
     {
         DG_DBG_set_err_string("Invalid Port to open, port=0x%02x", port);
         return -1;
@@ -295,7 +302,7 @@ void DG_LOOP_close(int fd)
     pthread_mutex_t* mutex;
     DG_LOOP_PORT_T   port;
 
-    if ((port = DG_LOOP_index_to_port(index)) == 0xFF)
+    if ((port = dg_loop_index_to_port(index)) == 0xFF)
     {
         DG_DBG_set_err_string("Invalid Port fd to close, fd=%d", fd);
         return;
@@ -335,7 +342,7 @@ BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len)
 
     DG_LOOP_PORT_T port;
 
-    if ((port = DG_LOOP_index_to_port(index)) == 0xFF)
+    if ((port = dg_loop_index_to_port(index)) == 0xFF)
     {
         DG_DBG_set_err_string("Invalid Port fd to send, fd=%d", fd);
         return FALSE;
@@ -373,7 +380,7 @@ BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len)
 
     DG_LOOP_PORT_T port;
 
-    if ((port = DG_LOOP_index_to_port(index)) == 0xFF)
+    if ((port = dg_loop_index_to_port(index)) == 0xFF)
     {
         DG_DBG_set_err_string("Invalid Port fd to recv, fd=%d", fd);
         return FALSE;
@@ -395,6 +402,28 @@ BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len)
 /*==================================================================================================
                                           LOCAL FUNCTIONS
 ==================================================================================================*/
+
+/*=============================================================================================*//**
+@brief map the index to port
+
+@param[in]  port - the port number according to definition
+
+@return the port index, 0xFF if invalid index.
+
+@note
+- index is 0, 1 ... DG_LOOP_PORT_NUM-1
+*//*==============================================================================================*/
+DG_LOOP_PORT_T dg_loop_index_to_port(int index)
+{
+    DG_LOOP_PORT_T port = 0xFF;
+
+    if ((index >= 0) && (index < DG_LOOP_PORT_NUM))
+    {
+        port = dg_loop_port_fd[index].port;
+    }
+
+    return port;
+}
 
 /*=============================================================================================*//**
 @brief open port implementation

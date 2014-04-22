@@ -74,13 +74,13 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
 {
     BOOL ret = FALSE;
 
-    if (DG_LOOP_port_to_index(test->tx_port) < 0)
+    if (DG_LOOP_check_port(test->tx_port) < 0)
     {
         DG_DBG_set_err_string("Invalid tx_port to test, port=0x%02x", test->tx_port);
         return FALSE;
     }
 
-    if (DG_LOOP_port_to_index(test->rx_port) < 0)
+    if (DG_LOOP_check_port(test->rx_port) < 0)
     {
         DG_DBG_set_err_string("Invalid rx_port to test, port=0x%02x", test->rx_port);
         return FALSE;
@@ -313,6 +313,10 @@ send_finish:
     /* tell the receive thread to stop */
     test->b_recv = FALSE;
 
+    DG_LOOP_MUTEX_LOCK(&test->mutex);
+    pthread_cond_signal(&test->recv_cond);
+    DG_LOOP_MUTEX_UNLOCK(&test->mutex);
+
     DG_DBG_TRACE("leave send thread: %p", (void*)pthread_self());
 
     return NULL;
@@ -352,7 +356,7 @@ void* dg_loop_recv_thread(void* arg)
         goto recv_finish;
     }
 
-    while ((test->count != 0) || test->b_recv)
+    while ((test->count > 0) || test->b_recv)
     {
         BOOL b_recv = TRUE;
         DG_LOOP_MUTEX_LOCK(&test->mutex);
@@ -367,6 +371,11 @@ void* dg_loop_recv_thread(void* arg)
             if (pthread_cond_wait(&test->recv_cond, &test->mutex) != 0)
             {
                 DG_DBG_ERROR("Error waiting on recv condition, errno=%d(%m)", errno);
+                b_recv = FALSE;
+            }
+
+            if (test->count == 0)
+            {
                 b_recv = FALSE;
             }
         }
@@ -404,7 +413,7 @@ void* dg_loop_recv_thread(void* arg)
 
             /* if read time out we consider there is no data */
             DG_LOOP_MUTEX_LOCK(&test->mutex);
-            test->count = 0;
+            test->count--;
             pthread_cond_signal(&test->send_cond);
             DG_LOOP_MUTEX_UNLOCK(&test->mutex);
         }
