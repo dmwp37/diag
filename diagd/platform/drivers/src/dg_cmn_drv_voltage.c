@@ -51,33 +51,44 @@ const float DG_CMN_DRV_VOLTAGE_BASE = 2.5 / 255;   /** the base value of the vol
 /** coefficient information */
 static float dg_cmn_drv_voltage_co[][DG_CMN_DRV_VOLTAGE_CHANNEL_MAX + 1] =
 {
-    { 6.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 3.0 },
-    { 3.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 },
-    { 6.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 3.0 },
-    { 1.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 },
-    { 6.0, 2.0, 2.0, 1.0, 1.0, 3.0, 1.0, 3.0 },
-    { 6.0, 2.0, 2.0, 1.0, 1.0, 3.0, 1.0, 3.0 }
+    [DG_CMN_DRV_VOLTAGE_CB_0]  = { 6.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 3.0 },
+    [DG_CMN_DRV_VOLTAGE_CB_1]  = { 3.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 },
+    [DG_CMN_DRV_VOLTAGE_FEB_0] = { 6.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 3.0 },
+    [DG_CMN_DRV_VOLTAGE_FEB_1] = { 1.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 },
+    [DG_CMN_DRV_VOLTAGE_WTB_0] = { 6.0, 2.0, 2.0, 1.0, 1.0, 3.0, 1.0, 3.0 },
+    [DG_CMN_DRV_VOLTAGE_WTB_1] = { 6.0, 2.0, 2.0, 1.0, 1.0, 3.0, 1.0, 3.0 }
 };
 /** chip bus information */
-static UINT8 dg_cmn_drv_voltage_chip_bus[] =
+static DG_CMN_DRV_I2C_BUS_T dg_cmn_drv_voltage_chip_bus[] =
 {
-    DG_CMN_DRV_I2C_PCH_SMB,
-    DG_CMN_DRV_I2C_PCH_SMB,
-    DG_CMN_DRV_I2C_MUX_FEB,
-    DG_CMN_DRV_I2C_MUX_FEB,
-    DG_CMN_DRV_I2C_MUX_WTB1,
-    DG_CMN_DRV_I2C_MUX_WTB2
+    [DG_CMN_DRV_VOLTAGE_CB_0]  = DG_CMN_DRV_I2C_MUX_CPU,
+    [DG_CMN_DRV_VOLTAGE_CB_1]  = DG_CMN_DRV_I2C_MUX_CPU,
+    [DG_CMN_DRV_VOLTAGE_FEB_0] = DG_CMN_DRV_I2C_MUX_FEB,
+    [DG_CMN_DRV_VOLTAGE_FEB_1] = DG_CMN_DRV_I2C_MUX_FEB,
+    [DG_CMN_DRV_VOLTAGE_WTB_0] = DG_CMN_DRV_I2C_MUX_WTB1,
+    [DG_CMN_DRV_VOLTAGE_WTB_1] = DG_CMN_DRV_I2C_MUX_WTB2
 };
 /** chip address information */
-static UINT8 dg_cmn_drv_voltage_chip_addr[] =
+static DG_CMN_DRV_I2C_ADDR_T dg_cmn_drv_voltage_chip_addr[] =
 {
-    0x4A, 0x4B, 0x4A, 0x4B, 0x48, 0x48
+    [DG_CMN_DRV_VOLTAGE_CB_0]  = 0x4A,
+    [DG_CMN_DRV_VOLTAGE_CB_1]  = 0x4B,
+    [DG_CMN_DRV_VOLTAGE_FEB_0] = 0x4A,
+    [DG_CMN_DRV_VOLTAGE_FEB_1] = 0x4B,
+    [DG_CMN_DRV_VOLTAGE_WTB_0] = 0x48,
+    [DG_CMN_DRV_VOLTAGE_WTB_1] = 0x48
 };
 /** channel address information */
-static UINT8 dg_cmn_drv_voltage_channel_addr[] =
+static DG_CMN_DRV_I2C_OFFSET_T dg_cmn_drv_voltage_channel_addr[] =
 {
-    0b10001100, 0b11001100, 0b10011100, 0b11011100,
-    0b10101100, 0b11101100, 0b10111100, 0b11111100
+    [DG_CMN_DRV_VOLTAGE_CHANNEL_0] = 0b10001100,
+    [DG_CMN_DRV_VOLTAGE_CHANNEL_1] = 0b11001100,
+    [DG_CMN_DRV_VOLTAGE_CHANNEL_2] = 0b10011100,
+    [DG_CMN_DRV_VOLTAGE_CHANNEL_3] = 0b11011100,
+    [DG_CMN_DRV_VOLTAGE_CHANNEL_4] = 0b10101100,
+    [DG_CMN_DRV_VOLTAGE_CHANNEL_5] = 0b11101100,
+    [DG_CMN_DRV_VOLTAGE_CHANNEL_6] = 0b10111100,
+    [DG_CMN_DRV_VOLTAGE_CHANNEL_7] = 0b11111100
 };
 
 /*==================================================================================================
