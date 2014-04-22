@@ -18,34 +18,35 @@ WR_LEN=02
 WR_DATA1=0102
 WR_DATA2=ffff
 
-
 echo "#-----------------------$SEC_NAME-----------------------"
 
 #Define array for command and description: following Diag and DVT Spec
 
 #command array
-array_command[0]=01000102
-array_command[1]=0ffd010000
-array_command[2]="$OPCODE""$RD_ACTION""$PCH_SMB""$ADDRESS""$RD_OFFSET""$RD_LEN"
-array_command[3]="$OPCODE""$WR_ACTION""$PCH_SMB""$ADDRESS""$WR_OFFSET""$WR_LEN""$WR_DATA1"
-array_command[4]=0ffe0000000200000400
-array_command[5]="$OPCODE""$RD_ACTION""$PCH_SMB""$ADDRESS""$RD_OFFSET""$RD_LEN"
-array_command[6]="$OPCODE""$WR_ACTION""$PCH_SMB""$ADDRESS""$WR_OFFSET""$WR_LEN""$WR_DATA2"
-array_command[7]=0ffe0000000200000400
-array_command[8]="$OPCODE""$RD_ACTION""$PCH_SMB""$ADDRESS""$RD_OFFSET""$RD_LEN"
-array_command[9]=0ffd010001
+COUNTER=0
+array_command[$((COUNTER++))]=01000102
+array_command[$((COUNTER++))]=0ffd010000
+array_command[$((COUNTER++))]="$OPCODE""$RD_ACTION""$PCH_SMB""$ADDRESS""$RD_OFFSET""$RD_LEN"
+#array_command[$((COUNTER++))]="$OPCODE""$WR_ACTION""$PCH_SMB""$ADDRESS""$WR_OFFSET""$WR_LEN""$WR_DATA1"
+#array_command[$((COUNTER++))]=0ffe0000000200000400
+#array_command[$((COUNTER++))]="$OPCODE""$RD_ACTION""$PCH_SMB""$ADDRESS""$RD_OFFSET""$RD_LEN"
+#array_command[$((COUNTER++))]="$OPCODE""$WR_ACTION""$PCH_SMB""$ADDRESS""$WR_OFFSET""$WR_LEN""$WR_DATA2"
+#array_command[$((COUNTER++))]=0ffe0000000200000400
+#array_command[$((COUNTER++))]="$OPCODE""$RD_ACTION""$PCH_SMB""$ADDRESS""$RD_OFFSET""$RD_LEN"
+array_command[$((COUNTER++))]=0ffd010001
 
 #command description array, need match with command array above.
-array_des[0]="Suspend the DUT"
-array_des[1]="Enable Data Dump"
-array_des[2]="Read I2C Bus=$PCH_SMB Address=$ADDRESS Offset=$RD_OFFSET Len=$RD_LEN"
-array_des[3]="Write I2C Bus=$PCH_SMB Address=$ADDRESS Offset=$WR_OFFSET Len=$WR_LEN Data=$WR_DATA1"
-array_des[4]="sleep 1s"
-array_des[5]="Read I2C Bus=$PCH_SMB Address=$ADDRESS Offset=$RD_OFFSET Len=$RD_LEN"
-array_des[6]="Write I2C Bus=$PCH_SMB Address=$ADDRESS Offset=$WR_OFFSET Len=$WR_LEN Data=$WR_DATA2"
-array_des[7]="sleep 1s"
-array_des[8]="Read I2C Bus=$PCH_SMB Address=$ADDRESS Offset=$RD_OFFSET Len=$RD_LEN"
-array_des[9]="Disable Data Dump"
+COUNTER=0
+array_des[$((COUNTER++))]="Suspend the DUT"
+array_des[$((COUNTER++))]="Enable Data Dump"
+array_des[$((COUNTER++))]="Read I2C Bus=$PCH_SMB Address=$ADDRESS Offset=$RD_OFFSET Len=$RD_LEN"
+#array_des[$((COUNTER++))]="Write I2C Bus=$PCH_SMB Address=$ADDRESS Offset=$WR_OFFSET Len=$WR_LEN Data=$WR_DATA1"
+#array_des[$((COUNTER++))]="sleep 1s"
+#array_des[$((COUNTER++))]="Read I2C Bus=$PCH_SMB Address=$ADDRESS Offset=$RD_OFFSET Len=$RD_LEN"
+#array_des[$((COUNTER++))]="Write I2C Bus=$PCH_SMB Address=$ADDRESS Offset=$WR_OFFSET Len=$WR_LEN Data=$WR_DATA2"
+#array_des[$((COUNTER++))]="sleep 1s"
+#array_des[$((COUNTER++))]="Read I2C Bus=$PCH_SMB Address=$ADDRESS Offset=$RD_OFFSET Len=$RD_LEN"
+array_des[$((COUNTER++))]="Disable Data Dump"
 
 array_command_fail[0]="$OPCODE""$RD_ACTION""08""$ADDRESS""$RD_OFFSET""$RD_LEN"
 array_des_fail[0]="Read invalid Bus"

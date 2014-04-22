@@ -140,7 +140,6 @@ BOOL DG_CMN_DRV_I2C_write_bus(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T ad
         close(bus_fd);
     }
 
-
     return ret;
 }
 
@@ -161,7 +160,32 @@ int dg_cmn_drv_i2c_connect_device(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_
     int  bus_fd = -1;
     char bus_name[DG_CMN_DRV_I2C_BUS_PATH_SIZE];
 
-    snprintf(bus_name, DG_CMN_DRV_I2C_BUS_PATH_SIZE, "/dev/i2c/%d", bus);
+    const int  bus_base  = __COUNTER__ + 1;
+    static int bus_map[] =
+    {
+        [DG_CMN_DRV_I2C_PCH_SMB]  = __COUNTER__,
+        [DG_CMN_DRV_I2C_MUX_CPU]  = __COUNTER__,
+        [DG_CMN_DRV_I2C_MUX_PSU0] = __COUNTER__,
+        [DG_CMN_DRV_I2C_MUX_PSU1] = __COUNTER__,
+        [DG_CMN_DRV_I2C_MUX_WBP]  = __COUNTER__,
+        [DG_CMN_DRV_I2C_MUX_WTB1] = __COUNTER__,
+        [DG_CMN_DRV_I2C_MUX_WTB2] = __COUNTER__,
+        [DG_CMN_DRV_I2C_MUX_FEB]  = __COUNTER__,
+    };
+
+    if (bus >= DG_ARRAY_SIZE(bus_map))
+    {
+        DG_DRV_UTIL_set_error_string("I2C invalid bus: 0x%02x", bus);
+        return -1;
+    }
+    else if (bus_map[bus] < bus_base)
+    {
+        DG_DRV_UTIL_set_error_string("I2C invalid bus: 0x%02x", bus);
+        return -1;
+    }
+
+    snprintf(bus_name, DG_CMN_DRV_I2C_BUS_PATH_SIZE, "/dev/i2c/%d", (bus_map[bus] - bus_base));
+
     if ((bus_fd = open(bus_name, O_RDWR)) < 0)
     {
         DG_DRV_UTIL_set_error_string("I2C driver failed to open bus %s, errno=%d(%m)",
