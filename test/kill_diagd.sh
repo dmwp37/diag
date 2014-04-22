@@ -3,10 +3,14 @@
 DIAGD_PID_FILE="/tmp/diagd.pid"
 
 if [ -e $DIAGD_PID_FILE ]; then
-  # stop the diagd
-  echo kill diag deamon
+  PID=$(cat $DIAGD_PID_FILE)
 
-  PID=`cat $DIAGD_PID_FILE`
-  kill -s SIGINT $PID
+  if [ -z "$(ps -p $PID | grep diagd)" ]; then
+    rm -f $DIAGD_PID_FILE
+  else
+    # stop the diagd
+    echo kill diag deamon
+    kill -s SIGINT $PID
+  fi
 fi
 
