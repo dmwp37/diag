@@ -46,7 +46,7 @@ implementation of the I2C driver
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
-static int  dg_cmn_drv_i2c_connect_device(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address);
+extern int  dg_cmn_drv_i2c_connect_device(DG_CMN_DRV_I2C_BUS_T bus, DG_CMN_DRV_I2C_ADDR_T address);
 static BOOL dg_cmn_drv_i2c_read(int fd, DG_CMN_DRV_I2C_OFFSET_T offset,
                                 DG_CMN_DRV_I2C_SIZE_T read_len, UINT8* read_data);
 static BOOL dg_cmn_drv_i2c_write(int fd, DG_CMN_DRV_I2C_OFFSET_T offset,
@@ -254,6 +254,7 @@ BOOL dg_cmn_drv_i2c_write(int fd, DG_CMN_DRV_I2C_OFFSET_T offset,
                           DG_CMN_DRV_I2C_SIZE_T write_len, const UINT8* write_data)
 {
     BOOL is_success = TRUE;
+    int  retry      = 0;
 
     DG_CMN_DRV_I2C_SIZE_T total_bytes_write = 0;
 
@@ -264,6 +265,13 @@ BOOL dg_cmn_drv_i2c_write(int fd, DG_CMN_DRV_I2C_OFFSET_T offset,
 
         if (write_ret < 0)
         {
+            if ((errno == ENXIO) && (retry++ < 500))
+            {
+                /* write busy, retry */
+                usleep(10);
+                continue;
+            }
+
             DG_DRV_UTIL_set_error_string("i2c byte write failed, "
                                          "offset=%d, wite_data=0x%02x, errno=%d(%m)",
                                          offset, *write_data, errno);
