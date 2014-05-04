@@ -4,6 +4,7 @@ CUR_PATH=$(dirname $0)
 DIAGD_APP=$CUR_PATH/../out/install/bin/diagd
 DIAGD_PID_FILE="/tmp/diagd.pid"
 DIAGD_LOG_FILE="/tmp/diagd.log"
+CLIENT_CMD="$CUR_PATH/../out/install/bin/diag_send"
 
 if [ -e $DIAGD_PID_FILE  ]; then
   PID=$(cat $DIAGD_PID_FILE)
@@ -19,9 +20,11 @@ if [ ! -e $DIAGD_PID_FILE ]; then
 
   rm -f $DIAGD_LOG_FILE
   $DIAGD_APP > $DIAGD_LOG_FILE 2>&1 &
-  chmod 666 $DIAGD_LOG_FILE
 
   # wait the daemon started
   sleep 1
+  chmod 666 $DIAGD_LOG_FILE
+  # get into diag mode
+  $CLIENT_CMD 01000102 >/dev/null 2>&1
 fi
 
