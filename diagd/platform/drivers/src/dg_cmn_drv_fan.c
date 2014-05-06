@@ -55,7 +55,7 @@ implementation of the FAN driver
 #define ADT7470_REG_PWM_MIN(x)        (ADT7470_REG_PWM_MIN_BASE_ADDR + (x))
 
 /* Fan Speed (RPM) = (90,000 * 60 )/Fan Tach Reading*/
-#define ADT7470_PERIOD_TO_RPM(x)      ((UINT16)((90000 * 60) / (x)))
+#define ADT7470_PERIOD_TO_RPM(x)      ((x == 0) ? 0 : ((UINT16)((90000 * 60) / (x))))
 #define ADT7470_RPM_TO_PERIOD         ADT7470_PERIOD_TO_RPM
 /* Fan PWM = percentage * 255 / 100 */
 #define ADT7470_PERCENTAGE_TO_PWM(x)  ((UINT8)(2.55 * (x)))
@@ -104,6 +104,7 @@ BOOL DG_CMN_DRV_FAN_get_rpm(DG_CMN_DRV_FAN_ID_T fan, DG_CMN_DRV_FAN_RPM_T* rpm)
     else
     {
         UINT16 tach;
+
         if (adt7470_read_short(ADT7470_REG_FAN(fan), &tach))
         {
             if ((tach != 0))
@@ -145,23 +146,14 @@ BOOL DG_CMN_DRV_FAN_get_rpm_limit(DG_CMN_DRV_FAN_ID_T   fan,
     {
         UINT16 tach_min;
         UINT16 tach_max;
+
         if (adt7470_read_short(ADT7470_REG_FAN_MIN(fan), &tach_min) &&
             adt7470_read_short(ADT7470_REG_FAN_MAX(fan), &tach_max))
         {
-            if ((tach_min != 0) && (tach_max != 0))
-            {
-                *min = ADT7470_PERIOD_TO_RPM(tach_min);
-                *min = ADT7470_PERIOD_TO_RPM(tach_max);
-
-                DG_DBG_TRACE("FAN %d got RPM limit: min=%d, max=%d", fan, *min, *max);
-
-                ret = TRUE;
-            }
-            else
-            {
-                DG_DRV_UTIL_set_error_string("Invalid tach limit values, tach_min=%d, tach_max=%d",
-                                             tach_min, tach_max);
-            }
+            *min = ADT7470_PERIOD_TO_RPM(tach_min);
+            *max = ADT7470_PERIOD_TO_RPM(tach_max);
+            DG_DBG_TRACE("FAN %d got RPM limit: min=%d, max=%d", fan, *min, *max);
+            ret = TRUE;
         }
     }
 
@@ -326,6 +318,7 @@ BOOL DG_CMN_DRV_FAN_get_status(DG_CMN_DRV_FAN_ID_T fan, DG_CMN_DRV_FAN_STATUS_T*
     {
         UINT8 no_present;
         UINT8 error;
+
         if (adt7470_read_byte(ADT7470_REG_FAN_NO_PRESENT, &no_present) &&
             adt7470_read_byte(ADT7470_REG_FAN_STATUS, &error))
         {
@@ -399,6 +392,7 @@ BOOL adt7470_read_short(UINT8 reg, UINT16* p_data)
     BOOL ret = DG_CMN_DRV_I2C_read_bus(DG_CMN_DRV_FAN_I2C_BUS,
                                        DG_CMN_DRV_FAN_I2C_ADDR,
                                        reg, 2, data);
+
     if (ret)
     {
         *p_data  = data[0];
