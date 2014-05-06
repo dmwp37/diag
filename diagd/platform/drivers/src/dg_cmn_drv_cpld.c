@@ -42,7 +42,7 @@ implementation of the CPLD driver
 ==================================================================================================*/
 #define DG_CMN_DRV_CPLD_MEM_SIZE 0x10000 /** 64k */
 #define DG_CMN_DRV_CPLD_CB_BASE  0x0000  /** CPU CPLD base */
-#define DG_CMN_DRV_CPLD_FEB_BASE 0x0400  /** FEB CPLD base */
+#define DG_CMN_DRV_CPLD_FEB_BASE 0x8000  /** FEB CPLD base */
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -188,7 +188,7 @@ BOOL DG_CMN_DRV_CPLD_set(DG_CMN_DRV_CPLD_ID_T     id,
         else
         {
             *(base + offset) = val;
-            DG_DBG_TRACE("CPLD ID %d offset 0x%04x set value: %d", id, offset, val);
+            DG_DBG_TRACE("CPLD ID %d offset 0x%04x set value: 0x%04x", id, offset, val);
             ret = TRUE;
         }
 

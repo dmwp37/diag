@@ -74,8 +74,8 @@ static UINT8 dg_cmn_drv_led_mask_shift[] =
 static UINT8 dg_cmn_drv_led_color[] =
 {
     0x01, /* default */
-    0x01, /* green   */
     0x02, /* red     */
+    0x01, /* green   */
     0x03  /* orange  */
 };
 
@@ -107,10 +107,25 @@ BOOL DG_CMN_DRV_LED_enable(DG_CMN_DRV_LED_ID_T led_id, DG_CMN_DRV_LED_COLOR_T le
     {
         DG_DBG_ERROR("can't get CPLD led register");
     }
+    else if (led_id == DG_CMN_DRV_LED_STORAGE)
+    {
+        if ((led_color == DG_CMN_DRV_LED_COLOR_RED) || (led_color == DG_CMN_DRV_LED_COLOR_DEFAULT))
+        {
+            value |= (1 << dg_cmn_drv_led_mask_shift[led_id]);
+            DG_CMN_DRV_CPLD_set(DG_CMN_DRV_CPLD_FEB, dg_cmn_drv_led_reg_addr[led_id], value);
+            DG_DBG_TRACE("Enable LED: led_id=0x%02x, led_color=0x%02x",
+                         led_id, led_color);
+            ret = TRUE;
+        }
+        else
+        {
+            DG_DRV_UTIL_set_error_string("Invalid led color: led_color=0x%02x", led_color);
+        }
+    }
     else
     {
         /* clear the bits and then set the bit */
-        value &= (0x03 << dg_cmn_drv_led_mask_shift[led_id]);
+        value &= ~(0x03 << dg_cmn_drv_led_mask_shift[led_id]);
         value |= (dg_cmn_drv_led_color[led_color] << dg_cmn_drv_led_mask_shift[led_id]);
 
         if (!DG_CMN_DRV_CPLD_set(DG_CMN_DRV_CPLD_FEB,
@@ -152,7 +167,7 @@ BOOL DG_CMN_DRV_LED_disable(DG_CMN_DRV_LED_ID_T led_id)
     else
     {
         /* clear the bit of the led */
-        value &= (0x03 << dg_cmn_drv_led_mask_shift[led_id]);
+        value &= ~(0x03 << dg_cmn_drv_led_mask_shift[led_id]);
 
         if (!DG_CMN_DRV_CPLD_set(DG_CMN_DRV_CPLD_FEB,
                                  dg_cmn_drv_led_reg_addr[led_id],
