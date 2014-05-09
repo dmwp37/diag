@@ -90,7 +90,7 @@ BOOL DG_CMN_DRV_PTTM_get(DG_CMN_DRV_PTTM_CHIP_T chip, DG_CMN_DRV_PTTM_DATA_T* da
         {
             if ((r = i2c_smbus_read_byte(fd)) < 0)
             {
-                DG_DRV_UTIL_set_error_string("I2C driver failed to read byte from AD5247, "
+                DG_DRV_UTIL_set_error_string("PTTM failed to read byte from AD5247, "
                                              "errno=%d(%m)", errno);
             }
         }
@@ -151,7 +151,7 @@ BOOL DG_CMN_DRV_PTTM_set(DG_CMN_DRV_PTTM_CHIP_T chip, DG_CMN_DRV_PTTM_DATA_T dat
         {
             if ((r = i2c_smbus_write_byte(fd, data)) < 0)
             {
-                DG_DRV_UTIL_set_error_string("I2C driver failed to write byte to AD5247, "
+                DG_DRV_UTIL_set_error_string("PTTM failed to write byte to AD5247, "
                                              "errno=%d(%m)", errno);
             }
         }

@@ -9,7 +9,7 @@ RESET_SYSTEM=00
 RESET_ACTION=01
 RECOVER_ACTION=02
 
-CHIP_ID=01 # FEB
+CHIP_ID=03 # i2c
 
 echo "#-----------------------$SEC_NAME-----------------------"
 
@@ -19,13 +19,11 @@ echo "#-----------------------$SEC_NAME-----------------------"
 array_command[0]=01000102
 array_command[1]="$OPCODE""$RESET_ACTION""$CHIP_ID"
 array_command[2]="$OPCODE""$RECOVER_ACTION""$CHIP_ID"
-array_command[3]="$OPCODE""$RESET_SYSTEM"
 
 #command description array, need match with command array above.
 array_des[0]="Suspend the DUT"
 array_des[1]="Reset Chip=$CHIP_ID"
 array_des[2]="Recover Chip=$CHIP_ID"
-array_des[3]="Reboot System"
 
 array_command_fail[0]="$OPCODE"07
 
