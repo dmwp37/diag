@@ -97,6 +97,23 @@ modules_to_install := $(call module-installed-files, $(ALL_MODULES))
 $(DEFAULT_GOAL): $(modules_to_install)
 
 
+# -------------------------------------------------------------------
+# the deploy rule
+#
+# by default we need to deploy all registered modules
+DEPLOY_DIR := ../out/install/usr/local/sbin
+modules_to_deploy := $(patsubst $(OUT_EXECUTABLES)/%, $(DEPLOY_DIR)/%, $(modules_to_install))
+
+$(DEPLOY_DIR):
+	@mkdir -p $(DEPLOY_DIR)
+
+$(DEPLOY_DIR)/%: $(OUT_EXECUTABLES)/% | $(DEPLOY_DIR)
+	cp $< $@
+
+deploy: $(DEFAULT_GOAL)
+deploy: $(modules_to_deploy)
+	
+
 .PHONY: clean
 clean:
 	@rm -rf $(OUT_DIR)
