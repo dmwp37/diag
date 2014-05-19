@@ -55,8 +55,8 @@ static float dg_cmn_drv_voltage_co[][DG_CMN_DRV_VOLTAGE_CHANNEL_MAX + 1] =
     [DG_CMN_DRV_VOLTAGE_CB_1]  = { 3.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 },
     [DG_CMN_DRV_VOLTAGE_FEB_0] = { 6.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 3.0 },
     [DG_CMN_DRV_VOLTAGE_FEB_1] = { 1.1, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 },
-    [DG_CMN_DRV_VOLTAGE_WTB_0] = { 6.0, 2.0, 2.0, 1.0, 1.0, 3.0, 1.0, 3.0 },
-    [DG_CMN_DRV_VOLTAGE_WTB_1] = { 6.0, 2.0, 2.0, 1.0, 1.0, 3.0, 1.0, 3.0 }
+    [DG_CMN_DRV_VOLTAGE_WTB_0] = { 6.0, 2.0, 2.0, 1.0, 1.0, 2.0, 1.0, 3.0 },
+    [DG_CMN_DRV_VOLTAGE_WTB_1] = { 6.0, 2.0, 2.0, 1.0, 1.0, 2.0, 1.0, 3.0 }
 };
 /** chip bus information */
 static DG_CMN_DRV_I2C_BUS_T dg_cmn_drv_voltage_chip_bus[] =

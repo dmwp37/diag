@@ -13,6 +13,7 @@
 #include "dg_handler_inc.h"
 #include "dg_drv_util.h"
 #include "dg_cmn_drv_button.h"
+#include "dg_cmn_drv_cpld.h"
 
 
 /** @addtogroup dg_common_drivers
@@ -39,6 +40,8 @@ implementation of the BUTTON driver
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
+static BOOL dg_cmn_drv_button_get_power();
+static BOOL dg_cmn_drv_button_get_reset();
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -82,6 +85,30 @@ BOOL DG_CMN_DRV_BUTTON_get(DG_CMN_DRV_BUTTON_CODE_T* code)
 /*==================================================================================================
                                           LOCAL FUNCTIONS
 ==================================================================================================*/
+
+/*=============================================================================================*//**
+@brief Get if the power key was pressed
+
+@param[out] pressed - TRUE if the button was pressed
+
+@return TRUE if no error
+*//*==============================================================================================*/
+BOOL dg_cmn_drv_button_get_power(BOOL* pressed)
+{
+
+}
+
+/*=============================================================================================*//**
+@brief Get if the reset key was pressed
+
+@param[out] pressed - TRUE if the button was pressed
+
+@return TRUE if no error
+*//*==============================================================================================*/
+BOOL dg_cmn_drv_button_get_power(BOOL* pressed)
+{
+
+}
 
 /** @} */
 /** @} */
