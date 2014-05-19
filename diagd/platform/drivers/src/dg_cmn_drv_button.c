@@ -63,23 +63,33 @@ static BOOL dg_cmn_drv_button_get_reset();
 *//*==============================================================================================*/
 BOOL DG_CMN_DRV_BUTTON_get(DG_CMN_DRV_BUTTON_CODE_T* code)
 {
-    static DG_CMN_DRV_BUTTON_CODE_T key_code = DG_CMN_DRV_BUTTON_NONE;
+    BOOL ret     = FALSE;
+    BOOL b_press = FALSE;
 
-    if (key_code == DG_CMN_DRV_BUTTON_NONE)
+    *code = DG_CMN_DRV_BUTTON_NONE;
+
+    if (dg_cmn_drv_button_get_power(&b_press))
     {
-        sleep(3); /* simulate the process to wait for a button press */
-        key_code = DG_CMN_DRV_BUTTON_POWER;
+        if (b_press)
+        {
+            *code = DG_CMN_DRV_BUTTON_POWER;
+            DG_DBG_TRACE("power key was pressed!");
+            return TRUE;
+        }
     }
-    else
+
+    if (dg_cmn_drv_button_get_reset(&b_press))
     {
-        key_code = DG_CMN_DRV_BUTTON_NONE;
+        if (b_press)
+        {
+            *code = DG_CMN_DRV_BUTTON_RESET;
+            DG_DBG_TRACE("reset key was pressed!");
+        }
+
+        ret = TRUE;
     }
 
-    DG_DBG_TRACE("the last button key_code=0x%02x", key_code);
-
-    *code = key_code;
-
-    return TRUE;
+    return ret;
 }
 
 /*==================================================================================================
@@ -95,7 +105,24 @@ BOOL DG_CMN_DRV_BUTTON_get(DG_CMN_DRV_BUTTON_CODE_T* code)
 *//*==============================================================================================*/
 BOOL dg_cmn_drv_button_get_power(BOOL* pressed)
 {
+    BOOL                    ret = FALSE;
+    DG_CMN_DRV_CPLD_VALUE_T value;
 
+    if (!DG_CMN_DRV_CPLD_get(DG_CMN_DRV_CPLD_CB, 0x26, &value))
+    {
+        DG_DBG_ERROR("can't get CB CPLD power key INT");
+    }
+    else if (!DG_CMN_DRV_CPLD_set(DG_CMN_DRV_CPLD_CB, 0x2a, (1 << 4)))
+    {
+        DG_DBG_ERROR("can't clear CB CPLD power key INT");
+    }
+    else
+    {
+        *pressed = (value & (1 << 4)) > 0;
+        ret      = TRUE;
+    }
+
+    return ret;
 }
 
 /*=============================================================================================*//**
@@ -105,9 +132,26 @@ BOOL dg_cmn_drv_button_get_power(BOOL* pressed)
 
 @return TRUE if no error
 *//*==============================================================================================*/
-BOOL dg_cmn_drv_button_get_power(BOOL* pressed)
+BOOL dg_cmn_drv_button_get_reset(BOOL* pressed)
 {
+    BOOL                    ret = FALSE;
+    DG_CMN_DRV_CPLD_VALUE_T value;
 
+    if (!DG_CMN_DRV_CPLD_get(DG_CMN_DRV_CPLD_FEB, 0x0d, &value))
+    {
+        DG_DBG_ERROR("can't get CB CPLD power key INT");
+    }
+    else if (!DG_CMN_DRV_CPLD_set(DG_CMN_DRV_CPLD_FEB, 0x1b, (1 << 1)))
+    {
+        DG_DBG_ERROR("can't clear CB CPLD power key INT");
+    }
+    else
+    {
+        *pressed = (value & (1 << 2)) > 0;
+        ret      = TRUE;
+    }
+
+    return ret;
 }
 
 /** @} */
