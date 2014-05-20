@@ -35,7 +35,17 @@
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
 ==================================================================================================*/
+struct DG_LOOP_PORT_FD_S;
+
 typedef struct
+{
+    BOOL (* open)(struct DG_LOOP_PORT_FD_S* fd);
+    void (* close)(struct DG_LOOP_PORT_FD_S* fd);
+    BOOL (* send)(struct DG_LOOP_PORT_FD_S* fd, UINT32 size, UINT8* data);
+    BOOL (* recv)(struct DG_LOOP_PORT_FD_S* fd, UINT32 size, UINT8* data);
+} DG_LOOP_PORT_OP_T;
+
+typedef struct DG_LOOP_PORT_FD_S
 {
     DG_LOOP_PORT_T port;   /* the stored port  */
 
@@ -43,16 +53,17 @@ typedef struct
     int tx_fd;             /* the actual tx fd */
     int rx_fd;             /* the actual rx fd */
 
-    pthread_mutex_t mutex; /* mutex protection */
+    DG_LOOP_PORT_OP_T* op;
+    pthread_mutex_t    mutex; /* mutex protection */
 } DG_LOOP_PORT_FD_T;
 
 /*==================================================================================================
                                      LOCAL FUNCTION PROTOTYPES
 ==================================================================================================*/
-static BOOL dg_loop_open_impl(DG_LOOP_PORT_FD_T* fd);
-static void dg_loop_close_impl(DG_LOOP_PORT_FD_T* fd);
-static BOOL dg_loop_write_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_write, UINT8* data);
-static BOOL dg_loop_read_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_read, UINT8* data);
+static BOOL dg_loop_open_sim(DG_LOOP_PORT_FD_T* fd);
+static void dg_loop_close_sys(DG_LOOP_PORT_FD_T* fd);
+static BOOL dg_loop_write_sim(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_write, UINT8* data);
+static BOOL dg_loop_read_sim(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_read, UINT8* data);
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -62,35 +73,40 @@ DG_LOOP_MUTEX_UNLOCK_FUN_T dg_loop_mutex_unlock = (DG_LOOP_MUTEX_UNLOCK_FUN_T)&p
 /*==================================================================================================
                                           LOCAL VARIABLES
 ==================================================================================================*/
+static DG_LOOP_PORT_OP_T dg_loop_port_sim_op =
+{
+    dg_loop_open_sim, dg_loop_close_sys, dg_loop_write_sim, dg_loop_read_sim
+};
+
 /** internal real file descriptor array for each ports */
 static DG_LOOP_PORT_FD_T dg_loop_port_fd[DG_LOOP_PORT_NUM] =
 {
-    { DG_LOOP_PORT_MGT,    0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_HA,     0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB0_1, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB0_2, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB1_1, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB1_2, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_0,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_1,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_2,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_3,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_4,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_5,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_6,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_7,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_8,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_9,   0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_10,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_11,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_0,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_1,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_2,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_3,  0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_0, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_1, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_2, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_3, 0, -1, -1, PTHREAD_MUTEX_INITIALIZER }
+    { DG_LOOP_PORT_MGT,    0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_HA,     0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_WTB0_1, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_WTB0_2, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_WTB1_1, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_WTB1_2, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_GE_0,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_GE_1,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_GE_2,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_GE_3,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_GE_4,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_GE_5,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_GE_6,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_GE_7,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_GE_8,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_GE_9,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_GE_10,  0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_GE_11,  0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_SFP_0,  0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_SFP_1,  0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_SFP_2,  0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_SFP_3,  0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_10GE_0, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_10GE_1, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_10GE_2, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
+    { DG_LOOP_PORT_10GE_3, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER }
 };
 
 /*==================================================================================================
@@ -169,7 +185,6 @@ BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
 {
     int index1;
     int index2;
-    int sockets[2];
 
     if ((index1 = DG_LOOP_check_port(port1)) < 0)
     {
@@ -192,26 +207,37 @@ BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
         return TRUE;
     }
 
-    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) != 0)
+    /* only simulation port support this action */
+    if ((dg_loop_port_fd[index1].op != &dg_loop_port_sim_op) ||
+        (dg_loop_port_fd[index2].op != &dg_loop_port_sim_op))
     {
-        DG_DBG_set_err_string("Failed to create connected sockets, errno=%d(%m)", errno);
+        return FALSE;
+    }
+
+    if ((DG_LOOP_open(port1) < 0) || (DG_LOOP_open(port2) < 0))
+    {
+        DG_LOOP_close(index1);
+        DG_LOOP_close(index2);
         return FALSE;
     }
 
     DG_DBG_TRACE("port1=0x%02x port2=0x%02x connected", port1, port2);
     /* Save the sockets */
-    if (port1 == port2)
+    if (port1 != port2)
     {
-        dg_loop_port_fd[index1].tx_fd = sockets[0];
-        dg_loop_port_fd[index1].rx_fd = sockets[1];
-    }
-    else
-    {
-        dg_loop_port_fd[index1].tx_fd = sockets[0];
-        dg_loop_port_fd[index2].rx_fd = sockets[1];
+        /* save one socket pair */
+        int socket0 = dg_loop_port_fd[index1].tx_fd;
+        int socket1 = dg_loop_port_fd[index1].rx_fd;
 
-        dg_loop_port_fd[index2].tx_fd = sockets[1];
-        dg_loop_port_fd[index1].rx_fd = sockets[0];
+        /* close one socket pair */
+        close(dg_loop_port_fd[index2].tx_fd);
+        close(dg_loop_port_fd[index2].rx_fd);
+
+        dg_loop_port_fd[index1].tx_fd = socket0;
+        dg_loop_port_fd[index2].rx_fd = socket1;
+
+        dg_loop_port_fd[index2].tx_fd = socket1;
+        dg_loop_port_fd[index1].rx_fd = socket0;
     }
 
     return TRUE;
@@ -229,17 +255,7 @@ void DG_LOOP_disconnect_all()
 
     for (index = 0; index < DG_LOOP_PORT_NUM; index++)
     {
-        if (dg_loop_port_fd[index].tx_fd > 0)
-        {
-            close(dg_loop_port_fd[index].tx_fd);
-            dg_loop_port_fd[index].tx_fd = -1;
-        }
-
-        if (dg_loop_port_fd[index].rx_fd > 0)
-        {
-            close(dg_loop_port_fd[index].rx_fd);
-            dg_loop_port_fd[index].rx_fd = -1;
-        }
+        DG_LOOP_close(index);
     }
 }
 
@@ -265,11 +281,17 @@ int DG_LOOP_open(DG_LOOP_PORT_T port)
         return -1;
     }
 
+    if (dg_loop_port_fd[index].op == NULL)
+    {
+        DG_DBG_set_err_string("Unsupported Port to open, port=0x%02x", port);
+        return -1;
+    }
+
     mutex = &dg_loop_port_fd[index].mutex;
     DG_LOOP_MUTEX_LOCK(mutex);
     if (dg_loop_port_fd[index].ref <= 0)
     {
-        if (dg_loop_open_impl(&dg_loop_port_fd[index]))
+        if (dg_loop_port_fd[index].op->open(&dg_loop_port_fd[index]))
         {
             DG_DBG_TRACE("open loop port 0x%02x", port);
             dg_loop_port_fd[index].ref = 1;
@@ -308,6 +330,12 @@ void DG_LOOP_close(int fd)
         return;
     }
 
+    if (dg_loop_port_fd[index].op == NULL)
+    {
+        DG_DBG_set_err_string("Unsupported Port to close, port=0x%02x", port);
+        return;
+    }
+
     mutex = &dg_loop_port_fd[index].mutex;
     DG_LOOP_MUTEX_LOCK(mutex);
     if (dg_loop_port_fd[index].ref > 0)
@@ -317,7 +345,7 @@ void DG_LOOP_close(int fd)
 
     if (dg_loop_port_fd[index].ref == 0)
     {
-        dg_loop_close_impl(&dg_loop_port_fd[index]);
+        dg_loop_port_fd[index].op->close(&dg_loop_port_fd[index]);
         DG_DBG_TRACE("close loop port 0x%02x", port);
     }
     DG_LOOP_MUTEX_UNLOCK(mutex);
@@ -347,13 +375,18 @@ BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len)
         DG_DBG_set_err_string("Invalid Port fd to send, fd=%d", fd);
         return FALSE;
     }
+    else if (dg_loop_port_fd[index].op == NULL)
+    {
+        DG_DBG_set_err_string("Unsupported Port to send, port=0x%02x", port);
+        return FALSE;
+    }
     else if (dg_loop_port_fd[index].ref <= 0)
     {
         DG_DBG_set_err_string("the fd is closed, fd=%d", fd);
         return FALSE;
     }
 
-    if (dg_loop_write_impl(&dg_loop_port_fd[index], len, buf))
+    if (dg_loop_port_fd[index].op->send(&dg_loop_port_fd[index], len, buf))
     {
         ret = TRUE;
     }
@@ -385,13 +418,18 @@ BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len)
         DG_DBG_set_err_string("Invalid Port fd to recv, fd=%d", fd);
         return FALSE;
     }
+    else if (dg_loop_port_fd[index].op == NULL)
+    {
+        DG_DBG_set_err_string("Unsupported Port to recv, port=0x%02x", port);
+        return FALSE;
+    }
     else if (dg_loop_port_fd[index].ref <= 0)
     {
         DG_DBG_set_err_string("the fd is closed, fd=%d", fd);
         return FALSE;
     }
 
-    if (dg_loop_read_impl(&dg_loop_port_fd[index], len, buf))
+    if (dg_loop_port_fd[index].op->recv(&dg_loop_port_fd[index], len, buf))
     {
         ret = TRUE;
     }
@@ -426,7 +464,7 @@ DG_LOOP_PORT_T dg_loop_index_to_port(int index)
 }
 
 /*=============================================================================================*//**
-@brief open port implementation
+@brief open simulation port implementation
 
 @param[out] fd - the fd
 
@@ -435,10 +473,28 @@ DG_LOOP_PORT_T dg_loop_index_to_port(int index)
 @note
 - if error happened, call DG_DBG_get_err_string() to get the last error
 *//*==============================================================================================*/
-BOOL dg_loop_open_impl(DG_LOOP_PORT_FD_T* fd)
+BOOL dg_loop_open_sim(DG_LOOP_PORT_FD_T* fd)
 {
-    /* we already opened in the connect simulation, do nothing */
-    DG_COMPILE_UNUSED(fd);
+    int sockets[2];
+
+    if ((fd->tx_fd > 0) || (fd->rx_fd > 0))
+    {
+        DG_DBG_TRACE("already opened. port=0x%02x", fd->port);
+        return TRUE;
+    }
+
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sockets) != 0)
+    {
+        DG_DBG_set_err_string("Failed to create connected sockets, errno=%d(%m)", errno);
+        return FALSE;
+    }
+
+    DG_DBG_TRACE("port=0x%02x opened", fd->port);
+
+    /* self connected by default */
+    fd->tx_fd = sockets[0];
+    fd->rx_fd = sockets[1];
+
     return TRUE;
 }
 
@@ -447,14 +503,23 @@ BOOL dg_loop_open_impl(DG_LOOP_PORT_FD_T* fd)
 
 @param[int] fd   - the fd
 *//*==============================================================================================*/
-void dg_loop_close_impl(DG_LOOP_PORT_FD_T* fd)
+void dg_loop_close_sys(DG_LOOP_PORT_FD_T* fd)
 {
-    /* we close in the connect simulation, do nothing */
-    DG_COMPILE_UNUSED(fd);
+    if (fd->tx_fd > 0)
+    {
+        close(fd->tx_fd);
+        fd->tx_fd = -1;
+    }
+
+    if (fd->rx_fd > 0)
+    {
+        close(fd->rx_fd);
+        fd->rx_fd = -1;
+    }
 }
 
 /*=============================================================================================*//**
-@brief Writes the specified number of bytes to the specified port
+@brief Writes the specified number of bytes to simulation port
 
 @param[in] fd             - The port fd
 @param[in] bytes_to_write - The number of bytes to write
@@ -465,7 +530,7 @@ void dg_loop_close_impl(DG_LOOP_PORT_FD_T* fd)
 @note
  - The write is synchronous, the function will block until the requested number of bytes are written
 *//*==============================================================================================*/
-BOOL dg_loop_write_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_write, UINT8* data)
+BOOL dg_loop_write_sim(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_write, UINT8* data)
 {
     BOOL is_success = FALSE;
 
@@ -478,7 +543,7 @@ BOOL dg_loop_write_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_write, UINT8* dat
 }
 
 /*=============================================================================================*//**
-@brief Reads the specified number of bytes from the specified port
+@brief Reads the specified number of bytes from simulation port
 
 @param[in]  fd            - port fd
 @param[in]  bytes_to_read - The number of bytes to read
@@ -489,7 +554,7 @@ BOOL dg_loop_write_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_write, UINT8* dat
 @note
  - The read is synchronous, use select/port before read
 *//*==============================================================================================*/
-BOOL dg_loop_read_impl(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_read, UINT8* data)
+BOOL dg_loop_read_sim(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_read, UINT8* data)
 {
     BOOL           is_success         = TRUE;
     int            total_bytes_read   = 0;
