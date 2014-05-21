@@ -218,7 +218,7 @@ BOOL DG_CMN_DRV_PSU_set_cfg(DG_CMN_DRV_PSU_SLOT_T slot, DG_CMN_DRV_PSU_CFG_T cfg
     }
     else if (!DG_CMN_DRV_CPLD_set(DG_CMN_DRV_CPLD_CB,
                                   CPLD_PSU_PWR_CTL_EN,
-                                  value | (~CPLD_PSU_PWR_EN_MASK)))
+                                  value | CPLD_PSU_PWR_EN_MASK))
     {
         DG_DBG_ERROR("can't set PSU enable register");
     }
