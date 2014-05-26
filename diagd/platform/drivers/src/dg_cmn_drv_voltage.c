@@ -12,6 +12,7 @@
 #include "dg_handler_inc.h"
 #include "dg_drv_util.h"
 #include "dg_cmn_drv_voltage.h"
+#include "dg_cmn_drv_cpld.h"
 #include "dg_cmn_drv_i2c.h"
 
 
@@ -32,6 +33,9 @@ const float DG_CMN_DRV_VOLTAGE_BASE = 2.5 / 255;   /** the base value of the vol
 /*==================================================================================================
                                            LOCAL MACROS
 ==================================================================================================*/
+#define CPLD_PWR_CTL_EN         0x0D
+#define CPLD_PWR_MARGIN_EN_MASK 0x10
+#define CPLD_PWR_MARGIN_CTL     0x12
 
 /*==================================================================================================
                             LOCAL TYPEDEFS (STRUCTURES, UNIONS, ENUMS)
@@ -155,11 +159,26 @@ BOOL DG_CMN_DRV_VOLTAGE_get(DG_CMN_DRV_VOLTAGE_CHIP_T    chip,
 *//*==============================================================================================*/
 BOOL DG_CMN_DRV_VOLTAGE_set(DG_CMN_DRV_VOLTAGE_LEVEL_T level)
 {
-    BOOL ret = FALSE;
+    BOOL                    ret = FALSE;
+    DG_CMN_DRV_CPLD_VALUE_T value;
 
     if (level > DG_CMN_DRV_VOLTAGE_LEVEL_MAX)
     {
         DG_DRV_UTIL_set_error_string("VOLTAGE level is not valid. level=%d", level);
+    }
+    else if (!DG_CMN_DRV_CPLD_get(DG_CMN_DRV_CPLD_CB, CPLD_PWR_CTL_EN, &value))
+    {
+        DG_DBG_ERROR("can't get PWR enable register");
+    }
+    else if (!DG_CMN_DRV_CPLD_set(DG_CMN_DRV_CPLD_CB,
+                                  CPLD_PWR_CTL_EN,
+                                  value | CPLD_PWR_MARGIN_EN_MASK))
+    {
+        DG_DBG_ERROR("can't set PWR enable register");
+    }
+    else if (!DG_CMN_DRV_CPLD_set(DG_CMN_DRV_CPLD_CB, CPLD_PWR_MARGIN_CTL, level))
+    {
+        DG_DBG_ERROR("can't set power margin register");
     }
     else
     {
