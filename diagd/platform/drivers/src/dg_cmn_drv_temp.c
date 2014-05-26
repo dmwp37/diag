@@ -9,6 +9,7 @@
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
+#include <stdio.h>
 #include <stdlib.h>
 #include <linux/i2c-dev.h>
 #include <unistd.h>
@@ -83,6 +84,10 @@ static BOOL dg_cmn_drv_temp_cpu(DG_CMN_DRV_I2C_BUS_T  bus,
                                 DG_CMN_DRV_I2C_ADDR_T dev_addr,
                                 float*                temp);
 
+static BOOL dg_cmn_drv_temp_pch(DG_CMN_DRV_I2C_BUS_T  bus,
+                                DG_CMN_DRV_I2C_ADDR_T dev_addr,
+                                float*                temp);
+
 /*==================================================================================================
                                          GLOBAL VARIABLES
 ==================================================================================================*/
@@ -98,7 +103,7 @@ static DG_CMN_DRV_TEMP_INFO_T dg_cmn_drv_temp_info[] =
     [DG_CMN_DRV_TEMP_FEB_1] = { DG_CMN_DRV_I2C_MUX_FEB,  0x4e, dg_cmn_drv_temp_tmp435_local },
     [DG_CMN_DRV_TEMP_FEB_2] = { DG_CMN_DRV_I2C_MUX_FEB,  0x4d, dg_cmn_drv_temp_tmp435_local },
     [DG_CMN_DRV_TEMP_CPU]   = { DG_CMN_DRV_I2C_MUX_CPU,  0xff, dg_cmn_drv_temp_cpu },
-    [DG_CMN_DRV_TEMP_PCH]   = { DG_CMN_DRV_I2C_MUX_CPU,  0xff, NULL },
+    [DG_CMN_DRV_TEMP_PCH]   = { DG_CMN_DRV_I2C_MUX_CPU,  0xff, dg_cmn_drv_temp_pch },
     [DG_CMN_DRV_TEMP_PSU_0] = { DG_CMN_DRV_I2C_MUX_PSU0, 0x58, dg_cmn_drv_temp_psu },
     [DG_CMN_DRV_TEMP_PSU_1] = { DG_CMN_DRV_I2C_MUX_PSU1, 0x58, dg_cmn_drv_temp_psu },
     [DG_CMN_DRV_TEMP_WTB_1] = { DG_CMN_DRV_I2C_MUX_WTB1, 0x4c, dg_cmn_drv_temp_tmp435_local },
@@ -311,6 +316,53 @@ BOOL dg_cmn_drv_temp_cpu(DG_CMN_DRV_I2C_BUS_T  bus,
             }
             free(p_out);
         }
+    }
+
+    return ret;
+}
+
+/*=============================================================================================*//**
+@brief Get temperature from PCH
+
+@param[in]  bus      - NOT USED
+@param[in]  dev_addr - NOT USED
+@param[out] temp     - The temperature from the sensor
+@note
+- The command depends on the kernel module coretemp. So please confirm with "lsmod |grep coretemp".
+*//*==============================================================================================*/
+BOOL dg_cmn_drv_temp_pch(DG_CMN_DRV_I2C_BUS_T  bus,
+                         DG_CMN_DRV_I2C_ADDR_T dev_addr,
+                         float*                temp)
+{
+    BOOL  ret      = FALSE;
+    char* filename = "/sys/bus/pci/devices/0000:00:1f.6/config";
+    FILE* fp;
+    UINT8 val;
+
+    DG_COMPILE_UNUSED(bus);
+    DG_COMPILE_UNUSED(dev_addr);
+
+    if ((fp = fopen(filename, "r")) == NULL)
+    {
+        DG_DBG_ERROR("can not open %s. errno=%d(%m)", filename, errno);
+    }
+    else if (fseek(fp, 0xa8, SEEK_SET) != 0)
+    {
+        DG_DBG_ERROR("fseek %s fail! errno=%d(%m)", filename, errno);
+    }
+    else if (fread(&val, 1, 1, fp) != 1)
+    {
+        DG_DBG_ERROR("fread %s fail!. errno=%d(%m)", filename, errno);
+    }
+    else
+    {
+        *temp = val * 0.5 - 50;
+        ret   = TRUE;
+    }
+
+    if (fp != NULL)
+    {
+        fclose(fp);
     }
 
     return ret;
