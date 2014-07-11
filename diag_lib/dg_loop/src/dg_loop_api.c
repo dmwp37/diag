@@ -126,47 +126,69 @@ static DG_LOOP_PORT_FD_T dg_loop_port_fd[DG_LOOP_PORT_NUM] =
 *//*==============================================================================================*/
 int DG_LOOP_check_port(DG_LOOP_PORT_T port)
 {
-    const UINT8 base = __COUNTER__ + 1;
-
-    static UINT8 port_index_map[] =
+    /* port index map */
+    enum
     {
-        [DG_LOOP_PORT_MGT]    = __COUNTER__,
-        [DG_LOOP_PORT_HA]     = __COUNTER__,
-        [DG_LOOP_PORT_WTB0_1] = __COUNTER__,
-        [DG_LOOP_PORT_WTB0_2] = __COUNTER__,
-        [DG_LOOP_PORT_WTB1_1] = __COUNTER__,
-        [DG_LOOP_PORT_WTB1_2] = __COUNTER__,
-        [DG_LOOP_PORT_GE_0]   = __COUNTER__,
-        [DG_LOOP_PORT_GE_1]   = __COUNTER__,
-        [DG_LOOP_PORT_GE_2]   = __COUNTER__,
-        [DG_LOOP_PORT_GE_3]   = __COUNTER__,
-        [DG_LOOP_PORT_GE_4]   = __COUNTER__,
-        [DG_LOOP_PORT_GE_5]   = __COUNTER__,
-        [DG_LOOP_PORT_GE_6]   = __COUNTER__,
-        [DG_LOOP_PORT_GE_7]   = __COUNTER__,
-        [DG_LOOP_PORT_GE_8]   = __COUNTER__,
-        [DG_LOOP_PORT_GE_9]   = __COUNTER__,
-        [DG_LOOP_PORT_GE_10]  = __COUNTER__,
-        [DG_LOOP_PORT_GE_11]  = __COUNTER__,
-        [DG_LOOP_PORT_SFP_0]  = __COUNTER__,
-        [DG_LOOP_PORT_SFP_1]  = __COUNTER__,
-        [DG_LOOP_PORT_SFP_2]  = __COUNTER__,
-        [DG_LOOP_PORT_SFP_3]  = __COUNTER__,
-        [DG_LOOP_PORT_10GE_0] = __COUNTER__,
-        [DG_LOOP_PORT_10GE_1] = __COUNTER__,
-        [DG_LOOP_PORT_10GE_2] = __COUNTER__,
-        [DG_LOOP_PORT_10GE_3] = __COUNTER__,
+        DG_LOOP_INDEX_MGT = 0,
+        DG_LOOP_INDEX_HA,
+        DG_LOOP_INDEX_WTB0_1,
+        DG_LOOP_INDEX_WTB0_2,
+        DG_LOOP_INDEX_WTB1_1,
+        DG_LOOP_INDEX_WTB1_2,
+        DG_LOOP_INDEX_GE_0,
+        DG_LOOP_INDEX_GE_1,
+        DG_LOOP_INDEX_GE_2,
+        DG_LOOP_INDEX_GE_3,
+        DG_LOOP_INDEX_GE_4,
+        DG_LOOP_INDEX_GE_5,
+        DG_LOOP_INDEX_GE_6,
+        DG_LOOP_INDEX_GE_7,
+        DG_LOOP_INDEX_GE_8,
+        DG_LOOP_INDEX_GE_9,
+        DG_LOOP_INDEX_GE_10,
+        DG_LOOP_INDEX_GE_11,
+        DG_LOOP_INDEX_SFP_0,
+        DG_LOOP_INDEX_SFP_1,
+        DG_LOOP_INDEX_SFP_2,
+        DG_LOOP_INDEX_SFP_3,
+        DG_LOOP_INDEX_10GE_0,
+        DG_LOOP_INDEX_10GE_1,
+        DG_LOOP_INDEX_10GE_2,
+        DG_LOOP_INDEX_10GE_3,
     };
 
-    if (port < DG_ARRAY_SIZE(port_index_map))
+#define INDEX_MAPPER(x) case DG_LOOP_PORT_ ## x: \
+    return DG_LOOP_INDEX_ ## x
+    switch (port)
     {
-        int index = port_index_map[port];
-
-        if (index > 0)
-        {
-            return index - base;
-        }
+        INDEX_MAPPER(MGT);
+        INDEX_MAPPER(HA);
+        INDEX_MAPPER(WTB0_1);
+        INDEX_MAPPER(WTB0_2);
+        INDEX_MAPPER(WTB1_1);
+        INDEX_MAPPER(WTB1_2);
+        INDEX_MAPPER(GE_0);
+        INDEX_MAPPER(GE_1);
+        INDEX_MAPPER(GE_2);
+        INDEX_MAPPER(GE_3);
+        INDEX_MAPPER(GE_4);
+        INDEX_MAPPER(GE_5);
+        INDEX_MAPPER(GE_6);
+        INDEX_MAPPER(GE_7);
+        INDEX_MAPPER(GE_8);
+        INDEX_MAPPER(GE_9);
+        INDEX_MAPPER(GE_10);
+        INDEX_MAPPER(GE_11);
+        INDEX_MAPPER(SFP_0);
+        INDEX_MAPPER(SFP_1);
+        INDEX_MAPPER(SFP_2);
+        INDEX_MAPPER(SFP_3);
+        INDEX_MAPPER(10GE_0);
+        INDEX_MAPPER(10GE_1);
+        INDEX_MAPPER(10GE_2);
+        INDEX_MAPPER(10GE_3);
     }
+#undef INDEX_MAPPER
 
     return -1;
 }

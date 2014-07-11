@@ -41,6 +41,7 @@
 static void* dg_loop_send_thread(void* arg);
 static void* dg_loop_recv_thread(void* arg);
 static BOOL  dg_loop_check_recv_data(UINT8* buf, UINT32 size, UINT8 pattern);
+static int   wait_sem(sem_t* sem, int time_out);
 
 /*==================================================================================================
                                          GLOBAL VARIABLES
@@ -86,21 +87,15 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
         return FALSE;
     }
 
-    if (pthread_cond_init(&test->send_cond, NULL) != 0)
+    if (sem_init(&test->send_sem, 0, 0) != 0)
     {
-        DG_DBG_set_err_string("can't init send condtion, errno=%d(%m)", errno);
+        DG_DBG_set_err_string("can't init send semaphore, errno=%d(%m)", errno);
         return FALSE;
     }
 
-    if (pthread_cond_init(&test->recv_cond, NULL) != 0)
+    if (sem_init(&test->recv_sem, 0, DG_LOOP_CACHE_COUNT_MAX) != 0)
     {
         DG_DBG_set_err_string("can't init recv condtion, errno=%d(%m)", errno);
-        return FALSE;
-    }
-
-    if (pthread_mutex_init(&test->mutex, NULL) != 0)
-    {
-        DG_DBG_set_err_string("can't init mutex, errno=%d(%m)", errno);
         return FALSE;
     }
 
@@ -206,9 +201,8 @@ void DG_LOOP_wait_test(DG_LOOP_TEST_T* test)
         pthread_join(test->recv_thread, NULL);
     }
 
-    pthread_mutex_destroy(&test->mutex);
-    pthread_cond_destroy(&test->send_cond);
-    pthread_cond_destroy(&test->recv_cond);
+    sem_destroy(&test->send_sem);
+    sem_destroy(&test->recv_sem);
 }
 
 /*==================================================================================================
@@ -252,22 +246,9 @@ void* dg_loop_send_thread(void* arg)
 
     while (test->b_run)
     {
-        BOOL b_send = TRUE;
-        DG_LOOP_MUTEX_LOCK(&test->mutex);
-        if (test->count >= DG_LOOP_CACHE_COUNT_MAX)
+        if (wait_sem(&test->recv_sem, 2000) < 0)
         {
-            /* no data to send */
-            pthread_cond_signal(&test->recv_cond);
-            if (pthread_cond_wait(&test->send_cond, &test->mutex) != 0)
-            {
-                DG_DBG_ERROR("Error waiting on send condition, errno=%d(%m)", errno);
-                b_send = FALSE;
-            }
-        }
-        DG_LOOP_MUTEX_UNLOCK(&test->mutex);
-
-        if (!b_send)
-        {
+            DG_DBG_ERROR("Error waiting on recv semaphore, errno=%d(%m)", errno);
             continue;
         }
 
@@ -294,10 +275,7 @@ void* dg_loop_send_thread(void* arg)
         else
         {
             result->total_send++;
-            DG_LOOP_MUTEX_LOCK(&test->mutex);
-            test->count++;
-            pthread_cond_signal(&test->recv_cond);
-            DG_LOOP_MUTEX_UNLOCK(&test->mutex);
+            sem_post(&test->send_sem);
         }
     }
 
@@ -312,10 +290,6 @@ send_finish:
     test->b_run = FALSE;
     /* tell the receive thread to stop */
     test->b_recv = FALSE;
-
-    DG_LOOP_MUTEX_LOCK(&test->mutex);
-    pthread_cond_signal(&test->recv_cond);
-    DG_LOOP_MUTEX_UNLOCK(&test->mutex);
 
     DG_DBG_TRACE("leave send thread: %p", (void*)pthread_self());
 
@@ -335,6 +309,7 @@ void* dg_loop_recv_thread(void* arg)
     DG_LOOP_TEST_STATISTIC_T* result = &test->result;
 
     int    fd;
+    int    send_cout    = 0;
     int    number       = test->number;
     int    size         = test->size;
     UINT8* recv_buf     = NULL;
@@ -356,37 +331,13 @@ void* dg_loop_recv_thread(void* arg)
         goto recv_finish;
     }
 
-    while ((test->count > 0) || test->b_recv)
+    while (test->b_recv || send_cout > 0)
     {
-        BOOL b_recv = TRUE;
-        DG_LOOP_MUTEX_LOCK(&test->mutex);
-        if (test->count > 0)
+        int status = wait_sem(&test->send_sem, 500);
+        sem_getvalue(&test->send_sem, &send_cout);
+        if (status < 0)
         {
-            /* we have data to recv */
-        }
-        else if (test->b_recv)
-        {
-            pthread_cond_signal(&test->send_cond);
-            /* no data to recv */
-            if (pthread_cond_wait(&test->recv_cond, &test->mutex) != 0)
-            {
-                DG_DBG_ERROR("Error waiting on recv condition, errno=%d(%m)", errno);
-                b_recv = FALSE;
-            }
-
-            if (test->count == 0)
-            {
-                b_recv = FALSE;
-            }
-        }
-        else
-        {
-            b_recv = FALSE;
-        }
-        DG_LOOP_MUTEX_UNLOCK(&test->mutex);
-
-        if (!b_recv)
-        {
+            /* DG_DBG_ERROR("Error waiting on send semaphore, errno=%d(%m)", errno); */
             continue;
         }
 
@@ -409,21 +360,11 @@ void* dg_loop_recv_thread(void* arg)
 
         if (!DG_LOOP_recv(fd, recv_buf, size))
         {
-            result->fail_recv++;
-
             /* if read time out we consider there is no data */
-            DG_LOOP_MUTEX_LOCK(&test->mutex);
-            test->count--;
-            pthread_cond_signal(&test->send_cond);
-            DG_LOOP_MUTEX_UNLOCK(&test->mutex);
+            result->fail_recv++;
         }
         else
         {
-            DG_LOOP_MUTEX_LOCK(&test->mutex);
-            test->count--;
-            pthread_cond_signal(&test->send_cond);
-            DG_LOOP_MUTEX_UNLOCK(&test->mutex);
-
             /* verify the data */
             if (!dg_loop_check_recv_data(recv_buf, size, test->pattern))
             {
@@ -432,6 +373,8 @@ void* dg_loop_recv_thread(void* arg)
             }
             result->total_recv++;
         }
+
+        sem_post(&test->recv_sem);
     }
 
 recv_finish:
@@ -469,6 +412,54 @@ BOOL dg_loop_check_recv_data(UINT8* buf, UINT32 size, UINT8 pattern)
 
     return v == 0;
 }
+
+/*=============================================================================================*//**
+@brief Wait the semaphore for specified time
+
+@param[in] sem     - the pointer of semaphore
+@param[in] timeout - timeout value to wait in ms
+
+@return 0 for success
+
+@note
+ - if timeout is 0, no wait
+ - -1, wait for ever
+*//*==============================================================================================*/
+int wait_sem(sem_t* sem, int time_out)
+{
+    int status = 0;
+
+    if (time_out < 0)
+    {
+        status = sem_wait(sem);
+    }
+    else if (time_out == 0)
+    {
+        status = sem_trywait(sem);
+    }
+    else
+    {
+        struct timespec timeout_time;
+
+        if (clock_gettime(CLOCK_REALTIME, &timeout_time) != 0)
+        {
+            DG_DBG_ERROR("Failed to call clock_gettime(), errno=%d(%m)", errno);
+            return -1;
+        }
+        else
+        {
+            /* Add the timeout time to the time of day to get absolute timeout time */
+            timeout_time.tv_sec  += time_out / 1000;
+            timeout_time.tv_nsec += (time_out % 1000) * 1000000;
+            timeout_time.tv_sec  += timeout_time.tv_nsec / 1000000000;
+            timeout_time.tv_nsec %= 1000000000;
+        }
+        status = sem_timedwait(sem, &timeout_time);
+    }
+
+    return status;
+}
+
 
 /** @} */
 

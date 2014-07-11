@@ -466,7 +466,7 @@ void* dg_client_comm_diag_handler_exec(void* diag_void)
         }
     }
     pthread_mutex_unlock(&(diag->delete_mutex));
-    DG_DBG_TRACE("Delete DIAG request for DIAG opcode 0x0%04x", diag->header.opcode);
+    DG_DBG_TRACE("Delete DIAG request for DIAG opcode 0x%04x", diag->header.opcode);
     DG_ENGINE_UTIL_free_diag_req(diag);
 
     return NULL;

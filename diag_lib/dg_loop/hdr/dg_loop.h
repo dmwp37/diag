@@ -12,6 +12,7 @@
                                            INCLUDE FILES
 ==================================================================================================*/
 #include <pthread.h>
+#include <semaphore.h>
 
 /** @addtogroup libdg_loop
 @{
@@ -112,14 +113,12 @@ typedef struct
     int                      number;      /* [in]  - how many times to send/recv  */
     DG_LOOP_TEST_STATISTIC_T result;      /* [out] - test result                  */
     /* private sector */
-    pthread_t       send_thread; /* [pri] - send thread        */
-    pthread_t       recv_thread; /* [pri] - recv thread        */
-    BOOL            b_run;       /* [pri] - thread run control */
-    BOOL            b_recv;      /* [pri] - recv run control   */
-    int             count;       /* [pri] - packet to be recv  */
-    pthread_mutex_t mutex;       /* [pri] - count mutex        */
-    pthread_cond_t  send_cond;   /* [pri] - send condition     */
-    pthread_cond_t  recv_cond;   /* [pri] - recv condition     */
+    pthread_t send_thread; /* [pri] - send thread        */
+    pthread_t recv_thread; /* [pri] - recv thread        */
+    BOOL      b_run;       /* [pri] - thread run control */
+    BOOL      b_recv;      /* [pri] - recv run control   */
+    sem_t     send_sem;    /* [pri] - send semaphore     */
+    sem_t     recv_sem;    /* [pri] - recv semaphore     */
 } DG_LOOP_TEST_T;
 
 /*==================================================================================================
