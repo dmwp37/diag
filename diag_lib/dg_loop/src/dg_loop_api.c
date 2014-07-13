@@ -134,6 +134,8 @@ int DG_LOOP_get_port(const char* name)
         {
             return port;
         }
+
+        port++;
     }
 
     return -1;

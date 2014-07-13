@@ -104,19 +104,19 @@ BOOL DG_LOOP_start_test(DG_LOOP_TEST_T* test)
 
     if (pthread_create(&test->recv_thread, NULL, dg_loop_recv_thread, test) != 0)
     {
-        DG_DBG_ERROR("failed to start recv thread, rx_port=0x%02x, errno=%d(%m)",
-                     test->rx_port, errno);
+        DG_DBG_ERROR("failed to start recv thread, rx_port=%s, errno=%d(%m)",
+                     DG_LOOP_port_name(test->rx_port), errno);
     }
     else if (pthread_create(&test->send_thread, NULL, dg_loop_send_thread, test) != 0)
     {
-        DG_DBG_ERROR("failed to start send thread, tx_port=0x%02x, errno=%d(%m)",
-                     test->tx_port, errno);
+        DG_DBG_ERROR("failed to start send thread, tx_port=%s, errno=%d(%m)",
+                     DG_LOOP_port_name(test->tx_port), errno);
     }
     else
     {
         ret = TRUE;
-        DG_DBG_TRACE("Successfully create send/recv thread pair, tx_port=0x%02x, tx_port=0x%02x",
-                     test->tx_port, test->rx_port);
+        DG_DBG_TRACE("Successfully create send/recv thread pair, tx_port=%s, tx_port=%s",
+                     DG_LOOP_port_name(test->tx_port), DG_LOOP_port_name(test->rx_port));
     }
 
     /* let the send/recv thread run first */
@@ -231,7 +231,8 @@ void* dg_loop_send_thread(void* arg)
     /* open the port for sending data */
     if ((fd = DG_LOOP_open(test->tx_port)) < 0)
     {
-        DG_DBG_ERROR("failed to open send port, tx_port=0x%02x", test->tx_port);
+        DG_DBG_ERROR("failed to open send port, tx_port=%s",
+                     DG_LOOP_port_name(test->tx_port));
         goto send_finish;
     }
 
@@ -320,7 +321,8 @@ void* dg_loop_recv_thread(void* arg)
     /* open the port for receiving data */
     if ((fd = DG_LOOP_open(test->rx_port)) < 0)
     {
-        DG_DBG_ERROR("failed to open recv port, rx_port=0x%02x", test->rx_port);
+        DG_DBG_ERROR("failed to open recv port, rx_port=%s",
+                     DG_LOOP_port_name(test->rx_port));
         goto recv_finish;
     }
 

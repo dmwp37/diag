@@ -449,11 +449,7 @@ error_t dg_loop_child_arg_parse(int key, char* arg, struct argp_state* state)
     switch (key)
     {
     case 'x':
-        if (!dg_loop_get_int_arg(arg, &value))
-        {
-            return EINVAL;
-        }
-        else if (value >= DG_LOOP_PORT_NUM)
+        if ((value = DG_LOOP_get_port(arg)) < 0)
         {
             printf("invalid tx_port: %s\n", arg);
             return EINVAL;
@@ -465,11 +461,7 @@ error_t dg_loop_child_arg_parse(int key, char* arg, struct argp_state* state)
         break;
 
     case 'r':
-        if (!dg_loop_get_int_arg(arg, &value))
-        {
-            return EINVAL;
-        }
-        else if (value >= DG_LOOP_PORT_NUM)
+        if ((value = DG_LOOP_get_port(arg)) < 0)
         {
             printf("invalid rx_port: %s\n", arg);
             return EINVAL;
@@ -674,6 +666,8 @@ DG_LOOP_CONFIG_T* dg_loop_read_config(const char* file)
     char  buf[DG_LOOP_CFG_MAX_BUF_SIZE];
     int   line  = 1;
     int   index = 0;
+    char  tx_port_name[16];
+    char  rx_port_name[16];
     int   tx_port;
     int   rx_port;
     int   size;
@@ -696,19 +690,19 @@ DG_LOOP_CONFIG_T* dg_loop_read_config(const char* file)
 
     while (fgets(buf, DG_LOOP_CFG_MAX_BUF_SIZE, fp) != NULL)
     {
-        if (sscanf(buf, "%x%x%d%x", &tx_port, &rx_port, &size, &pattern) == 4)
+        if (sscanf(buf, "%6s%6s%d%x", tx_port_name, rx_port_name, &size, &pattern) == 4)
         {
-            DG_DBG_TRACE("got %d cfg:   port1=0x%02x port2=0x%02x size=%4d pattern=0x%02x\n",
-                         index, tx_port, tx_port, size, pattern);
+            DG_DBG_TRACE("got %d cfg:   port1=%s port2=%s size=%4d pattern=0x%02x\n",
+                         index, tx_port_name, rx_port_name, size, pattern);
 
-            if (tx_port >= DG_LOOP_PORT_NUM)
+            if ((tx_port = DG_LOOP_get_port(tx_port_name)) < 0)
             {
                 printf("line %d: port1 invalid\n", line);
                 ret = NULL;
                 break;
             }
 
-            if (rx_port >= DG_LOOP_PORT_NUM)
+            if ((rx_port = DG_LOOP_get_port(rx_port_name)) < 0)
             {
                 printf("line %d: port2 invalid\n", line);
                 ret = NULL;
@@ -741,7 +735,7 @@ DG_LOOP_CONFIG_T* dg_loop_read_config(const char* file)
 
     if (index == 0)
     {
-        printf("%s contains no valid configuration!\n", file);
+        printf("%s contains invalid configuration!\n", file);
         ret = NULL;
     }
 
