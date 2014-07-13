@@ -47,7 +47,6 @@ extern DG_LOOP_MUTEX_UNLOCK_FUN_T dg_loop_mutex_unlock;
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
-extern DG_LOOP_PORT_T dg_loop_index_to_port(int index);
 
 #ifdef __cplusplus
 }

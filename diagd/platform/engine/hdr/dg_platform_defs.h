@@ -35,7 +35,7 @@ extern "C" {
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
 /* Do not redefine if we are already define those types */
-typedef unsigned char      UINT8;     /**< Unsigned 8 bit integer */
+git typedef unsigned char      UINT8;     /**< Unsigned 8 bit integer */
 typedef signed char        INT8;      /**< Signed 8 bit integer */
 typedef unsigned short int UINT16;    /**< Unsigned 16 bit integer */
 typedef signed short int   INT16;     /**< Signed 16 bit integer */

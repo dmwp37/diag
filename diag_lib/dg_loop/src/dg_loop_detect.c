@@ -52,32 +52,32 @@ static BOOL  dg_loop_is_detect_packet(UINT8* buf, UINT8* tx_port, UINT8* rx_port
 ==================================================================================================*/
 static DG_LOOP_PORT_PAIR_T dg_loop_detect_info[DG_LOOP_PORT_NUM] =
 {
-    { DG_LOOP_PORT_MGT,    0xFF },
-    { DG_LOOP_PORT_HA,     0xFF },
-    { DG_LOOP_PORT_WTB0_1, 0xFF },
-    { DG_LOOP_PORT_WTB0_2, 0xFF },
-    { DG_LOOP_PORT_WTB1_1, 0xFF },
-    { DG_LOOP_PORT_WTB1_2, 0xFF },
-    { DG_LOOP_PORT_GE_0,   0xFF },
-    { DG_LOOP_PORT_GE_1,   0xFF },
-    { DG_LOOP_PORT_GE_2,   0xFF },
-    { DG_LOOP_PORT_GE_3,   0xFF },
-    { DG_LOOP_PORT_GE_4,   0xFF },
-    { DG_LOOP_PORT_GE_5,   0xFF },
-    { DG_LOOP_PORT_GE_6,   0xFF },
-    { DG_LOOP_PORT_GE_7,   0xFF },
-    { DG_LOOP_PORT_GE_8,   0xFF },
-    { DG_LOOP_PORT_GE_9,   0xFF },
-    { DG_LOOP_PORT_GE_10,  0xFF },
-    { DG_LOOP_PORT_GE_11,  0xFF },
-    { DG_LOOP_PORT_SFP_0,  0xFF },
-    { DG_LOOP_PORT_SFP_1,  0xFF },
-    { DG_LOOP_PORT_SFP_2,  0xFF },
-    { DG_LOOP_PORT_SFP_3,  0xFF },
-    { DG_LOOP_PORT_10GE_0, 0xFF },
-    { DG_LOOP_PORT_10GE_1, 0xFF },
-    { DG_LOOP_PORT_10GE_2, 0xFF },
-    { DG_LOOP_PORT_10GE_3, 0xFF }
+    { DG_LOOP_PORT_mgt,   0xFF },
+    { DG_LOOP_PORT_ha,    0xFF },
+    { DG_LOOP_PORT_wtb0,  0xFF },
+    { DG_LOOP_PORT_ge_16, 0xFF },
+    { DG_LOOP_PORT_wtb1,  0xFF },
+    { DG_LOOP_PORT_ge_24, 0xFF },
+    { DG_LOOP_PORT_ge_0,  0xFF },
+    { DG_LOOP_PORT_ge_1,  0xFF },
+    { DG_LOOP_PORT_ge_2,  0xFF },
+    { DG_LOOP_PORT_ge_3,  0xFF },
+    { DG_LOOP_PORT_ge_4,  0xFF },
+    { DG_LOOP_PORT_ge_5,  0xFF },
+    { DG_LOOP_PORT_ge_6,  0xFF },
+    { DG_LOOP_PORT_ge_7,  0xFF },
+    { DG_LOOP_PORT_ge_8,  0xFF },
+    { DG_LOOP_PORT_ge_9,  0xFF },
+    { DG_LOOP_PORT_ge_10, 0xFF },
+    { DG_LOOP_PORT_ge_11, 0xFF },
+    { DG_LOOP_PORT_ge_12, 0xFF },
+    { DG_LOOP_PORT_ge_13, 0xFF },
+    { DG_LOOP_PORT_ge_14, 0xFF },
+    { DG_LOOP_PORT_ge_15, 0xFF },
+    { DG_LOOP_PORT_xe_0,  0xFF },
+    { DG_LOOP_PORT_xe_1,  0xFF },
+    { DG_LOOP_PORT_xe_2,  0xFF },
+    { DG_LOOP_PORT_xe_3,  0xFF }
 };
 
 /*==================================================================================================
@@ -92,14 +92,12 @@ static DG_LOOP_PORT_PAIR_T dg_loop_detect_info[DG_LOOP_PORT_NUM] =
 *//*==============================================================================================*/
 DG_LOOP_PORT_PAIR_T* DG_LOOP_auto_detect()
 {
-    int            index;
-    int            fd;
-    int            old_dbg_lvl;
-    DG_LOOP_PORT_T tx_port;
-    DG_LOOP_PORT_T rx_port;
-    UINT8*         packet = malloc(DG_LOOP_DETECT_PACKET_SIZE);
-    UINT8*         p_tx   = packet + DG_LOOP_DETECT_HDR_OFFSET;
-    pthread_t      detect_thread[DG_LOOP_PORT_NUM] = { 0 };
+    int       port;
+    int       fd;
+    int       old_dbg_lvl;
+    UINT8*    packet = malloc(DG_LOOP_DETECT_PACKET_SIZE);
+    UINT8*    p_tx   = packet + DG_LOOP_DETECT_HDR_OFFSET;
+    pthread_t detect_thread[DG_LOOP_PORT_NUM] = { 0 };
 
     if (packet == NULL)
     {
@@ -112,30 +110,27 @@ DG_LOOP_PORT_PAIR_T* DG_LOOP_auto_detect()
     DG_DBG_set_dbg_level(DG_DBG_LVL_DISABLE);
 
     /* start the detection threads */
-    for (index = 0; index < DG_LOOP_PORT_NUM; index++)
+    for (port = 0; port < DG_LOOP_PORT_NUM; port++)
     {
-        rx_port = dg_loop_index_to_port(index);
-        if (pthread_create(&detect_thread[index], NULL,
-                           dg_loop_detect_thread, (void*)(intptr_t)index) != 0)
+        if (pthread_create(&detect_thread[port], NULL,
+                           dg_loop_detect_thread, (void*)(intptr_t)port) != 0)
         {
-            DG_DBG_ERROR("failed to start detect thread, rx_port=0x%02x, errno=%d(%m)",
-                         rx_port, errno);
+            DG_DBG_ERROR("failed to start detect thread, rx_port=0x%02x, errno=%d(%m)", port, errno);
         }
     }
 
     /* send the detection packet */
-    for (index = 0; index < DG_LOOP_PORT_NUM; index++)
+    for (port = 0; port < DG_LOOP_PORT_NUM; port++)
     {
-        tx_port = dg_loop_index_to_port(index);
-        *p_tx   = tx_port;
+        *p_tx = port;
 
-        if ((fd = DG_LOOP_open(tx_port)) < 0)
+        if ((fd = DG_LOOP_open(port)) < 0)
         {
-            DG_DBG_ERROR("failed to open tx port, tx_port=0x%02x", tx_port);
+            DG_DBG_ERROR("failed to open tx port, tx_port=0x%02x", port);
         }
         else if (!DG_LOOP_send(fd, packet, DG_LOOP_DETECT_PACKET_SIZE))
         {
-            DG_DBG_ERROR("failed to send detection packet, tx_port=0x%02x", tx_port);
+            DG_DBG_ERROR("failed to send detection packet, tx_port=0x%02x", port);
         }
 
         if (fd >= 0)
@@ -145,11 +140,11 @@ DG_LOOP_PORT_PAIR_T* DG_LOOP_auto_detect()
     }
 
     /* wait the detection threads */
-    for (index = 0; index < DG_LOOP_PORT_NUM; index++)
+    for (port = 0; port < DG_LOOP_PORT_NUM; port++)
     {
-        if (detect_thread[index] != 0)
+        if (detect_thread[port] != 0)
         {
-            pthread_join(detect_thread[index], NULL);
+            pthread_join(detect_thread[port], NULL);
         }
     }
 
@@ -171,12 +166,11 @@ DG_LOOP_PORT_PAIR_T* DG_LOOP_auto_detect()
 *//*==============================================================================================*/
 void* dg_loop_detect_thread(void* arg)
 {
-    int    index = (int)(intptr_t)arg;
     int    fd;
     UINT32 size     = DG_LOOP_DETECT_PACKET_SIZE;
     UINT8* recv_buf = NULL;
 
-    DG_LOOP_PORT_T m_port = dg_loop_index_to_port(index);
+    DG_LOOP_PORT_T m_port = (DG_LOOP_PORT_T)(intptr_t)arg;
     DG_LOOP_PORT_T tx_port;
     DG_LOOP_PORT_T rx_port = m_port;
 
@@ -212,12 +206,11 @@ void* dg_loop_detect_thread(void* arg)
         }
         else
         {
-            int tx_index = DG_LOOP_check_port(tx_port);
             DG_DBG_TRACE("port 0x%02x recv a valid detection packet", m_port);
             /* save the detection */
-            if (dg_loop_detect_info[tx_index].rx_port == 0xFF)
+            if (dg_loop_detect_info[tx_port].rx_port == 0xFF)
             {
-                dg_loop_detect_info[tx_index].rx_port = m_port;
+                dg_loop_detect_info[tx_port].rx_port = m_port;
             }
         }
     }

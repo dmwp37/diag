@@ -178,10 +178,8 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
     BOOL ret = FALSE;
 
     DG_LOOP_CONFIG_FUNC_T cfg_f = NULL;
-    /* convert port id to index */
-    int index = DG_LOOP_check_port(port);
 
-    if (index < 0)
+    if (port >= DG_LOOP_PORT_NUM)
     {
         DG_DBG_set_err_string("Invalid port selection, port=0x%02x", port);
         return FALSE;
@@ -203,15 +201,15 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
 
     if (cfg == DG_LOOP_CFG_EXTERNAL)
     {
-        cfg_f = dg_loop_cfg_external_func[index][node];
+        cfg_f = dg_loop_cfg_external_func[port][node];
     }
     else if (cfg == DG_LOOP_CFG_INTERNAL)
     {
-        cfg_f = dg_loop_cfg_internal_func[index][node];
+        cfg_f = dg_loop_cfg_internal_func[port][node];
     }
     else
     {
-        cfg_f = dg_loop_cfg_normal_func[index][node];
+        cfg_f = dg_loop_cfg_normal_func[port][node];
     }
 
     if (cfg_f == NULL)
@@ -227,7 +225,7 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
     if (ret)
     {
         /* save the cfg map for reverting */
-        dg_loop_port_cfg[index][node] = cfg;
+        dg_loop_port_cfg[port][node] = cfg;
     }
 
     return ret;
@@ -243,18 +241,16 @@ BOOL DG_LOOP_config(DG_LOOP_PORT_T port, DG_LOOP_NODE_T node, DG_LOOP_CFG_T cfg)
 *//*==============================================================================================*/
 BOOL DG_LOOP_config_all_normal()
 {
-    BOOL           ret = TRUE;
-    int            index;
-    int            node;
-    DG_LOOP_PORT_T port;
+    BOOL ret = TRUE;
+    int  port;
+    int  node;
 
-    for (index = 0; index < DG_LOOP_PORT_NUM; index++)
+    for (port = 0; port < DG_LOOP_PORT_NUM; port++)
     {
         for (node = 0; node < DG_LOOP_NODE_NUM; node++)
         {
-            if (dg_loop_port_cfg[index][node] != DG_LOOP_CFG_NORMAL)
+            if (dg_loop_port_cfg[port][node] != DG_LOOP_CFG_NORMAL)
             {
-                port = dg_loop_index_to_port(index);
                 /* revert back to normal */
                 if (!DG_LOOP_config(port, node, DG_LOOP_CFG_NORMAL))
                 {

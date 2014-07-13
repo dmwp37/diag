@@ -86,32 +86,32 @@ static DG_LOOP_CONFIG_T dg_loop_cfg_end = { 0, 0, 0, 0 };
 
 static DG_LOOP_CONFIG_T dg_loop_cfg[DG_LOOP_PORT_PAIR_MAX + 1] =
 {
-    { DG_LOOP_PORT_MGT,    DG_LOOP_PORT_HA,     1024, 0x5A },
-    { DG_LOOP_PORT_HA,     DG_LOOP_PORT_MGT,    1024, 0xA5 },
-    { DG_LOOP_PORT_WTB0_1, DG_LOOP_PORT_WTB0_2, 1024, 0x5A },
-    { DG_LOOP_PORT_WTB0_2, DG_LOOP_PORT_WTB0_1, 1024, 0xA5 },
-    { DG_LOOP_PORT_WTB1_1, DG_LOOP_PORT_WTB1_2, 1024, 0x5A },
-    { DG_LOOP_PORT_WTB1_2, DG_LOOP_PORT_WTB1_1, 1024, 0xA5 },
-    { DG_LOOP_PORT_GE_0,   DG_LOOP_PORT_GE_1,   1024, 0x5A },
-    { DG_LOOP_PORT_GE_1,   DG_LOOP_PORT_GE_0,   1024, 0xA5 },
-    { DG_LOOP_PORT_GE_2,   DG_LOOP_PORT_GE_3,   1024, 0x5A },
-    { DG_LOOP_PORT_GE_3,   DG_LOOP_PORT_GE_2,   1024, 0xA5 },
-    { DG_LOOP_PORT_GE_4,   DG_LOOP_PORT_GE_5,   1024, 0x5A },
-    { DG_LOOP_PORT_GE_5,   DG_LOOP_PORT_GE_4,   1024, 0xA5 },
-    { DG_LOOP_PORT_GE_6,   DG_LOOP_PORT_GE_7,   1024, 0x5A },
-    { DG_LOOP_PORT_GE_7,   DG_LOOP_PORT_GE_6,   1024, 0xA5 },
-    { DG_LOOP_PORT_GE_8,   DG_LOOP_PORT_GE_9,   1024, 0x5A },
-    { DG_LOOP_PORT_GE_9,   DG_LOOP_PORT_GE_8,   1024, 0xA5 },
-    { DG_LOOP_PORT_GE_10,  DG_LOOP_PORT_GE_11,  1024, 0x5A },
-    { DG_LOOP_PORT_GE_11,  DG_LOOP_PORT_GE_10,  1024, 0xA5 },
-    { DG_LOOP_PORT_SFP_0,  DG_LOOP_PORT_SFP_1,  1024, 0x5A },
-    { DG_LOOP_PORT_SFP_1,  DG_LOOP_PORT_SFP_0,  1024, 0xA5 },
-    { DG_LOOP_PORT_SFP_2,  DG_LOOP_PORT_SFP_3,  1024, 0x5A },
-    { DG_LOOP_PORT_SFP_3,  DG_LOOP_PORT_SFP_2,  1024, 0xA5 },
-    { DG_LOOP_PORT_10GE_0, DG_LOOP_PORT_10GE_1, 1024, 0x5A },
-    { DG_LOOP_PORT_10GE_1, DG_LOOP_PORT_10GE_0, 1024, 0xA5 },
-    { DG_LOOP_PORT_10GE_2, DG_LOOP_PORT_10GE_3, 1024, 0x5A },
-    { DG_LOOP_PORT_10GE_3, DG_LOOP_PORT_10GE_2, 1024, 0xA5 },
+    { DG_LOOP_PORT_mgt,   DG_LOOP_PORT_ha,    1024, 0x5A },
+    { DG_LOOP_PORT_ha,    DG_LOOP_PORT_mgt,   1024, 0xA5 },
+    { DG_LOOP_PORT_wtb0,  DG_LOOP_PORT_ge_16, 1024, 0x5A },
+    { DG_LOOP_PORT_ge_16, DG_LOOP_PORT_wtb0,  1024, 0xA5 },
+    { DG_LOOP_PORT_wtb1,  DG_LOOP_PORT_ge_24, 1024, 0x5A },
+    { DG_LOOP_PORT_ge_24, DG_LOOP_PORT_wtb1,  1024, 0xA5 },
+    { DG_LOOP_PORT_ge_0,  DG_LOOP_PORT_ge_1,  1024, 0x5A },
+    { DG_LOOP_PORT_ge_1,  DG_LOOP_PORT_ge_0,  1024, 0xA5 },
+    { DG_LOOP_PORT_ge_2,  DG_LOOP_PORT_ge_3,  1024, 0x5A },
+    { DG_LOOP_PORT_ge_3,  DG_LOOP_PORT_ge_2,  1024, 0xA5 },
+    { DG_LOOP_PORT_ge_4,  DG_LOOP_PORT_ge_5,  1024, 0x5A },
+    { DG_LOOP_PORT_ge_5,  DG_LOOP_PORT_ge_4,  1024, 0xA5 },
+    { DG_LOOP_PORT_ge_6,  DG_LOOP_PORT_ge_7,  1024, 0x5A },
+    { DG_LOOP_PORT_ge_7,  DG_LOOP_PORT_ge_6,  1024, 0xA5 },
+    { DG_LOOP_PORT_ge_8,  DG_LOOP_PORT_ge_9,  1024, 0x5A },
+    { DG_LOOP_PORT_ge_9,  DG_LOOP_PORT_ge_8,  1024, 0xA5 },
+    { DG_LOOP_PORT_ge_10, DG_LOOP_PORT_ge_11, 1024, 0x5A },
+    { DG_LOOP_PORT_ge_11, DG_LOOP_PORT_ge_10, 1024, 0xA5 },
+    { DG_LOOP_PORT_ge_12, DG_LOOP_PORT_ge_13, 1024, 0x5A },
+    { DG_LOOP_PORT_ge_13, DG_LOOP_PORT_ge_12, 1024, 0xA5 },
+    { DG_LOOP_PORT_ge_14, DG_LOOP_PORT_ge_15, 1024, 0x5A },
+    { DG_LOOP_PORT_ge_15, DG_LOOP_PORT_ge_14, 1024, 0xA5 },
+    { DG_LOOP_PORT_xe_0,  DG_LOOP_PORT_xe_1,  1024, 0x5A },
+    { DG_LOOP_PORT_xe_1,  DG_LOOP_PORT_xe_0,  1024, 0xA5 },
+    { DG_LOOP_PORT_xe_2,  DG_LOOP_PORT_xe_3,  1024, 0x5A },
+    { DG_LOOP_PORT_xe_3,  DG_LOOP_PORT_xe_2,  1024, 0xA5 },
     { 0, 0, 0, 0 }
 };
 
@@ -202,11 +202,13 @@ int main(int argc, char** argv)
             exit(1);
         }
 
-        printf("TX_PORT  = 0x%02x\n"
-               "RX_PORT  = 0x%02x\n"
+        printf("TX_PORT  = %s\n"
+               "RX_PORT  = %s\n"
                "PK_SIZE  = %d\n"
                "PATTERN  = 0x%02x\n\n",
-               dg_loop_args.tx_port, dg_loop_args.rx_port, dg_loop_args.size, dg_loop_args.pattern);
+               DG_LOOP_port_name(dg_loop_args.tx_port),
+               DG_LOOP_port_name(dg_loop_args.rx_port),
+               dg_loop_args.size, dg_loop_args.pattern);
 
         memset(dg_loop_cfg, 0, sizeof(dg_loop_cfg));
         dg_loop_cfg[0].tx_port = dg_loop_args.tx_port;
@@ -246,8 +248,10 @@ int main(int argc, char** argv)
 
         if (!DG_LOOP_start_test(&dg_loop_test[index]))
         {
-            printf("failed to start loopback test tx_port=0x%02x rx_port=0x%02x: %s\n",
-                   p_cfg->tx_port, p_cfg->rx_port, DG_DBG_get_err_string());
+            printf("failed to start loopback test tx_port=%s rx_port=%s: %s\n",
+                   DG_LOOP_port_name(p_cfg->tx_port),
+                   DG_LOOP_port_name(p_cfg->rx_port),
+                   DG_DBG_get_err_string());
             ret = 1;
         }
         index++;
@@ -321,7 +325,8 @@ BOOL dg_loop_prepare_args(int argc, char** argv, DG_LOOP_ARG_T* args)
     char tool_doc[] =
         "\nthis tool is used for diag normal loopback test\n"
         "if no config file set, it will use the detected settings\n"
-        "if no time argument specified, the program will run for ever";
+        "if no time argument specified, the program will run forever\n"
+        "valid ports: mgt, ha, wtb[0-1], ge_[0-15], ge_16, ge_24, xe_[0-3]";
 
     /* The options we understand. */
     struct argp_option dg_options[] =
@@ -448,7 +453,7 @@ error_t dg_loop_child_arg_parse(int key, char* arg, struct argp_state* state)
         {
             return EINVAL;
         }
-        else if (DG_LOOP_check_port((DG_LOOP_PORT_T)value) < 0)
+        else if (value >= DG_LOOP_PORT_NUM)
         {
             printf("invalid tx_port: %s\n", arg);
             return EINVAL;
@@ -464,7 +469,7 @@ error_t dg_loop_child_arg_parse(int key, char* arg, struct argp_state* state)
         {
             return EINVAL;
         }
-        else if (DG_LOOP_check_port((DG_LOOP_PORT_T)value) < 0)
+        else if (value >= DG_LOOP_PORT_NUM)
         {
             printf("invalid rx_port: %s\n", arg);
             return EINVAL;
@@ -570,9 +575,11 @@ void dg_loop_print_result(int time)
     while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
         result = &dg_loop_test[index].result;
-        printf("tx_port=0x%02x, rx_port=0x%02x, ", p_cfg->tx_port, p_cfg->rx_port);
-        printf("total send=%6d ", result->total_send);
-        printf("recv=%6d, ", result->total_recv);
+        printf("tx_port=%-5s  rx_port=%-5s  ",
+               DG_LOOP_port_name(p_cfg->tx_port),
+               DG_LOOP_port_name(p_cfg->rx_port));
+        printf("send=%-8u ", result->total_send);
+        printf("recv=%-8u ", result->total_recv);
 
         if (time == 0)
         {
@@ -588,7 +595,7 @@ void dg_loop_print_result(int time)
             pps = (float)result->total_recv / time / 1000;
             bps = (float)result->total_recv / time * dg_loop_test[index].size * 8 / 1000000;
         }
-        printf("%5.2f Kpps, %6.2f Mbps. ", pps, bps);
+        printf("%5.2f Kpps  %6.2f Mbps ", pps, bps);
 
         if (result->fail_send)
         {
@@ -635,15 +642,16 @@ void dg_loop_dump_config()
     }
 
     printf("#    default normal loop test configuration\n"
-           "# for the port definition please ref diag loop spec\n"
            "#===============================================\n"
-           "#  tx_port  rx_port  packet_size    pattern\n"
+           "#  tx_port  rx_port  packet_size  pattern\n"
            "#===============================================\n");
 
     while (memcmp(p_cfg, &dg_loop_cfg_end, sizeof(dg_loop_cfg_end)) != 0)
     {
-        printf("   0x%02x     0x%02x     %4d           0x%02x\n",
-               p_cfg->tx_port, p_cfg->rx_port, p_cfg->size, p_cfg->pattern);
+        printf("   %-5s    %-5s    %4d         0x%02x\n",
+               DG_LOOP_port_name(p_cfg->tx_port),
+               DG_LOOP_port_name(p_cfg->rx_port),
+               p_cfg->size, p_cfg->pattern);
 
         p_cfg++;
     }
@@ -693,14 +701,14 @@ DG_LOOP_CONFIG_T* dg_loop_read_config(const char* file)
             DG_DBG_TRACE("got %d cfg:   port1=0x%02x port2=0x%02x size=%4d pattern=0x%02x\n",
                          index, tx_port, tx_port, size, pattern);
 
-            if (DG_LOOP_check_port(tx_port) < 0)
+            if (tx_port >= DG_LOOP_PORT_NUM)
             {
                 printf("line %d: port1 invalid\n", line);
                 ret = NULL;
                 break;
             }
 
-            if (DG_LOOP_check_port(rx_port) < 0)
+            if (rx_port >= DG_LOOP_PORT_NUM)
             {
                 printf("line %d: port2 invalid\n", line);
                 ret = NULL;

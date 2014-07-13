@@ -24,7 +24,6 @@ extern "C" {
 /*==================================================================================================
                                               MACROS
 ==================================================================================================*/
-#define DG_LOOP_PORT_NUM        26
 #define DG_LOOP_PACKET_SIZE_MAX 9000
 #define DG_LOOP_PACKET_SIZE_MIN 80
 #define DG_LOOP_RUN_IFINITE     -1
@@ -36,32 +35,33 @@ extern "C" {
 /** loopback path port definition */
 enum
 {
-    DG_LOOP_PORT_MGT    = 0x01, /** MGT Port           */
-    DG_LOOP_PORT_HA     = 0x02, /** HA Port            */
-    DG_LOOP_PORT_WTB0_1 = 0x03, /** WANPIM 0 Port 1    */
-    DG_LOOP_PORT_WTB0_2 = 0x04, /** WANPIM 0 Port 2    */
-    DG_LOOP_PORT_WTB1_1 = 0x05, /** WANPIM 1 Port 1    */
-    DG_LOOP_PORT_WTB1_2 = 0x06, /** WANPIM 1 Port 2    */
-    DG_LOOP_PORT_GE_0   = 0x10, /** GE_RJ45 Port 0     */
-    DG_LOOP_PORT_GE_1   = 0x11, /** GE_RJ45 Port 1     */
-    DG_LOOP_PORT_GE_2   = 0x12, /** GE_RJ45 Port 2     */
-    DG_LOOP_PORT_GE_3   = 0x13, /** GE_RJ45 Port 3     */
-    DG_LOOP_PORT_GE_4   = 0x14, /** GE_RJ45 Port 4     */
-    DG_LOOP_PORT_GE_5   = 0x15, /** GE_RJ45 Port 5     */
-    DG_LOOP_PORT_GE_6   = 0x16, /** GE_RJ45 Port 6     */
-    DG_LOOP_PORT_GE_7   = 0x17, /** GE_RJ45 Port 7     */
-    DG_LOOP_PORT_GE_8   = 0x20, /** GE_RJ45 Port 8     */
-    DG_LOOP_PORT_GE_9   = 0x21, /** GE_RJ45 Port 9     */
-    DG_LOOP_PORT_GE_10  = 0x22, /** GE_RJ45 Port 10    */
-    DG_LOOP_PORT_GE_11  = 0x23, /** GE_RJ45 Port 11    */
-    DG_LOOP_PORT_SFP_0  = 0x24, /** GE_SFP  Port 0     */
-    DG_LOOP_PORT_SFP_1  = 0x25, /** GE_SFP  Port 1     */
-    DG_LOOP_PORT_SFP_2  = 0x26, /** GE_SFP  Port 2     */
-    DG_LOOP_PORT_SFP_3  = 0x27, /** GE_SFP  Port 3     */
-    DG_LOOP_PORT_10GE_0 = 0x30, /** 10GE_SFP+ Port0    */
-    DG_LOOP_PORT_10GE_1 = 0x31, /** 10GE_SFP+ Port1    */
-    DG_LOOP_PORT_10GE_2 = 0x32, /** 10GE_SFP+ Port2    */
-    DG_LOOP_PORT_10GE_3 = 0x33, /** 10GE_SFP+ Port3    */
+    DG_LOOP_PORT_mgt = 0,    /** MGT Port           */
+    DG_LOOP_PORT_ha,         /** HA Port            */
+    DG_LOOP_PORT_wtb0,       /** WANPIM0 Marvell pt */
+    DG_LOOP_PORT_ge_16,      /** WANPIM0 BCM Port   */
+    DG_LOOP_PORT_wtb1,       /** WANPIM0 Marvell Pt */
+    DG_LOOP_PORT_ge_24,      /** WANPIM0 BCM Port   */
+    DG_LOOP_PORT_ge_0,       /** GE_RJ45 Port 0     */
+    DG_LOOP_PORT_ge_1,       /** GE_RJ45 Port 1     */
+    DG_LOOP_PORT_ge_2,       /** GE_RJ45 Port 2     */
+    DG_LOOP_PORT_ge_3,       /** GE_RJ45 Port 3     */
+    DG_LOOP_PORT_ge_4,       /** GE_RJ45 Port 4     */
+    DG_LOOP_PORT_ge_5,       /** GE_RJ45 Port 5     */
+    DG_LOOP_PORT_ge_6,       /** GE_RJ45 Port 6     */
+    DG_LOOP_PORT_ge_7,       /** GE_RJ45 Port 7     */
+    DG_LOOP_PORT_ge_8,       /** GE_RJ45 Port 8     */
+    DG_LOOP_PORT_ge_9,       /** GE_RJ45 Port 9     */
+    DG_LOOP_PORT_ge_10,      /** GE_RJ45 Port 10    */
+    DG_LOOP_PORT_ge_11,      /** GE_RJ45 Port 11    */
+    DG_LOOP_PORT_ge_12,      /** GE_SFP  Port 0     */
+    DG_LOOP_PORT_ge_13,      /** GE_SFP  Port 1     */
+    DG_LOOP_PORT_ge_14,      /** GE_SFP  Port 2     */
+    DG_LOOP_PORT_ge_15,      /** GE_SFP  Port 3     */
+    DG_LOOP_PORT_xe_0,       /** 10GE_SFP+ Port0    */
+    DG_LOOP_PORT_xe_1,       /** 10GE_SFP+ Port1    */
+    DG_LOOP_PORT_xe_2,       /** 10GE_SFP+ Port2    */
+    DG_LOOP_PORT_xe_3,       /** 10GE_SFP+ Port3    */
+    DG_LOOP_PORT_NUM
 };
 typedef UINT8 DG_LOOP_PORT_T;
 
@@ -128,19 +128,23 @@ typedef struct
 /*==================================================================================================
                                         FUNCTION PROTOTYPES
 ==================================================================================================*/
+/*=============================================================================================*//**
+@brief get the port number
+
+@param[in]  name - the port name
+
+@return -1 if invalid, otherwise the port number
+*//*==============================================================================================*/
+int DG_LOOP_get_port(const char* name);
 
 /*=============================================================================================*//**
-@brief check the validation of the port
+@brief get the port name
 
-@param[in]  port - the port number according to definition
+@param[in]  port - the port
 
-@return -1 if invalid, otherwise the internal index start from 0
-
-@note
-- index is 0, 1 ... DG_LOOP_PORT_NUM-1
-- use this function to check if the port is valid
+@return NULL if invalid, otherwise the name of the port
 *//*==============================================================================================*/
-int DG_LOOP_check_port(DG_LOOP_PORT_T port);
+const char* DG_LOOP_port_name(DG_LOOP_PORT_T port);
 
 /*=============================================================================================*//**
 @brief connect two ports

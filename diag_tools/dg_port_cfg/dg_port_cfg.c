@@ -72,30 +72,6 @@ static const char* dg_port_cfg_mode_name[] =
     [DG_LOOP_CFG_EXTERNAL] = "external"
 };
 
-static DG_LOOP_PORT_T dg_port_cfg_data_ports[] =
-{
-    DG_LOOP_PORT_GE_0,
-    DG_LOOP_PORT_GE_1,
-    DG_LOOP_PORT_GE_2,
-    DG_LOOP_PORT_GE_3,
-    DG_LOOP_PORT_GE_4,
-    DG_LOOP_PORT_GE_5,
-    DG_LOOP_PORT_GE_6,
-    DG_LOOP_PORT_GE_7,
-    DG_LOOP_PORT_GE_8,
-    DG_LOOP_PORT_GE_9,
-    DG_LOOP_PORT_GE_10,
-    DG_LOOP_PORT_GE_11,
-    DG_LOOP_PORT_SFP_0,
-    DG_LOOP_PORT_SFP_1,
-    DG_LOOP_PORT_SFP_2,
-    DG_LOOP_PORT_SFP_3,
-    DG_LOOP_PORT_10GE_0,
-    DG_LOOP_PORT_10GE_1,
-    DG_LOOP_PORT_10GE_2,
-    DG_LOOP_PORT_10GE_3
-};
-
 /*==================================================================================================
                                          GLOBAL FUNCTIONS
 ==================================================================================================*/
@@ -124,10 +100,10 @@ int main(int argc, char** argv)
 
     if (args.port == DG_PORT_CFG_DEFAULT_PORT)
     {
-        UINT8 i;
-        for (i = 0; i < DG_ARRAY_SIZE(dg_port_cfg_data_ports); i++)
+        UINT8 port;
+        for (port = 0; port < DG_LOOP_PORT_NUM; port++)
         {
-            if (!dg_port_cfg_config(dg_port_cfg_data_ports[i], args.node, args.mode))
+            if (!dg_port_cfg_config(port, args.node, args.mode))
             {
                 ret = 1;
             }
@@ -227,7 +203,7 @@ error_t dg_port_cfg_arg_parse(int key, char* arg, struct argp_state* state)
         {
             return EINVAL;
         }
-        else if (DG_LOOP_check_port((DG_LOOP_PORT_T)value) < 0)
+        else if (value >= DG_LOOP_PORT_NUM)
         {
             printf("invalid port: %s\n", arg);
             return EINVAL;

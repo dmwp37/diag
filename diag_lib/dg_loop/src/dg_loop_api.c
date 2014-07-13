@@ -11,6 +11,7 @@
 ==================================================================================================*/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -48,6 +49,7 @@ typedef struct
 typedef struct DG_LOOP_PORT_FD_S
 {
     DG_LOOP_PORT_T port;   /* the stored port  */
+    const char*    name;   /* the port name    */
 
     int ref;               /* reference count  */
     int tx_fd;             /* the actual tx fd */
@@ -81,32 +83,35 @@ static DG_LOOP_PORT_OP_T dg_loop_port_sim_op =
 /** internal real file descriptor array for each ports */
 static DG_LOOP_PORT_FD_T dg_loop_port_fd[DG_LOOP_PORT_NUM] =
 {
-    { DG_LOOP_PORT_MGT,    0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_HA,     0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB0_1, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB0_2, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB1_1, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_WTB1_2, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_0,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_1,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_2,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_3,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_4,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_5,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_6,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_7,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_8,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_9,   0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_10,  0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_GE_11,  0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_0,  0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_1,  0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_2,  0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_SFP_3,  0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_0, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_1, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_2, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER },
-    { DG_LOOP_PORT_10GE_3, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER }
+#define PORT_FD_INIT(port) \
+    { DG_LOOP_PORT_ ## port, # port, 0, -1, -1, &dg_loop_port_sim_op, PTHREAD_MUTEX_INITIALIZER }
+    PORT_FD_INIT(mgt),
+    PORT_FD_INIT(ha),
+    PORT_FD_INIT(wtb0),
+    PORT_FD_INIT(wtb1),
+    PORT_FD_INIT(ge_0),
+    PORT_FD_INIT(ge_1),
+    PORT_FD_INIT(ge_2),
+    PORT_FD_INIT(ge_3),
+    PORT_FD_INIT(ge_4),
+    PORT_FD_INIT(ge_5),
+    PORT_FD_INIT(ge_6),
+    PORT_FD_INIT(ge_7),
+    PORT_FD_INIT(ge_8),
+    PORT_FD_INIT(ge_9),
+    PORT_FD_INIT(ge_10),
+    PORT_FD_INIT(ge_11),
+    PORT_FD_INIT(ge_12),
+    PORT_FD_INIT(ge_13),
+    PORT_FD_INIT(ge_14),
+    PORT_FD_INIT(ge_15),
+    PORT_FD_INIT(ge_16),
+    PORT_FD_INIT(ge_24),
+    PORT_FD_INIT(xe_0),
+    PORT_FD_INIT(xe_1),
+    PORT_FD_INIT(xe_2),
+    PORT_FD_INIT(xe_3)
+#undef PORT_FD_INIT
 };
 
 /*==================================================================================================
@@ -114,83 +119,42 @@ static DG_LOOP_PORT_FD_T dg_loop_port_fd[DG_LOOP_PORT_NUM] =
 ==================================================================================================*/
 
 /*=============================================================================================*//**
-@brief check the validation of the port
+@brief get the port number
 
-@param[in]  port - the port number according to definition
+@param[in]  name - the port name
 
-@return -1 if invalid, otherwise the internal index start from 0
-
-@note
-- index is 0, 1 ... DG_LOOP_PORT_NUM-1
-- use this function to check if the port is valid
+@return -1 if invalid, otherwise the port number
 *//*==============================================================================================*/
-int DG_LOOP_check_port(DG_LOOP_PORT_T port)
+int DG_LOOP_get_port(const char* name)
 {
-    /* port index map */
-    enum
+    int port = 0;
+    while (port < DG_LOOP_PORT_NUM)
     {
-        DG_LOOP_INDEX_MGT = 0,
-        DG_LOOP_INDEX_HA,
-        DG_LOOP_INDEX_WTB0_1,
-        DG_LOOP_INDEX_WTB0_2,
-        DG_LOOP_INDEX_WTB1_1,
-        DG_LOOP_INDEX_WTB1_2,
-        DG_LOOP_INDEX_GE_0,
-        DG_LOOP_INDEX_GE_1,
-        DG_LOOP_INDEX_GE_2,
-        DG_LOOP_INDEX_GE_3,
-        DG_LOOP_INDEX_GE_4,
-        DG_LOOP_INDEX_GE_5,
-        DG_LOOP_INDEX_GE_6,
-        DG_LOOP_INDEX_GE_7,
-        DG_LOOP_INDEX_GE_8,
-        DG_LOOP_INDEX_GE_9,
-        DG_LOOP_INDEX_GE_10,
-        DG_LOOP_INDEX_GE_11,
-        DG_LOOP_INDEX_SFP_0,
-        DG_LOOP_INDEX_SFP_1,
-        DG_LOOP_INDEX_SFP_2,
-        DG_LOOP_INDEX_SFP_3,
-        DG_LOOP_INDEX_10GE_0,
-        DG_LOOP_INDEX_10GE_1,
-        DG_LOOP_INDEX_10GE_2,
-        DG_LOOP_INDEX_10GE_3,
-    };
-
-#define INDEX_MAPPER(x) case DG_LOOP_PORT_ ## x: \
-    return DG_LOOP_INDEX_ ## x
-    switch (port)
-    {
-        INDEX_MAPPER(MGT);
-        INDEX_MAPPER(HA);
-        INDEX_MAPPER(WTB0_1);
-        INDEX_MAPPER(WTB0_2);
-        INDEX_MAPPER(WTB1_1);
-        INDEX_MAPPER(WTB1_2);
-        INDEX_MAPPER(GE_0);
-        INDEX_MAPPER(GE_1);
-        INDEX_MAPPER(GE_2);
-        INDEX_MAPPER(GE_3);
-        INDEX_MAPPER(GE_4);
-        INDEX_MAPPER(GE_5);
-        INDEX_MAPPER(GE_6);
-        INDEX_MAPPER(GE_7);
-        INDEX_MAPPER(GE_8);
-        INDEX_MAPPER(GE_9);
-        INDEX_MAPPER(GE_10);
-        INDEX_MAPPER(GE_11);
-        INDEX_MAPPER(SFP_0);
-        INDEX_MAPPER(SFP_1);
-        INDEX_MAPPER(SFP_2);
-        INDEX_MAPPER(SFP_3);
-        INDEX_MAPPER(10GE_0);
-        INDEX_MAPPER(10GE_1);
-        INDEX_MAPPER(10GE_2);
-        INDEX_MAPPER(10GE_3);
+        if (strcasecmp(name, dg_loop_port_fd[port].name) == 0)
+        {
+            return port;
+        }
     }
-#undef INDEX_MAPPER
 
     return -1;
+}
+
+/*=============================================================================================*//**
+@brief get the port name
+
+@param[in]  port - the port
+
+@return NULL if invalid, otherwise the name of the port
+*//*==============================================================================================*/
+const char* DG_LOOP_port_name(DG_LOOP_PORT_T port)
+{
+    const char* port_name = NULL;
+    if (port < DG_LOOP_PORT_NUM)
+    {
+        port_name = dg_loop_port_fd[port].name;
+    }
+
+    return port_name;
 }
 
 /*=============================================================================================*//**
@@ -205,61 +169,60 @@ int DG_LOOP_check_port(DG_LOOP_PORT_T port)
 *//*==============================================================================================*/
 BOOL DG_LOOP_connect(DG_LOOP_PORT_T port1, DG_LOOP_PORT_T port2)
 {
-    int index1;
-    int index2;
-
-    if ((index1 = DG_LOOP_check_port(port1)) < 0)
+    if (port1 >= DG_LOOP_PORT_NUM)
     {
         DG_DBG_set_err_string("invalid connect: port1=0x%02x", port1);
         return FALSE;
     }
 
-    if ((index2 = DG_LOOP_check_port(port2)) < 0)
+    if (port1 >= DG_LOOP_PORT_NUM)
     {
         DG_DBG_set_err_string("invalid connect: port2=0x%02x", port2);
         return FALSE;
     }
 
-    if ((dg_loop_port_fd[index1].tx_fd > 0) ||
-        (dg_loop_port_fd[index1].rx_fd > 0) ||
-        (dg_loop_port_fd[index2].tx_fd > 0) ||
-        (dg_loop_port_fd[index2].rx_fd > 0))
+    if ((dg_loop_port_fd[port1].tx_fd > 0) ||
+        (dg_loop_port_fd[port1].rx_fd > 0) ||
+        (dg_loop_port_fd[port2].tx_fd > 0) ||
+        (dg_loop_port_fd[port2].rx_fd > 0))
     {
-        DG_DBG_TRACE("already connected. port1=0x%02x port2=0x%02x", port1, port2);
+        DG_DBG_TRACE("already connected. port1=%s port2=%s",
+                     dg_loop_port_fd[port1].name, dg_loop_port_fd[port1].name);
         return TRUE;
     }
 
     /* only simulation port support this action */
-    if ((dg_loop_port_fd[index1].op != &dg_loop_port_sim_op) ||
-        (dg_loop_port_fd[index2].op != &dg_loop_port_sim_op))
+    if ((dg_loop_port_fd[port1].op != &dg_loop_port_sim_op) ||
+        (dg_loop_port_fd[port2].op != &dg_loop_port_sim_op))
     {
         return FALSE;
     }
 
     if ((DG_LOOP_open(port1) < 0) || (DG_LOOP_open(port2) < 0))
     {
-        DG_LOOP_close(index1);
-        DG_LOOP_close(index2);
+        DG_LOOP_close(port1);
+        DG_LOOP_close(port2);
         return FALSE;
     }
 
-    DG_DBG_TRACE("port1=0x%02x port2=0x%02x connected", port1, port2);
+    DG_DBG_TRACE("port1=%s port2=%s connected",
+                 dg_loop_port_fd[port1].name, dg_loop_port_fd[port2].name);
     /* Save the sockets */
     if (port1 != port2)
     {
         /* save one socket pair */
-        int socket0 = dg_loop_port_fd[index1].tx_fd;
-        int socket1 = dg_loop_port_fd[index1].rx_fd;
+        int socket0 = dg_loop_port_fd[port1].tx_fd;
+        int socket1 = dg_loop_port_fd[port1].rx_fd;
 
         /* close one socket pair */
-        close(dg_loop_port_fd[index2].tx_fd);
-        close(dg_loop_port_fd[index2].rx_fd);
+        close(dg_loop_port_fd[port2].tx_fd);
+        close(dg_loop_port_fd[port2].rx_fd);
 
-        dg_loop_port_fd[index1].tx_fd = socket0;
-        dg_loop_port_fd[index2].rx_fd = socket1;
+        dg_loop_port_fd[port1].tx_fd = socket0;
+        dg_loop_port_fd[port2].rx_fd = socket1;
 
-        dg_loop_port_fd[index2].tx_fd = socket1;
-        dg_loop_port_fd[index1].rx_fd = socket0;
+        dg_loop_port_fd[port2].tx_fd = socket1;
+        dg_loop_port_fd[port1].rx_fd = socket0;
     }
 
     return TRUE;
@@ -293,41 +256,41 @@ void DG_LOOP_disconnect_all()
 *//*==============================================================================================*/
 int DG_LOOP_open(DG_LOOP_PORT_T port)
 {
-    int index;
+    int index = port;
 
     pthread_mutex_t* mutex;
 
-    if ((index = DG_LOOP_check_port(port)) < 0)
+    if (port >= DG_LOOP_PORT_NUM)
     {
         DG_DBG_set_err_string("Invalid Port to open, port=0x%02x", port);
         return -1;
     }
 
-    if (dg_loop_port_fd[index].op == NULL)
+    if (dg_loop_port_fd[port].op == NULL)
     {
-        DG_DBG_set_err_string("Unsupported Port to open, port=0x%02x", port);
+        DG_DBG_set_err_string("Unsupported Port to open, port=%s", dg_loop_port_fd[port].name);
         return -1;
     }
 
-    mutex = &dg_loop_port_fd[index].mutex;
+    mutex = &dg_loop_port_fd[port].mutex;
     DG_LOOP_MUTEX_LOCK(mutex);
-    if (dg_loop_port_fd[index].ref <= 0)
+    if (dg_loop_port_fd[port].ref <= 0)
     {
-        if (dg_loop_port_fd[index].op->open(&dg_loop_port_fd[index]))
+        if (dg_loop_port_fd[port].op->open(&dg_loop_port_fd[port]))
         {
-            DG_DBG_TRACE("open loop port 0x%02x", port);
+            DG_DBG_TRACE("open loop port %s", dg_loop_port_fd[port].name);
             dg_loop_port_fd[index].ref = 1;
         }
         else
         {
-            DG_DBG_ERROR("failed to open, port=0x%02x", port);
+            DG_DBG_ERROR("failed to open, port=%s", dg_loop_port_fd[port].name);
             index = -1;
         }
     }
     else
     {
         /* already opened */
-        dg_loop_port_fd[index].ref++;
+        dg_loop_port_fd[port].ref++;
     }
     DG_LOOP_MUTEX_UNLOCK(mutex);
 
@@ -344,9 +307,8 @@ void DG_LOOP_close(int fd)
     int index = fd;
 
     pthread_mutex_t* mutex;
-    DG_LOOP_PORT_T   port;
 
-    if ((port = dg_loop_index_to_port(index)) == 0xFF)
+    if (index >= DG_LOOP_PORT_NUM)
     {
         DG_DBG_set_err_string("Invalid Port fd to close, fd=%d", fd);
         return;
@@ -354,7 +316,7 @@ void DG_LOOP_close(int fd)
 
     if (dg_loop_port_fd[index].op == NULL)
     {
-        DG_DBG_set_err_string("Unsupported Port to close, port=0x%02x", port);
+        DG_DBG_set_err_string("Unsupported Port to close, port=%s", dg_loop_port_fd[index].name);
         return;
     }
 
@@ -368,7 +330,7 @@ void DG_LOOP_close(int fd)
     if (dg_loop_port_fd[index].ref == 0)
     {
         dg_loop_port_fd[index].op->close(&dg_loop_port_fd[index]);
-        DG_DBG_TRACE("close loop port 0x%02x", port);
+        DG_DBG_TRACE("close loop port %s", dg_loop_port_fd[index].name);
     }
     DG_LOOP_MUTEX_UNLOCK(mutex);
 }
@@ -387,33 +349,27 @@ void DG_LOOP_close(int fd)
 *//*==============================================================================================*/
 BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len)
 {
-    BOOL ret   = FALSE;
-    int  index = fd;
+    int index = fd;
 
-    DG_LOOP_PORT_T port;
-
-    if ((port = dg_loop_index_to_port(index)) == 0xFF)
+    if (index >= DG_LOOP_PORT_NUM)
     {
         DG_DBG_set_err_string("Invalid Port fd to send, fd=%d", fd);
         return FALSE;
     }
-    else if (dg_loop_port_fd[index].op == NULL)
+
+    if (dg_loop_port_fd[index].op == NULL)
     {
-        DG_DBG_set_err_string("Unsupported Port to send, port=0x%02x", port);
+        DG_DBG_set_err_string("Unsupported Port to send, port=%s", dg_loop_port_fd[index].name);
         return FALSE;
     }
-    else if (dg_loop_port_fd[index].ref <= 0)
+
+    if (dg_loop_port_fd[index].ref <= 0)
     {
         DG_DBG_set_err_string("the fd is closed, fd=%d", fd);
         return FALSE;
     }
 
-    if (dg_loop_port_fd[index].op->send(&dg_loop_port_fd[index], len, buf))
-    {
-        ret = TRUE;
-    }
-
-    return ret;
+    return dg_loop_port_fd[index].op->send(&dg_loop_port_fd[index], len, buf);
 }
 
 /*=============================================================================================*//**
@@ -430,60 +386,32 @@ BOOL DG_LOOP_send(int fd, UINT8* buf, UINT32 len)
 *//*==============================================================================================*/
 BOOL DG_LOOP_recv(int fd, UINT8* buf, UINT32 len)
 {
-    BOOL ret   = FALSE;
-    int  index = fd;
+    int index = fd;
 
-    DG_LOOP_PORT_T port;
-
-    if ((port = dg_loop_index_to_port(index)) == 0xFF)
+    if (index >= DG_LOOP_PORT_NUM)
     {
         DG_DBG_set_err_string("Invalid Port fd to recv, fd=%d", fd);
         return FALSE;
     }
-    else if (dg_loop_port_fd[index].op == NULL)
+
+    if (dg_loop_port_fd[index].op == NULL)
     {
-        DG_DBG_set_err_string("Unsupported Port to recv, port=0x%02x", port);
+        DG_DBG_set_err_string("Unsupported Port to recv, port=%s", dg_loop_port_fd[index].name);
         return FALSE;
     }
-    else if (dg_loop_port_fd[index].ref <= 0)
+
+    if (dg_loop_port_fd[index].ref <= 0)
     {
         DG_DBG_set_err_string("the fd is closed, fd=%d", fd);
         return FALSE;
     }
 
-    if (dg_loop_port_fd[index].op->recv(&dg_loop_port_fd[index], len, buf))
-    {
-        ret = TRUE;
-    }
-
-    return ret;
+    return dg_loop_port_fd[index].op->recv(&dg_loop_port_fd[index], len, buf);
 }
 
 /*==================================================================================================
                                           LOCAL FUNCTIONS
 ==================================================================================================*/
-
-/*=============================================================================================*//**
-@brief map the index to port
-
-@param[in]  port - the port number according to definition
-
-@return the port index, 0xFF if invalid index.
-
-@note
-- index is 0, 1 ... DG_LOOP_PORT_NUM-1
-*//*==============================================================================================*/
-DG_LOOP_PORT_T dg_loop_index_to_port(int index)
-{
-    DG_LOOP_PORT_T port = 0xFF;
-
-    if ((index >= 0) && (index < DG_LOOP_PORT_NUM))
-    {
-        port = dg_loop_port_fd[index].port;
-    }
-
-    return port;
-}
 
 /*=============================================================================================*//**
 @brief open simulation port implementation
@@ -501,7 +429,7 @@ BOOL dg_loop_open_sim(DG_LOOP_PORT_FD_T* fd)
 
     if ((fd->tx_fd > 0) || (fd->rx_fd > 0))
     {
-        DG_DBG_TRACE("already opened. port=0x%02x", fd->port);
+        DG_DBG_TRACE("already opened. port=%s", fd->name);
         return TRUE;
     }
 
@@ -511,7 +439,7 @@ BOOL dg_loop_open_sim(DG_LOOP_PORT_FD_T* fd)
         return FALSE;
     }
 
-    DG_DBG_TRACE("port=0x%02x opened", fd->port);
+    DG_DBG_TRACE("port=%s opened", fd->name);
 
     /* self connected by default */
     fd->tx_fd = sockets[0];
@@ -621,8 +549,8 @@ BOOL dg_loop_read_sim(DG_LOOP_PORT_FD_T* fd, UINT32 bytes_to_read, UINT8* data)
                indicates client closed its connection */
             if (current_bytes_read != 0)
             {
-                DG_DBG_ERROR("Read port 0x%02x failed, current_bytes_read=%d, errno=%d(%m)",
-                             fd->port, current_bytes_read, errno);
+                DG_DBG_ERROR("Read port %s failed, current_bytes_read=%d, errno=%d(%m)",
+                             fd->name, current_bytes_read, errno);
                 is_success = FALSE;
             }
         }
