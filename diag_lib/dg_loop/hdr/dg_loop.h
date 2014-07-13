@@ -96,11 +96,11 @@ typedef struct
 
 typedef struct
 {
-    int fail_send;  /* failed send packets number     */
-    int fail_recv;  /* failed recv packets number     */
-    int total_send; /* total send packets number      */
-    int total_recv; /* total recv packets number      */
-    int wrong_recv; /* wrong recv packets number      */
+    int    fail_send;  /* failed send packets number */
+    int    fail_recv;  /* failed recv packets number */
+    UINT64 total_send; /* total send packets number  */
+    UINT64 total_recv; /* total recv packets number  */
+    int    wrong_recv; /* wrong recv packets number  */
 } DG_LOOP_TEST_STATISTIC_T;
 
 typedef struct

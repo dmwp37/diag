@@ -578,8 +578,8 @@ void dg_loop_print_result(int time)
         printf("tx_port=%-5s  rx_port=%-5s  ",
                DG_LOOP_port_name(p_cfg->tx_port),
                DG_LOOP_port_name(p_cfg->rx_port));
-        printf("send=%-8u ", result->total_send);
-        printf("recv=%-8u ", result->total_recv);
+        printf("send=%-10" PRIu64 " ", result->total_send);
+        printf("recv=%-10" PRIu64 " ", result->total_recv);
 
         if (time == 0)
         {
