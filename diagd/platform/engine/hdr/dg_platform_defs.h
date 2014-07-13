@@ -11,6 +11,8 @@
 ====================================================================================================
                                            INCLUDE FILES
 ==================================================================================================*/
+#include <inttypes.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,8 +22,8 @@ extern "C" {
                                                MACROS
 ==================================================================================================*/
 #ifndef TRUE
-    #define TRUE   1
-    #define FALSE  0
+    #define TRUE  true
+    #define FALSE false
 #endif
 
 #define DG_COMPILE_UNUSED(x) (void)(x)
@@ -35,17 +37,16 @@ extern "C" {
                                    STRUCTURES AND OTHER TYPEDEFS
 ==================================================================================================*/
 /* Do not redefine if we are already define those types */
-git typedef unsigned char      UINT8;     /**< Unsigned 8 bit integer */
-typedef signed char        INT8;      /**< Signed 8 bit integer */
-typedef unsigned short int UINT16;    /**< Unsigned 16 bit integer */
-typedef signed short int   INT16;     /**< Signed 16 bit integer */
-typedef unsigned int       UINT32;    /**< Unsigned 32 bit integer */
-typedef signed int         INT32;     /**< Signed 32 bit integer */
-typedef signed long long   INT64;     /**< Signed 64 bit integer */
-typedef unsigned long long UINT64;    /**< Unsigned 64 bit integer */
-typedef unsigned char      BOOLEAN;   /**< Boolean type */
-typedef BOOLEAN            BOOL;      /**< Boolean type */
-typedef unsigned short     W_CHAR;    /**< Wide char */
+typedef uint8_t  UINT8;    /**< Unsigned 8 bit integer */
+typedef int8_t   INT8;     /**< Signed 8 bit integer */
+typedef uint16_t UINT16;   /**< Unsigned 16 bit integer */
+typedef int16_t  INT16;    /**< Signed 16 bit integer */
+typedef uint32_t UINT32;   /**< Unsigned 32 bit integer */
+typedef int32_t  INT32;    /**< Signed 32 bit integer */
+typedef uint64_t UINT64;   /**< Unsigned 64 bit integer */
+typedef int64_t  INT64;    /**< Signed 64 bit integer */
+typedef bool     BOOL;     /**< Boolean type */
+typedef int16_t  W_CHAR;   /**< Wide char */
 
 /*==================================================================================================
                                       GLOBAL VARIABLE DECLARATIONS
