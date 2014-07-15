@@ -249,7 +249,7 @@ void* dg_loop_send_thread(void* arg)
     {
         if (wait_sem(&test->recv_sem, 2000) < 0)
         {
-            DG_DBG_ERROR("Error waiting on recv semaphore, errno=%d(%m)", errno);
+            DG_DBG_ERROR("waiting on recv semaphore, errno=%d(%m)", errno);
             continue;
         }
 

@@ -170,6 +170,12 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    /* open all the port first */    
+    for (index = 0; index < DG_LOOP_PORT_NUM; index++)
+    {
+        DG_LOOP_open(index);
+    }
+
     /* signal setup */
     memset(&actions, 0, sizeof(actions));
     sigemptyset(&actions.sa_mask);

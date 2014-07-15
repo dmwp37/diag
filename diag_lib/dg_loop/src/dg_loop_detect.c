@@ -52,32 +52,36 @@ static BOOL  dg_loop_is_detect_packet(UINT8* buf, UINT8* tx_port, UINT8* rx_port
 ==================================================================================================*/
 static DG_LOOP_PORT_PAIR_T dg_loop_detect_info[DG_LOOP_PORT_NUM] =
 {
-    { DG_LOOP_PORT_mgt,   0xFF },
-    { DG_LOOP_PORT_ha,    0xFF },
-    { DG_LOOP_PORT_wtb0,  0xFF },
-    { DG_LOOP_PORT_ge_16, 0xFF },
-    { DG_LOOP_PORT_wtb1,  0xFF },
-    { DG_LOOP_PORT_ge_24, 0xFF },
-    { DG_LOOP_PORT_ge_0,  0xFF },
-    { DG_LOOP_PORT_ge_1,  0xFF },
-    { DG_LOOP_PORT_ge_2,  0xFF },
-    { DG_LOOP_PORT_ge_3,  0xFF },
-    { DG_LOOP_PORT_ge_4,  0xFF },
-    { DG_LOOP_PORT_ge_5,  0xFF },
-    { DG_LOOP_PORT_ge_6,  0xFF },
-    { DG_LOOP_PORT_ge_7,  0xFF },
-    { DG_LOOP_PORT_ge_8,  0xFF },
-    { DG_LOOP_PORT_ge_9,  0xFF },
-    { DG_LOOP_PORT_ge_10, 0xFF },
-    { DG_LOOP_PORT_ge_11, 0xFF },
-    { DG_LOOP_PORT_ge_12, 0xFF },
-    { DG_LOOP_PORT_ge_13, 0xFF },
-    { DG_LOOP_PORT_ge_14, 0xFF },
-    { DG_LOOP_PORT_ge_15, 0xFF },
-    { DG_LOOP_PORT_xe_0,  0xFF },
-    { DG_LOOP_PORT_xe_1,  0xFF },
-    { DG_LOOP_PORT_xe_2,  0xFF },
-    { DG_LOOP_PORT_xe_3,  0xFF }
+#define PORT_PAIR_INIT(x) [DG_LOOP_PORT_ ## x] = { DG_LOOP_PORT_ ## x, 0xFF }
+
+    PORT_PAIR_INIT(mgt),
+    PORT_PAIR_INIT(ha),
+    PORT_PAIR_INIT(wtb0),
+    PORT_PAIR_INIT(wtb1),
+    PORT_PAIR_INIT(ge_0),
+    PORT_PAIR_INIT(ge_1),
+    PORT_PAIR_INIT(ge_2),
+    PORT_PAIR_INIT(ge_3),
+    PORT_PAIR_INIT(ge_4),
+    PORT_PAIR_INIT(ge_5),
+    PORT_PAIR_INIT(ge_6),
+    PORT_PAIR_INIT(ge_7),
+    PORT_PAIR_INIT(ge_8),
+    PORT_PAIR_INIT(ge_9),
+    PORT_PAIR_INIT(ge_10),
+    PORT_PAIR_INIT(ge_11),
+    PORT_PAIR_INIT(ge_12),
+    PORT_PAIR_INIT(ge_13),
+    PORT_PAIR_INIT(ge_14),
+    PORT_PAIR_INIT(ge_15),
+    PORT_PAIR_INIT(ge_16),
+    PORT_PAIR_INIT(ge_24),
+    PORT_PAIR_INIT(xe_0),
+    PORT_PAIR_INIT(xe_1),
+    PORT_PAIR_INIT(xe_2),
+    PORT_PAIR_INIT(xe_3)
+
+#undef PORT_PAIR_INIT
 };
 
 /*==================================================================================================
@@ -197,16 +201,16 @@ void* dg_loop_detect_thread(void* arg)
 
         if (!DG_LOOP_recv(fd, recv_buf, size))
         {
-            DG_DBG_TRACE("port 0x%02x failed to recv packet", m_port);
+            DG_DBG_TRACE("port %s failed to recv packet", DG_LOOP_port_name(m_port));
             break;
         }
         else if (!dg_loop_is_detect_packet(recv_buf, &tx_port, &rx_port))
         {
-            DG_DBG_TRACE("port 0x%02x recv wrong packet", m_port);
+            DG_DBG_TRACE("port %s recv wrong packet", DG_LOOP_port_name(m_port));
         }
         else
         {
-            DG_DBG_TRACE("port 0x%02x recv a valid detection packet", m_port);
+            DG_DBG_TRACE("port %s recv a valid detection packet", DG_LOOP_port_name(m_port));
             /* save the detection */
             if (dg_loop_detect_info[tx_port].rx_port == 0xFF)
             {
