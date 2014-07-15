@@ -35,32 +35,32 @@ extern "C" {
 /** loopback path port definition */
 enum
 {
-    DG_LOOP_PORT_mgt = 0,    /** MGT Port         */
-    DG_LOOP_PORT_ha,         /** HA Port          */
-    DG_LOOP_PORT_wtb0,       /** WANPIM0 Marvell  */
-    DG_LOOP_PORT_wtb1,       /** WANPIM0 Marvell  */
-    DG_LOOP_PORT_ge_0,       /** GE_RJ45 Port 0   */
-    DG_LOOP_PORT_ge_1,       /** GE_RJ45 Port 1   */
-    DG_LOOP_PORT_ge_2,       /** GE_RJ45 Port 2   */
-    DG_LOOP_PORT_ge_3,       /** GE_RJ45 Port 3   */
-    DG_LOOP_PORT_ge_4,       /** GE_RJ45 Port 4   */
-    DG_LOOP_PORT_ge_5,       /** GE_RJ45 Port 5   */
-    DG_LOOP_PORT_ge_6,       /** GE_RJ45 Port 6   */
-    DG_LOOP_PORT_ge_7,       /** GE_RJ45 Port 7   */
-    DG_LOOP_PORT_ge_8,       /** GE_RJ45 Port 8   */
-    DG_LOOP_PORT_ge_9,       /** GE_RJ45 Port 9   */
-    DG_LOOP_PORT_ge_10,      /** GE_RJ45 Port 10  */
-    DG_LOOP_PORT_ge_11,      /** GE_RJ45 Port 11  */
-    DG_LOOP_PORT_ge_12,      /** GE_SFP  Port 0   */
-    DG_LOOP_PORT_ge_13,      /** GE_SFP  Port 1   */
-    DG_LOOP_PORT_ge_14,      /** GE_SFP  Port 2   */
-    DG_LOOP_PORT_ge_15,      /** GE_SFP  Port 3   */
-    DG_LOOP_PORT_ge_16,      /** WANPIM0 BCM Port */
-    DG_LOOP_PORT_ge_24,      /** WANPIM0 BCM Port */
-    DG_LOOP_PORT_xe_0,       /** 10GE_SFP+ Port0  */
-    DG_LOOP_PORT_xe_1,       /** 10GE_SFP+ Port1  */
-    DG_LOOP_PORT_xe_2,       /** 10GE_SFP+ Port2  */
-    DG_LOOP_PORT_xe_3,       /** 10GE_SFP+ Port3  */
+    DG_LOOP_PORT_mgt = 0,   /** MGT Port         */
+    DG_LOOP_PORT_ha,        /** HA Port          */
+    DG_LOOP_PORT_wtb0,      /** WANPIM0 Marvell  */
+    DG_LOOP_PORT_wtb1,      /** WANPIM0 Marvell  */
+    DG_LOOP_PORT_ge0,       /** GE_RJ45 Port 0   */
+    DG_LOOP_PORT_ge1,       /** GE_RJ45 Port 1   */
+    DG_LOOP_PORT_ge2,       /** GE_RJ45 Port 2   */
+    DG_LOOP_PORT_ge3,       /** GE_RJ45 Port 3   */
+    DG_LOOP_PORT_ge4,       /** GE_RJ45 Port 4   */
+    DG_LOOP_PORT_ge5,       /** GE_RJ45 Port 5   */
+    DG_LOOP_PORT_ge6,       /** GE_RJ45 Port 6   */
+    DG_LOOP_PORT_ge7,       /** GE_RJ45 Port 7   */
+    DG_LOOP_PORT_ge8,       /** GE_RJ45 Port 8   */
+    DG_LOOP_PORT_ge9,       /** GE_RJ45 Port 9   */
+    DG_LOOP_PORT_ge10,      /** GE_RJ45 Port 10  */
+    DG_LOOP_PORT_ge11,      /** GE_RJ45 Port 11  */
+    DG_LOOP_PORT_ge12,      /** GE_SFP  Port 0   */
+    DG_LOOP_PORT_ge13,      /** GE_SFP  Port 1   */
+    DG_LOOP_PORT_ge14,      /** GE_SFP  Port 2   */
+    DG_LOOP_PORT_ge15,      /** GE_SFP  Port 3   */
+    DG_LOOP_PORT_ge16,      /** WANPIM0 BCM Port */
+    DG_LOOP_PORT_ge24,      /** WANPIM0 BCM Port */
+    DG_LOOP_PORT_xe0,       /** 10GE_SFP+ Port0  */
+    DG_LOOP_PORT_xe1,       /** 10GE_SFP+ Port1  */
+    DG_LOOP_PORT_xe2,       /** 10GE_SFP+ Port2  */
+    DG_LOOP_PORT_xe3,       /** 10GE_SFP+ Port3  */
     DG_LOOP_PORT_NUM
 };
 typedef UINT8 DG_LOOP_PORT_T;

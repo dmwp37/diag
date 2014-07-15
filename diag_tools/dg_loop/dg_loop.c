@@ -86,32 +86,32 @@ static DG_LOOP_CONFIG_T dg_loop_cfg_end = { 0, 0, 0, 0 };
 
 static DG_LOOP_CONFIG_T dg_loop_cfg[DG_LOOP_PORT_PAIR_MAX + 1] =
 {
-    { DG_LOOP_PORT_mgt,   DG_LOOP_PORT_ha,    1024, 0x5A },
-    { DG_LOOP_PORT_ha,    DG_LOOP_PORT_mgt,   1024, 0xA5 },
-    { DG_LOOP_PORT_wtb0,  DG_LOOP_PORT_ge_16, 1024, 0x5A },
-    { DG_LOOP_PORT_ge_16, DG_LOOP_PORT_wtb0,  1024, 0xA5 },
-    { DG_LOOP_PORT_wtb1,  DG_LOOP_PORT_ge_24, 1024, 0x5A },
-    { DG_LOOP_PORT_ge_24, DG_LOOP_PORT_wtb1,  1024, 0xA5 },
-    { DG_LOOP_PORT_ge_0,  DG_LOOP_PORT_ge_1,  1024, 0x5A },
-    { DG_LOOP_PORT_ge_1,  DG_LOOP_PORT_ge_0,  1024, 0xA5 },
-    { DG_LOOP_PORT_ge_2,  DG_LOOP_PORT_ge_3,  1024, 0x5A },
-    { DG_LOOP_PORT_ge_3,  DG_LOOP_PORT_ge_2,  1024, 0xA5 },
-    { DG_LOOP_PORT_ge_4,  DG_LOOP_PORT_ge_5,  1024, 0x5A },
-    { DG_LOOP_PORT_ge_5,  DG_LOOP_PORT_ge_4,  1024, 0xA5 },
-    { DG_LOOP_PORT_ge_6,  DG_LOOP_PORT_ge_7,  1024, 0x5A },
-    { DG_LOOP_PORT_ge_7,  DG_LOOP_PORT_ge_6,  1024, 0xA5 },
-    { DG_LOOP_PORT_ge_8,  DG_LOOP_PORT_ge_9,  1024, 0x5A },
-    { DG_LOOP_PORT_ge_9,  DG_LOOP_PORT_ge_8,  1024, 0xA5 },
-    { DG_LOOP_PORT_ge_10, DG_LOOP_PORT_ge_11, 1024, 0x5A },
-    { DG_LOOP_PORT_ge_11, DG_LOOP_PORT_ge_10, 1024, 0xA5 },
-    { DG_LOOP_PORT_ge_12, DG_LOOP_PORT_ge_13, 1024, 0x5A },
-    { DG_LOOP_PORT_ge_13, DG_LOOP_PORT_ge_12, 1024, 0xA5 },
-    { DG_LOOP_PORT_ge_14, DG_LOOP_PORT_ge_15, 1024, 0x5A },
-    { DG_LOOP_PORT_ge_15, DG_LOOP_PORT_ge_14, 1024, 0xA5 },
-    { DG_LOOP_PORT_xe_0,  DG_LOOP_PORT_xe_1,  1024, 0x5A },
-    { DG_LOOP_PORT_xe_1,  DG_LOOP_PORT_xe_0,  1024, 0xA5 },
-    { DG_LOOP_PORT_xe_2,  DG_LOOP_PORT_xe_3,  1024, 0x5A },
-    { DG_LOOP_PORT_xe_3,  DG_LOOP_PORT_xe_2,  1024, 0xA5 },
+    { DG_LOOP_PORT_mgt,  DG_LOOP_PORT_ha,   1024, 0x5A },
+    { DG_LOOP_PORT_ha,   DG_LOOP_PORT_mgt,  1024, 0xA5 },
+    { DG_LOOP_PORT_wtb0, DG_LOOP_PORT_ge16, 1024, 0x5A },
+    { DG_LOOP_PORT_ge16, DG_LOOP_PORT_wtb0, 1024, 0xA5 },
+    { DG_LOOP_PORT_wtb1, DG_LOOP_PORT_ge24, 1024, 0x5A },
+    { DG_LOOP_PORT_ge24, DG_LOOP_PORT_wtb1, 1024, 0xA5 },
+    { DG_LOOP_PORT_ge0,  DG_LOOP_PORT_ge1,  1024, 0x5A },
+    { DG_LOOP_PORT_ge1,  DG_LOOP_PORT_ge0,  1024, 0xA5 },
+    { DG_LOOP_PORT_ge2,  DG_LOOP_PORT_ge3,  1024, 0x5A },
+    { DG_LOOP_PORT_ge3,  DG_LOOP_PORT_ge2,  1024, 0xA5 },
+    { DG_LOOP_PORT_ge4,  DG_LOOP_PORT_ge5,  1024, 0x5A },
+    { DG_LOOP_PORT_ge5,  DG_LOOP_PORT_ge4,  1024, 0xA5 },
+    { DG_LOOP_PORT_ge6,  DG_LOOP_PORT_ge7,  1024, 0x5A },
+    { DG_LOOP_PORT_ge7,  DG_LOOP_PORT_ge6,  1024, 0xA5 },
+    { DG_LOOP_PORT_ge8,  DG_LOOP_PORT_ge9,  1024, 0x5A },
+    { DG_LOOP_PORT_ge9,  DG_LOOP_PORT_ge8,  1024, 0xA5 },
+    { DG_LOOP_PORT_ge10, DG_LOOP_PORT_ge11, 1024, 0x5A },
+    { DG_LOOP_PORT_ge11, DG_LOOP_PORT_ge10, 1024, 0xA5 },
+    { DG_LOOP_PORT_ge12, DG_LOOP_PORT_ge13, 1024, 0x5A },
+    { DG_LOOP_PORT_ge13, DG_LOOP_PORT_ge12, 1024, 0xA5 },
+    { DG_LOOP_PORT_ge14, DG_LOOP_PORT_ge15, 1024, 0x5A },
+    { DG_LOOP_PORT_ge15, DG_LOOP_PORT_ge14, 1024, 0xA5 },
+    { DG_LOOP_PORT_xe0,  DG_LOOP_PORT_xe1,  1024, 0x5A },
+    { DG_LOOP_PORT_xe1,  DG_LOOP_PORT_xe0,  1024, 0xA5 },
+    { DG_LOOP_PORT_xe2,  DG_LOOP_PORT_xe3,  1024, 0x5A },
+    { DG_LOOP_PORT_xe3,  DG_LOOP_PORT_xe2,  1024, 0xA5 },
     { 0, 0, 0, 0 }
 };
 
@@ -170,7 +170,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    /* open all the port first */    
+    /* open all the port first */
     for (index = 0; index < DG_LOOP_PORT_NUM; index++)
     {
         DG_LOOP_open(index);
