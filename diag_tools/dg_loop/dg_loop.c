@@ -581,11 +581,10 @@ void dg_loop_print_result(int time)
 
         if (time == 0)
         {
-            static int last[DG_LOOP_PORT_PAIR_MAX] = { 0 };
+            static uint64_t last[DG_LOOP_PORT_PAIR_MAX] = { 0 };
 
             pps = (float)(result->total_recv - last[index]) / 1000;
-            bps = (float)(result->total_recv - last[index]) * dg_loop_test[index].size *
-                  8 / 1000000;
+            bps = (float)(result->total_recv - last[index]) * dg_loop_test[index].size * 8 / 1000000;
             last[index] = result->total_recv;
         }
         else
